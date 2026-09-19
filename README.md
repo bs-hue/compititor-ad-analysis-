@@ -2,7 +2,6 @@
 
 [![Node.js](https://img.shields.io/badge/Node.js-v18%2B-green.svg)](https://nodejs.org/)
 [![Express.js](https://img.shields.io/badge/Express-v5.2-blue.svg)](https://expressjs.com/)
-[![Database](https://img.shields.io/badge/Database-Supabase%20PostgreSQL-3ECF8E.svg)](https://supabase.com/)
 [![Scraper](https://img.shields.io/badge/Scraper-Apify%20Meta%20Ad%20Library-FF9900.svg)](https://apify.com/)
 [![License](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
 
@@ -17,9 +16,6 @@ An enterprise-grade, multi-client **Meta Ad Library Competitor Intelligence & Ad
 * **🏆 Automated Winner Ad Detection (>90 Days Active):** Automatically flags ads that have survived multi-month testing and are running continuously (proven high-ROAS, profitable evergreen winners).
 * **🧠 Copywriting Hook Deconstruction:** Isolates the top 1–2 scroll-stopping lines from ad copy into a standalone, searchable Hook Library.
 * **📐 Marketing Angle Classification:** Categorizes creative angles (*Social Proof*, *Fear / Problem Agitation*, *Speed & Value*, *Micro-Tripwire Offers*, *Curiosity*, and *Authority*).
-* **💾 Dual-Mode Persistence Layer:**
-  * **Production:** Persistent cloud PostgreSQL database managed via **Supabase**.
-  * **Zero-Config Fallback:** In-memory store with pre-seeded datasets for rapid local testing without setup.
 * **⚡ Webhooks & Scheduled Automation:** REST API endpoints to receive automated runs from Apify actors, Make.com, Zapier, or cron tasks.
 * **📥 CSV Export:** One-click CSV export of ad copy, hooks, angles, and live Meta Ad Library URLs for media buyers and creative teams.
 
@@ -44,7 +40,7 @@ flowchart TD
     end
 
     subgraph Storage["3. Storage Layer"]
-        E1 & E2 & E3 & F --> G[(Supabase PostgreSQL / Local Store)]
+        E1 & E2 & E3 & F --> G[(In-Memory & Seed Store)]
     end
 
     subgraph Presentation["4. Dashboard UI"]
@@ -62,8 +58,6 @@ flowchart TD
 ```text
 Dashboard/
 ├── backend/
-│   ├── config/
-│   │   └── supabase.js              # Supabase PostgreSQL client & connection health
 │   ├── controllers/
 │   │   ├── adController.js          # Ad CRUD operations
 │   │   ├── clientController.js      # Client workspace management
@@ -75,10 +69,8 @@ Dashboard/
 │   │   └── api.js                   # Express REST API route definitions
 │   ├── services/
 │   │   ├── apifyService.js          # Apify actor runner, winner detection & hook classifier
-│   │   └── dbService.js             # Unified DB abstraction layer (Supabase + Memory store)
+│   │   └── dbService.js             # Data service (in-memory store)
 │   └── server.js                    # Express backend application instance
-├── database/
-│   └── schema.sql                   # Supabase PostgreSQL DDL schema & performance indexes
 ├── frontend/
 │   ├── css/
 │   │   └── style.css                # Polished SaaS styling, cards, badges & responsive grid
@@ -119,10 +111,6 @@ Edit `.env` with your credentials:
 ```env
 PORT=3000
 
-# Supabase Credentials (Optional for local memory mode, recommended for production)
-SUPABASE_URL=https://your-project-ref.supabase.co
-SUPABASE_ANON_KEY=your-anon-key-here
-
 # Apify Credentials (For live Meta Ad Library automated scraping)
 APIFY_API_TOKEN=your-apify-api-token-here
 APIFY_ACTOR_ID=curious_coder/facebook-ads-library-scraper
@@ -137,29 +125,6 @@ npm start
 The dashboard is immediately accessible at:
 * 🌐 **Dashboard UI:** [http://localhost:3000](http://localhost:3000)
 * ⚡ **API Health:** [http://localhost:3000/api/health](http://localhost:3000/api/health)
-
----
-
-## 🗄️ Database Setup (Supabase Cloud PostgreSQL)
-
-The engine works out-of-the-box in **Local Fast Memory Mode**. For persistent, multi-user production data:
-
-1. Create a free PostgreSQL project at [Supabase](https://supabase.com).
-2. Open the **SQL Editor** in the left sidebar of your Supabase dashboard.
-3. Open [`database/schema.sql`](database/schema.sql) in this repository.
-4. Copy the entire script and run it in the Supabase SQL editor.
-5. In Supabase: **Project Settings** > **API**, copy:
-   * **Project URL** ➡️ `SUPABASE_URL` in `.env`
-   * **`anon` `public` key** ➡️ `SUPABASE_ANON_KEY` in `.env`
-6. Restart the server. The health endpoint (`/api/health`) will confirm:
-   ```json
-   { "status": "online", "mode": "supabase_postgresql", "supabaseConfigured": true }
-   ```
-
-### Relational Schema:
-* **`clients`**: Stores client workspaces (`id`, `name`, `niche`, `created_at`).
-* **`competitors`**: Stores monitored competitor brands (`id`, `client_id`, `name`, `ad_library_url`, `active_ad_count`, `max_days_active`, `tier`).
-* **`swipe_data`**: Stores creative intelligence (`id`, `client_id`, `competitor_id`, `hook`, `body_text`, `angle`, `days_active`, `tier`, `format`, `ad_library_url`).
 
 ---
 
