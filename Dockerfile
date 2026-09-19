@@ -16,7 +16,6 @@ RUN npm ci --only=production
 # Copy application source code
 COPY backend ./backend
 COPY frontend ./frontend
-COPY database ./database
 COPY server.js ./
 COPY .env.example ./
 
