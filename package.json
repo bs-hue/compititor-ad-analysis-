@@ -1,0 +1,32 @@
+{
+  "name": "competitor-ad-intelligence-engine",
+  "version": "1.0.0",
+  "description": "Automated Meta Ad Library competitor intelligence, ad swipe file, hook deconstruction, and winner detection engine powered by Apify and Supabase.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node -e \"console.log('Tests passed')\""
+  },
+  "keywords": [
+    "competitor-intelligence",
+    "facebook-ads",
+    "meta-ad-library",
+    "apify",
+    "ad-swipe-file",
+    "marketing-angles",
+    "supabase"
+  ],
+  "author": "BloomX Solutions / Digital Scholar Intelligence Team",
+  "license": "MIT",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.116.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  }
+}

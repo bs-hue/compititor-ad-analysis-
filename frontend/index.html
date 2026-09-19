@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Competitor Intelligence & Ad Swipe Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<!-- ─── 1. TOP HEADER ─── -->
+<header class="top-header">
+  <div class="app-container">
+    <div class="header-inner">
+      <div class="brand-wrap">
+        <div class="brand-emblem">⚡</div>
+        <div class="brand-text">
+          <h1>Competitor Intelligence</h1>
+          <p>Track competitor ads, identify winning patterns and turn market insights into campaign ideas.</p>
+        </div>
+      </div>
+      <div class="header-controls">
+        <div class="sync-status-pill" id="apifyStatusPill" title="Apify Meta Scraper Engine">
+          <span class="pulse-dot"></span>
+          <span id="apifyEngineLabel">Apify Engine Active</span>
+          <span style="opacity: 0.4;">•</span>
+          <span id="lastUpdatedLabel">Updated Today</span>
+        </div>
+        <button class="btn btn-primary" id="btnApifySync" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); border: none; color: #fff;" onclick="triggerApifyAutoSync()">⚡ Auto-Sync Ads (Apify)</button>
+        <button class="btn btn-secondary" onclick="refreshClientData()">🔄 Refresh</button>
+        <button class="btn btn-secondary" onclick="exportDataCSV()">📥 Export CSV</button>
+        <button class="btn btn-primary" onclick="openAddClientModal()">+ New Client</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ─── 2. CLIENT TABS BAR (STRICT HORIZONTAL TABS) ─── -->
+<div class="client-tabs-bar">
+  <div class="app-container">
+    <div class="client-tabs-inner" id="clientTabsNavContainer">
+      <!-- Populated dynamically: [ Client · Count ] tabs + [ + Add Client ] -->
+    </div>
+  </div>
+</div>
+
+<!-- ─── MAIN CONTENT WORKSPACE ─── -->
+<main class="app-container main-layout">
+
+  <!-- 3. SUMMARY METRICS (4 PASTEL IDENTITY CARDS) -->
+  <section class="metrics-section">
+    <div class="metric-box theme-lavender">
+      <div class="metric-header-row">
+        <span class="metric-title">Competitors</span>
+        <span style="font-size: 14px; opacity: 0.6;" title="Tracked brands in this client workspace">ⓘ</span>
+      </div>
+      <div class="metric-figure" id="metricCompCount">5</div>
+      <div class="metric-desc">Across tracked brands</div>
+    </div>
+
+    <div class="metric-box theme-blue">
+      <div class="metric-header-row">
+        <span class="metric-title">Active Ads</span>
+        <span style="font-size: 14px; opacity: 0.6;" title="Total active ads currently monitored">ⓘ</span>
+      </div>
+      <div class="metric-figure" id="metricAdsCount">404</div>
+      <div class="metric-desc">Live ad creatives monitored</div>
+    </div>
+
+    <div class="metric-box theme-amber">
+      <div class="metric-header-row">
+        <span class="metric-title">Longest Active Ad</span>
+        <span style="font-size: 14px; opacity: 0.6;" title="Longest currently active ad in the dataset">ⓘ</span>
+      </div>
+      <div class="metric-figure" id="metricMaxDays">340d</div>
+      <div class="metric-desc">Potential messaging signal</div>
+    </div>
+
+    <div class="metric-box theme-emerald">
+      <div class="metric-header-row">
+        <span class="metric-title">Messaging Angles</span>
+        <span style="font-size: 14px; opacity: 0.6;" title="Distinct conversion angles detected">ⓘ</span>
+      </div>
+      <div class="metric-figure" id="metricAngleCount">7</div>
+      <div class="metric-desc">Unique positioning patterns</div>
+    </div>
+  </section>
+
+  <!-- 4. MARKET INTELLIGENCE (VERY SUBTLE TINTED SECTION) -->
+  <section class="market-intel-panel">
+    <div class="panel-header-wrap">
+      <h2>Market Intelligence</h2>
+      <p>AI-synthesized patterns from tracked competitor advertising.</p>
+    </div>
+    <div class="intel-cards-grid" id="intelCardsGrid">
+      <!-- Dynamically populated 3 insight cards -->
+    </div>
+  </section>
+
+  <!-- 5. TOP PERFORMING ADS (CURATED CARDS) -->
+  <section class="top-ads-section">
+    <div class="top-ads-header">
+      <h2>Top Performing Ads</h2>
+      <p>Long-running competitor ads can reveal messaging and creative patterns worth studying. Longevity does not necessarily indicate profitability.</p>
+    </div>
+    <div class="top-ads-grid" id="topAdsGrid">
+      <!-- 3-5 Curated Longest Running Ad Cards -->
+    </div>
+  </section>
+
+  <!-- 6. WORKSPACE PRODUCT NAVIGATION TABS -->
+  <div>
+    <nav class="workspace-tabs-container">
+      <button class="ws-tab-btn active" id="wsTabAds" onclick="switchProductTab('ads')">
+        <span>⚡ Ad Intelligence</span>
+        <span class="ws-tab-badge" id="badgeTabAds">7</span>
+      </button>
+      <button class="ws-tab-btn" id="wsTabHooks" onclick="switchProductTab('hooks')">
+        <span>Hook Library</span>
+        <span class="ws-tab-badge" id="badgeTabHooks">7</span>
+      </button>
+      <button class="ws-tab-btn" id="wsTabAngles" onclick="switchProductTab('angles')">
+        <span>Angles Explorer</span>
+        <span class="ws-tab-badge" id="badgeTabAngles">7</span>
+      </button>
+      <button class="ws-tab-btn" id="wsTabSaved" onclick="switchProductTab('saved')">
+        <span>Saved Swipe File</span>
+        <span class="ws-tab-badge" id="badgeTabSaved">0</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ─── TAB 1: AD INTELLIGENCE FEED ─── -->
+  <div id="productPaneAds">
+    <!-- 7. BEAUTIFIED FILTER SYSTEM (ELEVATED CARD DESIGN) -->
+    <div class="filter-box-container">
+      <!-- Row 1: Competitor Pills -->
+      <div class="filter-group-row">
+        <span class="filter-row-label">Competitor:</span>
+        <div class="filter-pills-row" id="competitorPillsRow">
+          <!-- Populated competitor filter pills -->
+        </div>
+      </div>
+
+      <!-- Row 2: Tier & Format Pills -->
+      <div class="filter-group-row">
+        <span class="filter-row-label">Tier:</span>
+        <div class="filter-pills-row" id="tierPillsRow">
+          <span class="pill-option active" data-filter="tier" data-val="all" onclick="setFilter('tier', 'all', this)">All</span>
+          <span class="pill-option" data-filter="tier" data-val="Winner" onclick="setFilter('tier', 'Winner', this)">Winner</span>
+          <span class="pill-option" data-filter="tier" data-val="Tested" onclick="setFilter('tier', 'Tested', this)">Tested</span>
+          <span class="pill-option" data-filter="tier" data-val="New" onclick="setFilter('tier', 'New', this)">New</span>
+        </div>
+
+        <span class="filter-row-label" style="min-width: 70px; margin-left: 12px;">Format:</span>
+        <div class="filter-pills-row" id="formatPillsRow">
+          <span class="pill-option active" data-filter="format" data-val="all" onclick="setFilter('format', 'all', this)">All</span>
+          <span class="pill-option" data-filter="format" data-val="Video" onclick="setFilter('format', 'Video', this)">Video</span>
+          <span class="pill-option" data-filter="format" data-val="Image" onclick="setFilter('format', 'Image', this)">Image</span>
+          <span class="pill-option" data-filter="format" data-val="Carousel" onclick="setFilter('format', 'Carousel', this)">Carousel</span>
+        </div>
+      </div>
+
+      <!-- Row 3: Search Input -->
+      <div class="filter-group-row">
+        <span class="filter-row-label">Search:</span>
+        <div class="search-field-wrapper">
+          <span class="search-icon-prefix">🔍</span>
+          <input type="text" id="filterSearchInput" class="search-field-input" placeholder="Search hooks, keywords, remedies...">
+        </div>
+      </div>
+    </div>
+
+    <!-- Feed Title & Results Count -->
+    <div style="margin: 28px 0 18px;">
+      <h3 style="font-size: 20px; font-weight: 750; color: var(--text-primary);">Ad Intelligence (<span id="resultsCountLabel">0 ads found</span>)</h3>
+      <p style="font-size: 14.5px; color: var(--text-muted); margin-top: 3px;">Study competitor messaging, hooks and creative patterns.</p>
+    </div>
+
+    <!-- 8. AD CARDS GRID (3 COLUMNS DESKTOP) -->
+    <div class="ad-cards-grid" id="allAdsGridContainer">
+      <!-- Full ad library rendered dynamically -->
+    </div>
+  </div>
+
+  <!-- ─── TAB 2: HOOK LIBRARY ─── -->
+  <div id="productPaneHooks" style="display: none;">
+    <div style="margin-bottom: 28px;">
+      <h3 style="font-size: 20px; font-weight: 750; color: var(--text-primary);">Hook Library</h3>
+      <p style="font-size: 14.5px; color: var(--text-muted); margin-top: 3px;">Study competitor hooks and copy structures in isolation from creative format.</p>
+    </div>
+    <div class="hook-library-grid" id="hooksGridContainer">
+      <!-- Populated hook cards -->
+    </div>
+  </div>
+
+  <!-- ─── TAB 3: ANGLES EXPLORER ─── -->
+  <div id="productPaneAngles" style="display: none;">
+    <div style="margin-bottom: 28px;">
+      <h3 style="font-size: 20px; font-weight: 750; color: var(--text-primary);">Popular Competitor Angles</h3>
+      <p style="font-size: 14.5px; color: var(--text-muted); margin-top: 3px;">Recurring psychological triggers and value propositions across competitor campaigns.</p>
+    </div>
+    <div class="angles-grid-view" id="anglesGridContainer">
+      <!-- Populated angle tiles -->
+    </div>
+  </div>
+
+  <!-- ─── TAB 4: SAVED SWIPE FILE ─── -->
+  <div id="productPaneSaved" style="display: none;">
+    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 28px;">
+      <div>
+        <h3 style="font-size: 20px; font-weight: 750; color: var(--text-primary);">Saved Swipe File</h3>
+        <p style="font-size: 14.5px; color: var(--text-muted); margin-top: 3px;">Your personal research library of inspiration, hooks, and competitor ad patterns.</p>
+      </div>
+      <button class="btn btn-secondary" onclick="exportSavedSwipeCSV()">📥 Export Saved CSV</button>
+    </div>
+    <div class="ad-cards-grid" id="savedGridContainer">
+      <!-- Populated saved cards -->
+    </div>
+  </div>
+
+</main>
+
+<!-- ─── 9. SLIDE-OVER RIGHT DRAWERS (USE THIS HOOK & ANALYZE) ─── -->
+<div class="drawer-backdrop-mask" id="drawerBackdropMask" onclick="closeActiveDrawers()"></div>
+
+<!-- Drawer: "Use This Hook" Adaptation Studio -->
+<aside class="slide-drawer-panel" id="useHookDrawer">
+  <div class="drawer-header-pane">
+    <div class="drawer-header-title">
+      <h3>Use This Hook</h3>
+      <p>Turn this competitor insight into an original idea for your client.</p>
+    </div>
+    <button class="btn btn-secondary" style="height: 36px; padding: 0 12px;" onclick="closeActiveDrawers()">&times;</button>
+  </div>
+
+  <div class="drawer-body-pane">
+    <!-- Original Hook -->
+    <div class="drawer-card-wrapper">
+      <div class="drawer-label-small">Original Competitor Hook</div>
+      <div style="font-size: 17px; font-weight: 700; color: var(--text-primary); line-height: 1.45;" id="drawerOrigHook">"..."</div>
+    </div>
+
+    <!-- Why It Works -->
+    <div class="drawer-card-wrapper" style="background: var(--tint-lavender-bg); border-color: var(--tint-lavender-border);">
+      <div class="drawer-label-small" style="color: var(--tint-lavender-text);">Why It Works (Psychological Mechanism)</div>
+      <div style="font-size: 14px; color: #4C1D95; font-weight: 500; line-height: 1.55;" id="drawerWhyWorks">
+        • Low-friction offer removes conversion resistance<br>
+        • Clear benefit with immediate relevance<br>
+        • High curiosity + direct benefit
+      </div>
+    </div>
+
+    <!-- Client Adaptation Studio -->
+    <div>
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+        <div class="drawer-label-small" style="margin-bottom: 0;">AI-Generated Adaptations for <strong id="drawerTargetClient" style="color: var(--primary);">Client</strong></div>
+        <button class="btn-link" onclick="regenerateAdaptationIdeas()">🎲 Regenerate</button>
+      </div>
+      <div id="drawerAdaptationVariants">
+        <!-- Populated adaptation items -->
+      </div>
+    </div>
+  </div>
+
+  <div class="drawer-footer-pane">
+    <button class="btn btn-primary" style="flex: 1;" onclick="saveActiveHookToSwipeFile()">💾 Save to Swipe File</button>
+    <button class="btn btn-secondary" onclick="closeActiveDrawers()">Close</button>
+  </div>
+</aside>
+
+<!-- Drawer: "Analyze Ad" Deep-Dive Intelligence -->
+<aside class="slide-drawer-panel" id="analyzeDrawer">
+  <div class="drawer-header-pane">
+    <div class="drawer-header-title">
+      <h3>Ad Intelligence Analysis</h3>
+      <p id="analyzeDrawerMeta">Competitor Analysis Breakdown</p>
+    </div>
+    <button class="btn btn-secondary" style="height: 36px; padding: 0 12px;" onclick="closeActiveDrawers()">&times;</button>
+  </div>
+
+  <div class="drawer-body-pane">
+    <div class="drawer-card-wrapper">
+      <div class="drawer-label-small" style="color: var(--primary);">Message Architecture</div>
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 6px;">
+        <div>
+          <span style="font-size: 11.5px; font-weight: 750; color: var(--text-muted); text-transform: uppercase;">Hook</span>
+          <div style="font-size: 15px; font-weight: 700; color: var(--text-primary);" id="analyzeHookVal">"..."</div>
+        </div>
+        <div>
+          <span style="font-size: 11.5px; font-weight: 750; color: var(--text-muted); text-transform: uppercase;">Headline</span>
+          <div style="font-size: 14px; font-weight: 600; color: var(--text-secondary);" id="analyzeHeadlineVal">"..."</div>
+        </div>
+        <div>
+          <span style="font-size: 11.5px; font-weight: 750; color: var(--text-muted); text-transform: uppercase;">Offer</span>
+          <div style="font-size: 14px; font-weight: 500; color: var(--text-primary);" id="analyzeOfferVal">Free Consultation</div>
+        </div>
+        <div>
+          <span style="font-size: 11.5px; font-weight: 750; color: var(--text-muted); text-transform: uppercase;">Call to Action</span>
+          <div style="font-size: 14px; font-weight: 500; color: var(--text-primary);" id="analyzeCtaVal">Book / Consult</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-card-wrapper">
+      <div class="drawer-label-small" style="color: var(--tint-lavender-text);">Psychological Angle & Trigger</div>
+      <div style="font-size: 14.5px; font-weight: 650; color: var(--text-primary);" id="analyzeAngleVal">Direct Problem Agitation + Immediate Relief</div>
+    </div>
+
+    <div class="drawer-card-wrapper" style="border-left: 4px solid var(--primary);">
+      <div class="drawer-label-small" style="color: var(--text-primary);">💡 What You Can Learn</div>
+      <div style="font-size: 14px; font-weight: 500; color: var(--text-secondary);" id="analyzeLearnVal">Combining authority with a zero-friction entry offer maximizes top-of-funnel conversion velocity.</div>
+    </div>
+
+    <div class="drawer-card-wrapper" style="background: var(--tint-amber-bg); border-color: var(--tint-amber-border);">
+      <div class="drawer-label-small" style="color: var(--tint-amber-text);">🚀 Strategic Adaptation Idea</div>
+      <div style="font-size: 14px; font-weight: 500; color: #92400E;" id="analyzeIdeaVal">Create a 3-step audit video addressing top dosha concerns paired with a free sample breakdown.</div>
+    </div>
+  </div>
+
+  <div class="drawer-footer-pane">
+    <button class="btn btn-primary" onclick="openHookFromAnalyzeDrawer()">✦ Use This Hook</button>
+    <button class="btn btn-secondary" onclick="saveAdFromAnalyzeDrawer()">♡ Save</button>
+    <a href="#" target="_blank" class="btn btn-secondary" id="analyzeMetaLink">Meta Library ↗</a>
+  </div>
+</aside>
+
+<!-- ─── MODAL: NEW CLIENT ─── -->
+<div class="modal-overlay-bg" id="newClientModal">
+  <div class="modal-card-window">
+    <div class="modal-head">
+      <h3 style="font-size: 19px; font-weight: 750;">Create Client Workspace</h3>
+      <button class="btn btn-secondary" style="height: 34px; padding: 0 12px;" onclick="closeAddClientModal()">&times;</button>
+    </div>
+    <form onsubmit="handleCreateClientSubmit(event)">
+      <div class="modal-content">
+        <div>
+          <label style="font-size: 13.5px; font-weight: 650; color: var(--text-secondary); margin-bottom: 6px; display: block;">Client / Brand Name</label>
+          <input type="text" id="modalInputClientName" class="search-field-input" placeholder="e.g. Master Kundli Report By Ankit Batra" required style="padding-left: 16px;">
+        </div>
+        <div>
+          <label style="font-size: 13.5px; font-weight: 650; color: var(--text-secondary); margin-bottom: 6px; display: block;">Niche / Market Category</label>
+          <input type="text" id="modalInputClientNiche" class="search-field-input" placeholder="e.g. Astrology & Kundli Prediction Reports" required style="padding-left: 16px;">
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn btn-secondary" onclick="closeAddClientModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create Workspace</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ─── TOAST NOTIFICATION DOCK ─── -->
+<div class="toast-dock" id="toastDock"></div>
+
+<script src="/js/app.js"></script>
+</body>
+</html>
