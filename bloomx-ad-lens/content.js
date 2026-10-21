@@ -511,7 +511,7 @@
     let activeVerticalKey = 'spiritual_coaching';
     let isCalibrated = true;
     let activeVerticalName = 'Spiritual / Coaching';
-    let connectedDashboardUrl = 'http://localhost:3001';
+    let connectedDashboardUrl = 'http://localhost:3000';
 
     let BENCHMARKS = {
         daily_spend_tiers: {
@@ -648,7 +648,7 @@
         chrome.storage.onChanged.addListener((changes, area) => {
             if (area === 'local') {
                 if (changes.dashboard_api_url) {
-                    connectedDashboardUrl = changes.dashboard_api_url.newValue || 'http://localhost:3001';
+                    connectedDashboardUrl = changes.dashboard_api_url.newValue || 'http://localhost:3000';
                 }
                 if (changes.active_vertical || changes.custom_benchmarks) {
                     loadBenchmarksAndSync(() => {

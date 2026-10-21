@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (result.custom_benchmarks && Object.keys(result.custom_benchmarks).length > 0) {
             allBenchmarks = result.custom_benchmarks;
         }
-        const savedUrl = result.dashboard_api_url || 'http://localhost:3001';
+        const savedUrl = result.dashboard_api_url || 'http://localhost:3000';
         if (inputDashboardUrl) {
             inputDashboardUrl.value = savedUrl;
         }
@@ -252,7 +252,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         };
 
-        let customUrl = (inputDashboardUrl ? inputDashboardUrl.value.trim() : '') || 'http://localhost:3001';
+        let customUrl = (inputDashboardUrl ? inputDashboardUrl.value.trim() : '') || 'http://localhost:3000';
         if (customUrl.endsWith('/')) customUrl = customUrl.slice(0, -1);
         if (btnOpenDashboardLink) {
             btnOpenDashboardLink.href = customUrl;
