@@ -163,6 +163,18 @@
       "notes": "Direct horoscope analysis, Raj Yoga timing, Sade Sati mitigation remedies, and personal consultation booking.",
       "createdAt": "2026-09-18T10:53:04.403Z",
       "vertical": "spiritual_coaching"
+    },
+    {
+      "id": 1792580840874,
+      "clientId": 1,
+      "name": "Premium Personalized Kundli By Astro Arun Pandit",
+      "adLibraryUrl": "https://www.facebook.com/ads/library/?id=3271663196351922",
+      "activeAdCount": 1,
+      "maxDaysActive": 65,
+      "tier": "Winner Scaled",
+      "notes": "Imported via BloomX Ad Lens Extension (21/10/2026)",
+      "vertical": "spiritual_coaching",
+      "createdAt": "2026-10-21T11:07:20.910Z"
     }
   ],
   "ads": [
@@ -3779,6 +3791,26 @@
         "Facebook",
         "Instagram"
       ]
+    },
+    {
+      "id": 1792580856072,
+      "clientId": 1,
+      "competitorId": 1792580840874,
+      "competitorName": "Premium Personalized Kundli By Astro Arun Pandit",
+      "adLibraryUrl": "https://www.facebook.com/ads/library/?id=3271663196351922",
+      "daysActive": 65,
+      "tier": "Winner",
+      "format": "Video",
+      "hook": "Analyzed via Ad Lens: High converting offer angle with proven retention hook.",
+      "bodyText": "Real-time intelligence captured for Ad Library ID 3271663196351922. Live spend estimated at ₹1.3L – ₹2.6L over 65 days active delivery.",
+      "angle": "Direct Offer & Problem Agitation",
+      "adFormatType": "",
+      "notes": "Library ID: 3271663196351922",
+      "platforms": [
+        "Facebook",
+        "Instagram"
+      ],
+      "createdAt": "2026-10-21T11:07:36.072Z"
     }
   ]
 }
