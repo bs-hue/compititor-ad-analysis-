@@ -680,8 +680,14 @@ body {
 .library-top-controls {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 14px;
+  margin-bottom: 24px;
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 8px 20px -6px rgba(15, 23, 42, 0.07);
+  position: relative;
 }
 
 .search-and-view-row {
@@ -695,40 +701,48 @@ body {
 .search-box {
   position: relative;
   flex: 1;
-  min-width: 260px;
-  max-width: 480px;
+  min-width: 270px;
+  max-width: 520px;
 }
 
 .search-icon {
   position: absolute;
-  left: 12px;
+  left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--text-subtle);
-  font-size: 14px;
+  color: #6366F1;
+  font-size: 15px;
+  pointer-events: none;
 }
 
 .search-input {
   width: 100%;
-  height: 38px;
-  padding: 8px 12px 8px 36px;
+  height: 40px;
+  padding: 8px 14px 8px 38px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border-default);
-  background: var(--bg-app);
-  font-size: 13px;
+  border: 1.5px solid #CBD5E1;
+  background: #F8FAFC;
+  font-size: 13.5px;
+  font-weight: 500;
   color: var(--text-primary);
-  transition: all 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .search-input:focus {
   outline: none;
-  border-color: var(--border-focus);
+  border-color: #6366F1;
   background: #FFFFFF;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+  box-shadow: 0 0 0 3.5px rgba(99, 102, 241, 0.18), 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.search-input:hover:not(:focus) {
+  border-color: #94A3B8;
+  background: #FFFFFF;
 }
 
 .search-input::placeholder {
-  color: var(--text-subtle);
+  color: #94A3B8;
+  font-weight: 400;
 }
 
 .view-and-sort-group {
@@ -738,87 +752,213 @@ body {
 }
 
 .sort-select {
-  height: 38px;
-  padding: 0 12px;
+  height: 40px;
+  padding: 0 14px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border-default);
+  border: 1.5px solid #CBD5E1;
   background: #FFFFFF;
   font-size: 13px;
-  font-weight: 550;
+  font-weight: 600;
   color: var(--text-secondary);
   cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sort-select:hover {
+  border-color: #94A3B8;
 }
 
 .sort-select:focus {
   outline: none;
-  border-color: var(--border-focus);
+  border-color: #6366F1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
 .view-toggle-group {
   display: flex;
-  border: 1px solid var(--border-default);
+  border: 1.5px solid #CBD5E1;
   border-radius: var(--radius-sm);
   overflow: hidden;
+  background: #F8FAFC;
 }
 
 .view-toggle-btn {
-  background: #FFFFFF;
+  background: transparent;
   border: none;
-  padding: 8px 12px;
+  padding: 8px 13px;
+  height: 38px;
   cursor: pointer;
-  color: var(--text-muted);
-  font-size: 13px;
+  color: #64748B;
+  font-size: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.15s ease;
 }
 
-.view-toggle-btn.active {
-  background: var(--bg-subtle);
-  color: var(--text-primary);
-}
-
-/* Secondary Filter Pills Row */
-.filter-pills-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  padding-top: 14px;
-  border-top: 1px solid var(--border-subtle);
-}
-
-.filter-group-label {
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  margin-right: 4px;
-}
-
-.filter-pill {
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 11px;
-  border-radius: var(--radius-full);
-  background: var(--bg-subtle);
-  border: 1px solid transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.filter-pill:hover {
+.view-toggle-btn:hover:not(.active) {
   background: #E2E8F0;
   color: var(--text-primary);
 }
 
-.filter-pill.active {
-  background: var(--primary-light);
-  color: var(--primary);
-  border-color: var(--primary-border);
+.view-toggle-btn.active {
+  background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
+  color: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.35);
 }
+
+/* Secondary Filter Pills Rows */
+.filter-pills-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 14px;
+  border-top: 1px solid #F1F5F9;
+}
+
+.filter-group-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  color: #475569;
+  text-transform: uppercase;
+  margin-right: 2px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ─── Modern High-Contrast Filter Pills ─── */
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  background: #F8FAFC;
+  border: 1.5px solid #E2E8F0;
+  color: #334155;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+.filter-pill:hover {
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  color: #0F172A;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.08);
+}
+
+.filter-pill:active {
+  transform: translateY(0);
+}
+
+/* Pill Count Bubble */
+.pill-count-bubble {
+  font-size: 11px;
+  font-weight: 750;
+  padding: 1px 7px;
+  border-radius: 10px;
+  background: #E2E8F0;
+  color: #475569;
+  transition: all 0.15s ease;
+}
+
+/* ─── Vibrant Glowing Active States ────────────────────────────────────────── */
+
+/* Default / Brand Active Pill (Electric Indigo Glow) */
+.filter-pill.active {
+  background: linear-gradient(135deg, #4338CA 0%, #6366F1 100%) !important;
+  color: #FFFFFF !important;
+  border-color: #4338CA !important;
+  font-weight: 750 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.42), 0 0 0 1.5px rgba(99, 102, 241, 0.25) !important;
+}
+
+.filter-pill.active .pill-count-bubble {
+  background: rgba(255, 255, 255, 0.28) !important;
+  color: #FFFFFF !important;
+}
+
+/* Winner (>90d) - Glowing Emerald Accent */
+.filter-pill[data-filter="tier"][data-val="Winner"].active {
+  background: linear-gradient(135deg, #059669 0%, #10B981 100%) !important;
+  border-color: #047857 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45), 0 0 0 1.5px rgba(5, 150, 105, 0.3) !important;
+}
+
+/* Tested (30-90d) - Glowing Royal Blue Accent */
+.filter-pill[data-filter="tier"][data-val="Tested"].active {
+  background: linear-gradient(135deg, #1D4ED8 0%, #3B82F6 100%) !important;
+  border-color: #1E40AF !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.45), 0 0 0 1.5px rgba(29, 78, 216, 0.3) !important;
+}
+
+/* New (<30d) - Glowing Amber Accent */
+.filter-pill[data-filter="tier"][data-val="New"].active {
+  background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%) !important;
+  border-color: #B45309 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.45), 0 0 0 1.5px rgba(217, 119, 6, 0.3) !important;
+}
+
+/* Video Format - Glowing Violet Accent */
+.filter-pill[data-filter="format"][data-val="Video"].active {
+  background: linear-gradient(135deg, #6D28D9 0%, #8B5CF6 100%) !important;
+  border-color: #5B21B6 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.45), 0 0 0 1.5px rgba(109, 40, 217, 0.3) !important;
+}
+
+/* Image Format - Glowing Sky Accent */
+.filter-pill[data-filter="format"][data-val="Image"].active {
+  background: linear-gradient(135deg, #0284C7 0%, #0EA5E9 100%) !important;
+  border-color: #0369A1 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 14px rgba(14, 165, 233, 0.45), 0 0 0 1.5px rgba(2, 132, 199, 0.3) !important;
+}
+
+/* Carousel Format - Glowing Pink Accent */
+.filter-pill[data-filter="format"][data-val="Carousel"].active {
+  background: linear-gradient(135deg, #BE185D 0%, #EC4899 100%) !important;
+  border-color: #9D174D !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.45), 0 0 0 1.5px rgba(190, 24, 93, 0.3) !important;
+}
+
+/* Reset / Clear Filters Action Pill */
+.filter-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 750;
+  padding: 5px 11px;
+  border-radius: var(--radius-full);
+  background: #FEF2F2;
+  border: 1.5px solid #FECDD3;
+  color: #E11D48;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  margin-left: auto;
+}
+
+.filter-reset-btn:hover {
+  background: #FFE4E6;
+  border-color: #FDA4AF;
+  color: #BE123C;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(225, 29, 72, 0.2);
+}
+
 
 /* ─── 6. AD CARDS GRID & ITEM ────────────────────────────────────────────── */
 .ads-library-grid {

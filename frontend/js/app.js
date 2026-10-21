@@ -550,6 +550,7 @@ function setupLiveSearch() {
     input.addEventListener('input', (e) => {
       state.filters.search = e.target.value.trim().toLowerCase();
       state.pagination.page = 1;
+      updateResetButtonVisibility();
       renderAdsLibrary();
     });
   }
@@ -557,14 +558,22 @@ function setupLiveSearch() {
 
 function renderCompetitorFilterPills(competitors) {
   const container = document.getElementById('competitorPillsContainer');
-  let html = `<span class="filter-pill ${state.filters.competitor === 'all' ? 'active' : ''}" data-val="all" onclick="setFilter('competitor', 'all', this)">All</span>`;
+  if (!container) return;
+  const client = typeof getActiveClient === 'function' ? getActiveClient() : null;
+  const ads = (state.ads && state.ads.length > 0) ? state.ads : (client && client.ads ? client.ads : []);
+  const totalCount = ads ? ads.length : 0;
+  let html = `<span class="filter-pill ${state.filters.competitor === 'all' ? 'active' : ''}" data-val="all" onclick="setFilter('competitor', 'all', this)">All <span class="pill-count-bubble">${totalCount}</span></span>`;
   
-  competitors.forEach(c => {
-    const isActive = state.filters.competitor === c.name;
-    html += `<span class="filter-pill ${isActive ? 'active' : ''}" data-val="${c.name}" onclick="setFilter('competitor', '${c.name.replace(/'/g, "\\'")}', this)">${c.name}</span>`;
-  });
+  if (Array.isArray(competitors)) {
+    competitors.forEach(c => {
+      const isActive = state.filters.competitor === c.name;
+      const count = ads.filter(a => a.competitorName === c.name || a.competitorId === c.id).length || c.activeAds || c.activeAdCount || 0;
+      html += `<span class="filter-pill ${isActive ? 'active' : ''}" data-val="${c.name}" onclick="setFilter('competitor', '${c.name.replace(/'/g, "\\'")}', this)">${c.name} <span class="pill-count-bubble">${count}</span></span>`;
+    });
+  }
 
   container.innerHTML = html;
+  updateResetButtonVisibility();
 }
 
 function setFilter(type, val, element) {
@@ -576,6 +585,7 @@ function setFilter(type, val, element) {
     element.classList.add('active');
   }
 
+  updateResetButtonVisibility();
   renderAdsLibrary();
 }
 
@@ -586,6 +596,13 @@ function syncFilterPillsActiveUI() {
   document.querySelectorAll('[data-filter="tier"]').forEach(p => {
     p.classList.toggle('active', p.getAttribute('data-val') === state.filters.tier);
   });
+  const compContainer = document.getElementById('competitorPillsContainer');
+  if (compContainer) {
+    compContainer.querySelectorAll('.filter-pill').forEach(p => {
+      p.classList.toggle('active', p.getAttribute('data-val') === state.filters.competitor);
+    });
+  }
+  updateResetButtonVisibility();
 }
 
 function filterByFormat(format) {
@@ -716,7 +733,18 @@ function resetFilters() {
   document.querySelectorAll('.filter-pill').forEach(p => {
     p.classList.toggle('active', p.getAttribute('data-val') === 'all');
   });
+  updateResetButtonVisibility();
   renderAdsLibrary();
+}
+
+function updateResetButtonVisibility() {
+  const btn = document.getElementById('btnResetFilters');
+  if (!btn) return;
+  const isFiltered = state.filters.competitor !== 'all' || 
+                     state.filters.format !== 'all' || 
+                     state.filters.tier !== 'all' || 
+                     Boolean(state.filters.search && state.filters.search.trim());
+  btn.style.display = isFiltered ? 'inline-flex' : 'none';
 }
 
 function buildAdCardHTML(ad) {

@@ -262,21 +262,22 @@
             </div>
           </div>
 
-          <div class="filter-pills-row" style="padding-top: 10px;">
+          <div class="filter-pills-row" style="padding-top: 12px;">
             <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
               <span class="filter-group-label">Format:</span>
               <span class="filter-pill active" data-filter="format" data-val="all" onclick="setFilter('format', 'all', this)">All</span>
-              <span class="filter-pill" data-filter="format" data-val="Video" onclick="setFilter('format', 'Video', this)">Video</span>
-              <span class="filter-pill" data-filter="format" data-val="Image" onclick="setFilter('format', 'Image', this)">Image</span>
-              <span class="filter-pill" data-filter="format" data-val="Carousel" onclick="setFilter('format', 'Carousel', this)">Carousel</span>
+              <span class="filter-pill" data-filter="format" data-val="Video" onclick="setFilter('format', 'Video', this)">🎬 Video</span>
+              <span class="filter-pill" data-filter="format" data-val="Image" onclick="setFilter('format', 'Image', this)">🖼️ Image</span>
+              <span class="filter-pill" data-filter="format" data-val="Carousel" onclick="setFilter('format', 'Carousel', this)">📑 Carousel</span>
             </div>
 
             <div style="display: flex; align-items: center; gap: 8px; margin-left: auto; flex-wrap: wrap;">
               <span class="filter-group-label">Tier:</span>
               <span class="filter-pill active" data-filter="tier" data-val="all" onclick="setFilter('tier', 'all', this)">All</span>
-              <span class="filter-pill" data-filter="tier" data-val="Winner" onclick="setFilter('tier', 'Winner', this)">Winner (&gt;90d)</span>
-              <span class="filter-pill" data-filter="tier" data-val="Tested" onclick="setFilter('tier', 'Tested', this)">Tested (30-90d)</span>
-              <span class="filter-pill" data-filter="tier" data-val="New" onclick="setFilter('tier', 'New', this)">New (&lt;30d)</span>
+              <span class="filter-pill" data-filter="tier" data-val="Winner" onclick="setFilter('tier', 'Winner', this)">🏆 Winner (&gt;90d)</span>
+              <span class="filter-pill" data-filter="tier" data-val="Tested" onclick="setFilter('tier', 'Tested', this)">⚡ Tested (30-90d)</span>
+              <span class="filter-pill" data-filter="tier" data-val="New" onclick="setFilter('tier', 'New', this)">🧪 New (&lt;30d)</span>
+              <button id="btnResetFilters" class="filter-reset-btn" onclick="resetFilters()" style="display: none;" title="Reset all filters">✕ Clear</button>
             </div>
           </div>
         </div>
