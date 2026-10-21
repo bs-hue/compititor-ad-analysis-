@@ -1106,24 +1106,41 @@ function openTranscribeDrawer(adId) {
   document.getElementById('simVideoHookText').textContent = `"${ad.hook}"`;
   document.getElementById('simMetaLink').href = ad.adLibraryUrl || '#';
 
-  // Render Transcript Segments
-  const segments = [
+  function renderSegments(segs) {
+    document.getElementById('transcribeSegmentsContainer').innerHTML = segs.map(s => `
+      <div class="script-segment-item">
+        <div class="segment-badge-row">
+          <span class="time-stamp-pill">${s.start} - ${s.end}</span>
+          <span style="font-size: 10.5px; font-weight: 750; text-transform: uppercase; color: var(--primary); background: var(--primary-light); padding: 2px 7px; border-radius: 4px;">${s.tag}</span>
+        </div>
+        <div style="font-size: 13.5px; font-weight: 600; color: var(--text-primary); line-height: 1.45;">"${s.text}"</div>
+        <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px; font-style: italic;">💡 ${s.notes}</div>
+      </div>
+    `).join('');
+  }
+
+  // Render baseline segments
+  const initialSegments = [
     { start: '00:00', end: '00:05', tag: 'Hook', text: `${ad.hook}? Kya aapke sath bhi baar baar aisa ho raha hai?`, notes: 'Pattern interrupt targeting latent doubt.' },
-    { start: '00:05', end: '00:18', tag: 'Problem', text: `Log saalon tak mehnat karte hain par jab tak kundali ke mukhya grah shant na hon, tab tak results aate aate ruk jate hain. ${ad.bodyText.split('.')[0] || 'Koshish ke baad bhi kaam ruk jata hai'}.`, notes: 'Validates viewer pain points, shifts blame to external planetary timing.' },
+    { start: '00:05', end: '00:18', tag: 'Problem', text: `Log saalon tak mehnat karte hain par jab tak kundali ke mukhya grah shant na hon, tab tak results aate aate ruk jate hain. ${ad.bodyText ? ad.bodyText.split('.')[0] : ''}.`, notes: 'Validates viewer pain points, shifts blame to external planetary timing.' },
     { start: '00:18', end: '00:40', tag: 'Mechanism', text: `Iska sabse saral aur pramanit samadhan hai aapka personalized horoscope report. Isme certified algorithms se aapke grahon ki exact sthiti aur simple Vedic upay bataye jate hain.`, notes: 'Introduces authentic mechanism with social proof.' },
     { start: '00:40', end: '00:54', tag: 'Call to Action', text: `Aaj hi neeche diye gaye link par click karein aur apna first consultation 100% FREE ya sirf ₹1 mein claim karein. Slots limited hain!`, notes: 'Frictionless entry offer paired with scarcity.' }
   ];
+  renderSegments(initialSegments);
 
-  document.getElementById('transcribeSegmentsContainer').innerHTML = segments.map(s => `
-    <div class="script-segment-item">
-      <div class="segment-badge-row">
-        <span class="time-stamp-pill">${s.start} - ${s.end}</span>
-        <span style="font-size: 10.5px; font-weight: 750; text-transform: uppercase; color: var(--primary); background: var(--primary-light); padding: 2px 7px; border-radius: 4px;">${s.tag}</span>
-      </div>
-      <div style="font-size: 13.5px; font-weight: 600; color: var(--text-primary); line-height: 1.45;">"${s.text}"</div>
-      <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px; font-style: italic;">💡 ${s.notes}</div>
-    </div>
-  `).join('');
+  // Fetch from backend /api/ads/:id/transcribe
+  fetch(`/api/ads/${adId}/transcribe`)
+    .then(r => r.json())
+    .then(json => {
+      if (json && json.data && Array.isArray(json.data.segments) && json.data.segments.length > 0) {
+        renderSegments(json.data.segments);
+        const badge = document.getElementById('transcribeModelBadge');
+        if (badge) {
+          badge.textContent = json.data.provider === 'sarvam_ai' ? '● Sarvam AI (saaras:v3)' : '● Sarvam AI Ready';
+        }
+      }
+    })
+    .catch(() => {});
 
   document.getElementById('transcribeTakeawaysContainer').innerHTML = `
     <li>Opens with high-urgency rhetorical question within first 3 seconds.</li>

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const dbService = require('../services/dbService');
+const transcriptionService = require('../services/transcriptionService');
 const clientController = require('../controllers/clientController');
 const competitorController = require('../controllers/competitorController');
 const adController = require('../controllers/adController');
@@ -60,11 +61,22 @@ router.post('/extension/ingest', async (req, res) => {
     }
 });
 
-// ─── Transcribe Ad Video & Script Endpoint ──────────────────────────────────
+// ─── Transcribe Ad Video & Script Endpoint (Sarvam AI / STT) ───────────────
+router.get('/transcribe/status', (req, res) => {
+    res.json({
+        status: 'success',
+        data: {
+            configured: transcriptionService.isConfigured,
+            provider: 'sarvam_ai',
+            model: 'saaras:v3'
+        }
+    });
+});
+
 router.get('/ads/:id/transcribe', async (req, res) => {
     try {
-        const adId = parseInt(req.params.id, 10);
-        const transcript = await dbService.getAdTranscript(adId);
+        const adId = req.params.id;
+        const transcript = await transcriptionService.transcribeAd(adId);
         res.json({
             message: 'success',
             data: transcript
