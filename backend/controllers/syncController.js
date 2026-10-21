@@ -38,14 +38,32 @@ class SyncController {
     async syncCompetitor(req, res) {
         try {
             const competitorId = Number(req.params.id);
-            const clientId = Number(req.body.clientId);
+            let clientId = Number(req.body?.clientId);
 
-            const overview = await dbService.getClientOverview(clientId);
-            if (!overview) {
-                return res.status(404).json({ status: 'error', message: 'Client workspace not found.' });
+            let overview = null;
+            let competitor = null;
+
+            if (clientId) {
+                overview = await dbService.getClientOverview(clientId);
+                if (overview && Array.isArray(overview.competitors)) {
+                    competitor = overview.competitors.find(c => c.id === competitorId);
+                }
             }
 
-            const competitor = overview.competitors.find(c => c.id === competitorId);
+            // Fallback: search across all clients if clientId was not supplied
+            if (!competitor) {
+                const clients = await dbService.getClients();
+                for (const cl of clients) {
+                    const ov = await dbService.getClientOverview(cl.id);
+                    const found = ov?.competitors?.find(c => c.id === competitorId);
+                    if (found) {
+                        clientId = cl.id;
+                        competitor = found;
+                        break;
+                    }
+                }
+            }
+
             if (!competitor) {
                 return res.status(404).json({ status: 'error', message: 'Competitor not found.' });
             }

@@ -107,6 +107,14 @@
       </div>
 
       <div class="top-nav-actions">
+        <!-- Apify Live Cloud Status & Sync Button -->
+        <div id="apifyStatusPill" class="apify-status-pill" title="Apify Cloud Scraper API Status">
+          <span class="apify-pulse-dot"></span>
+          <span id="apifyStatusText">Apify Cloud Active</span>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="btnSyncApify" onclick="triggerApifySync()" title="Trigger live Meta Ad Library auto-scrape via Apify">
+          🔄 Sync via Apify
+        </button>
         <button class="btn btn-primary btn-sm" onclick="openAddCompetitorModal()">
           + Add Competitor
         </button>

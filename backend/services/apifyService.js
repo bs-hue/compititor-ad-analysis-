@@ -2,11 +2,13 @@
  * Apify Meta Ad Library Scraper & Automated Intelligence Service
  * Ingests, normalizes, and extracts winner ad insights automatically.
  */
+const path = require('path');
 const dbService = require('./dbService');
 
 class ApifyService {
     get apiToken() {
-        return process.env.APIFY_API_TOKEN || '';
+        require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env'), override: true });
+        return (process.env.APIFY_API_TOKEN || '').trim();
     }
 
     get actorId() {
@@ -22,9 +24,8 @@ class ApifyService {
     }
 
     getStatus() {
-        require('dotenv').config();
         const token = this.apiToken;
-        const isConfigured = Boolean(token && token.trim() !== '' && !token.includes('your-apify-api-token'));
+        const isConfigured = Boolean(token && token !== '' && !token.includes('your-apify-api-token'));
         return {
             configured: isConfigured,
             actorId: this.actorId,
