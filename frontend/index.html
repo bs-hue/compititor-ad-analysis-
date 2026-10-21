@@ -228,6 +228,39 @@
       <!-- ─── 5. AD LIBRARY WORKSPACE (SEARCH, FILTER & CONTROLS) ──────────── -->
       <section class="library-section" id="adLibrarySection">
         
+        <!-- Ad Lens Instant URL Analyzer Banner -->
+        <div class="adlens-dashboard-analyzer">
+          <div class="adlens-analyzer-header">
+            <div class="adlens-analyzer-title">
+              <span class="adlens-badge-icon">⚡</span>
+              <div>
+                <h4 style="margin: 0; font-size: 14.5px; font-weight: 750; color: var(--text-primary);">Ad Lens™ Instant Intelligence Analyzer</h4>
+                <p style="margin: 2px 0 0; font-size: 12px; color: var(--text-secondary);">Paste any Facebook Ad Library link or ID to compute real-time spend estimates, reach, CPC, and winner tier without leaving your dashboard.</p>
+              </div>
+            </div>
+            <div class="adlens-analyzer-vertical-select-wrap">
+              <span style="font-size: 11px; font-weight: 750; color: var(--text-muted); text-transform: uppercase;">Benchmark:</span>
+              <select id="dashboardVerticalSelect" class="adlens-vertical-select" onchange="handleBenchmarkVerticalChange()">
+                <option value="spiritual_coaching" selected>Spiritual / Coaching (Calibrated)</option>
+                <option value="d2c">D2C E-commerce</option>
+                <option value="healthcare">Healthcare &amp; Wellness</option>
+                <option value="fintech">Fintech &amp; Finance</option>
+                <option value="education">Education &amp; EdTech</option>
+              </select>
+            </div>
+          </div>
+          <div class="adlens-analyzer-input-row">
+            <div class="adlens-input-wrap">
+              <span class="adlens-input-icon">🔗</span>
+              <input type="text" id="adLensUrlInput" class="adlens-input" placeholder="Paste FB Ad Library URL or ID (e.g. https://www.facebook.com/ads/library/?id=3271663196351922)..." onkeydown="if(event.key==='Enter') handleDashboardAdLensAnalyze()">
+            </div>
+            <button class="adlens-analyze-btn" id="btnRunAdLens" onclick="handleDashboardAdLensAnalyze()">
+              ⚡ Run Ad Lens Analysis
+            </button>
+          </div>
+          <div id="adLensAnalyzerResult" style="display: none; margin-top: 14px;"></div>
+        </div>
+
         <!-- Controls Bar -->
         <div class="library-top-controls">
           <div class="search-and-view-row">

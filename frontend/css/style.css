@@ -1613,3 +1613,217 @@ body {
   color: var(--text-muted);
   margin-top: 4px;
 }
+
+/* ─── 14. AD LENS DASHBOARD INTELLIGENCE & METRICS ───────────────────────── */
+.adlens-dashboard-analyzer {
+  background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%);
+  border: 1.5px solid #CBD5E1;
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s ease;
+}
+
+.adlens-dashboard-analyzer:focus-within {
+  border-color: #6366F1;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.12);
+}
+
+.adlens-analyzer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.adlens-analyzer-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.adlens-badge-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.3);
+  flex-shrink: 0;
+}
+
+.adlens-analyzer-vertical-select-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.adlens-vertical-select {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1.5px solid #CBD5E1;
+  background: #FFFFFF;
+  font-size: 12px;
+  font-weight: 650;
+  color: #334155;
+  cursor: pointer;
+}
+
+.adlens-analyzer-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.adlens-input-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 280px;
+}
+
+.adlens-input-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #64748B;
+  pointer-events: none;
+}
+
+.adlens-input {
+  width: 100%;
+  height: 42px;
+  padding: 8px 14px 8px 36px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid #CBD5E1;
+  background: #FFFFFF;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #0F172A;
+  transition: all 0.2s ease;
+}
+
+.adlens-input:focus {
+  outline: none;
+  border-color: #6366F1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+}
+
+.adlens-analyze-btn {
+  height: 42px;
+  padding: 0 18px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
+  color: #FFFFFF;
+  border: none;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.adlens-analyze-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.45);
+}
+
+/* AdLens Live Result Box */
+.adlens-result-card {
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+  animation: fadeIn 0.25s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Card-level AdLens Micro Metrics Grid */
+.adlens-card-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  margin: 4px 0;
+}
+
+.adlens-metric-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-right: 1px solid #E2E8F0;
+  padding-right: 6px;
+}
+
+.adlens-metric-cell:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+
+.adlens-metric-sub {
+  font-size: 9.5px;
+  font-weight: 750;
+  text-transform: uppercase;
+  color: #64748B;
+  letter-spacing: 0.3px;
+  margin-bottom: 2px;
+}
+
+.adlens-metric-val {
+  font-size: 12px;
+  font-weight: 800;
+  color: #0F172A;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.adlens-metric-val.spend-gradient {
+  background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 1-Click Creative Download Button */
+.btn-card-download {
+  background: #F0FDF4;
+  color: #15803D;
+  border: 1px solid #BBF7D0;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 5px 9px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.btn-card-download:hover {
+  background: #16A34A;
+  color: #FFFFFF;
+  border-color: #16A34A;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.25);
+}
