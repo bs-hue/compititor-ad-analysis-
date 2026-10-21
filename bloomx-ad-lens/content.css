@@ -647,3 +647,256 @@
     flex-grow: 1 !important;
     outline: none !important;
 }
+
+/* ─── AdLens Per-Card Overlay Styles (AdLens Exact Feature Set) ──────────── */
+.bloomx-adlens-card {
+    display: block !important;
+    position: relative !important;
+    margin: 0 0 12px 0 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    color: #F8FAFC !important;
+    background: #0E1219 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 14px !important;
+    padding: 12px 14px !important;
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45) !important;
+    box-sizing: border-box !important;
+    z-index: 10 !important;
+    width: 100% !important;
+    user-select: none !important;
+}
+
+.adlens-header-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 8px !important;
+}
+
+.adlens-header-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    flex-wrap: wrap !important;
+}
+
+.adlens-tier-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    font-size: 11px !important;
+    font-weight: 750 !important;
+    padding: 2.5px 8.5px !important;
+    border-radius: 20px !important;
+}
+
+.adlens-badge-winner {
+    background: rgba(16, 185, 129, 0.16) !important;
+    border: 1px solid rgba(16, 185, 129, 0.35) !important;
+    color: #34D399 !important;
+}
+
+.adlens-badge-tested {
+    background: rgba(59, 130, 246, 0.16) !important;
+    border: 1px solid rgba(59, 130, 246, 0.35) !important;
+    color: #60A5FA !important;
+}
+
+.adlens-badge-new {
+    background: rgba(245, 158, 11, 0.16) !important;
+    border: 1px solid rgba(245, 158, 11, 0.35) !important;
+    color: #FBBF24 !important;
+}
+
+.adlens-tier-dot {
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+    background: currentColor !important;
+}
+
+.adlens-platforms-tag {
+    background: #18202F !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #94A3B8 !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    padding: 2px 7px !important;
+    border-radius: 4px !important;
+}
+
+.adlens-lib-copy {
+    background: #161B26 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #94A3B8 !important;
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+    padding: 2.5px 8px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+
+.adlens-lib-copy:hover {
+    border-color: #6366F1 !important;
+    color: #FFFFFF !important;
+    background: #1F2537 !important;
+}
+
+.adlens-metrics-grid {
+    display: grid !important;
+    grid-template-columns: 1.15fr 1fr 1fr !important;
+    gap: 7px !important;
+    margin-bottom: 9px !important;
+}
+
+.adlens-stat-box {
+    background: #11151E !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-radius: 10px !important;
+    padding: 8px 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1px !important;
+}
+
+.adlens-stat-spend {
+    border-color: rgba(192, 132, 252, 0.35) !important;
+    background: linear-gradient(135deg, rgba(192, 132, 252, 0.08) 0%, rgba(17, 21, 30, 0.95) 100%) !important;
+}
+
+.adlens-stat-label {
+    font-size: 9.5px !important;
+    font-weight: 700 !important;
+    color: #8E95A2 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+.adlens-stat-val {
+    font-size: 15px !important;
+    font-weight: 850 !important;
+    color: #F8FAFC !important;
+    line-height: 1.25 !important;
+    margin-top: 1px !important;
+}
+
+.adlens-spend-gradient {
+    color: #C084FC !important;
+    background: linear-gradient(90deg, #C084FC 0%, #F472B6 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
+
+.adlens-stat-sub {
+    font-size: 9.5px !important;
+    color: #8E95A2 !important;
+    margin-top: 1px !important;
+}
+
+.adlens-actions-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.adlens-btn {
+    border: none !important;
+    outline: none !important;
+    font-family: inherit !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
+    padding: 7px 11px !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    transition: all 0.15s ease !important;
+}
+
+.adlens-btn-download {
+    background: #18202E !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #E2E8F0 !important;
+    flex: 1 !important;
+}
+
+.adlens-btn-download:hover {
+    background: #232C3F !important;
+    border-color: #38BDF8 !important;
+    color: #38BDF8 !important;
+}
+
+.adlens-btn-save {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(168, 85, 247, 0.3) 100%) !important;
+    border: 1px solid rgba(168, 85, 247, 0.45) !important;
+    color: #E9D5FF !important;
+    flex: 1 !important;
+}
+
+.adlens-btn-save:hover {
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 2px 10px rgba(99, 102, 241, 0.45) !important;
+}
+
+.adlens-btn-toggle {
+    background: #141923 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #94A3B8 !important;
+    padding: 7px 10px !important;
+}
+
+.adlens-btn-toggle:hover {
+    background: #1D2332 !important;
+    color: #FFFFFF !important;
+}
+
+.adlens-details-drawer {
+    background: #0B0E14 !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px !important;
+    padding: 10px 12px !important;
+    margin-top: 8px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+.adlens-drawer-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    font-size: 10.5px !important;
+    color: #94A3B8 !important;
+}
+
+.adlens-drawer-grid span {
+    color: #8E95A2 !important;
+}
+
+.adlens-drawer-grid b {
+    color: #F8FAFC !important;
+    margin-left: 4px !important;
+}
+
+.adlens-drawer-footer {
+    padding-top: 6px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+}
+
+.adlens-dashboard-link {
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    color: #A78BFA !important;
+    text-decoration: none !important;
+}
+
+.adlens-dashboard-link:hover {
+    text-decoration: underline !important;
+}
+

@@ -282,6 +282,226 @@
                 font-weight: 700 !important;
                 text-decoration: none !important;
             }
+
+            /* AdLens Per-Card Direct Overlay */
+            .bloomx-adlens-card {
+                display: block !important;
+                position: relative !important;
+                margin: 0 0 12px 0 !important;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+                color: #F8FAFC !important;
+                background: #0E1219 !important;
+                border: 1px solid rgba(255, 255, 255, 0.12) !important;
+                border-radius: 14px !important;
+                padding: 12px 14px !important;
+                box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45) !important;
+                box-sizing: border-box !important;
+                z-index: 10 !important;
+                width: 100% !important;
+                user-select: none !important;
+            }
+            .adlens-header-row {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                margin-bottom: 8px !important;
+            }
+            .adlens-header-left {
+                display: flex !important;
+                align-items: center !important;
+                gap: 7px !important;
+                flex-wrap: wrap !important;
+            }
+            .adlens-tier-badge {
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 5px !important;
+                font-size: 11px !important;
+                font-weight: 750 !important;
+                padding: 2.5px 8.5px !important;
+                border-radius: 20px !important;
+            }
+            .adlens-badge-winner {
+                background: rgba(16, 185, 129, 0.16) !important;
+                border: 1px solid rgba(16, 185, 129, 0.35) !important;
+                color: #34D399 !important;
+            }
+            .adlens-badge-tested {
+                background: rgba(59, 130, 246, 0.16) !important;
+                border: 1px solid rgba(59, 130, 246, 0.35) !important;
+                color: #60A5FA !important;
+            }
+            .adlens-badge-new {
+                background: rgba(245, 158, 11, 0.16) !important;
+                border: 1px solid rgba(245, 158, 11, 0.35) !important;
+                color: #FBBF24 !important;
+            }
+            .adlens-tier-dot {
+                width: 6px !important;
+                height: 6px !important;
+                border-radius: 50% !important;
+                background: currentColor !important;
+            }
+            .adlens-platforms-tag {
+                background: #18202F !important;
+                border: 1px solid rgba(255, 255, 255, 0.08) !important;
+                color: #94A3B8 !important;
+                font-size: 10px !important;
+                font-weight: 600 !important;
+                padding: 2px 7px !important;
+                border-radius: 4px !important;
+            }
+            .adlens-lib-copy {
+                background: #161B26 !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                color: #94A3B8 !important;
+                font-size: 10.5px !important;
+                font-weight: 600 !important;
+                padding: 2.5px 8px !important;
+                border-radius: 6px !important;
+                cursor: pointer !important;
+                transition: all 0.15s ease !important;
+            }
+            .adlens-lib-copy:hover {
+                border-color: #6366F1 !important;
+                color: #FFFFFF !important;
+                background: #1F2537 !important;
+            }
+            .adlens-metrics-grid {
+                display: grid !important;
+                grid-template-columns: 1.15fr 1fr 1fr !important;
+                gap: 7px !important;
+                margin-bottom: 9px !important;
+            }
+            .adlens-stat-box {
+                background: #11151E !important;
+                border: 1px solid rgba(255, 255, 255, 0.06) !important;
+                border-radius: 10px !important;
+                padding: 8px 10px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 1px !important;
+            }
+            .adlens-stat-spend {
+                border-color: rgba(192, 132, 252, 0.35) !important;
+                background: linear-gradient(135deg, rgba(192, 132, 252, 0.08) 0%, rgba(17, 21, 30, 0.95) 100%) !important;
+            }
+            .adlens-stat-label {
+                font-size: 9.5px !important;
+                font-weight: 700 !important;
+                color: #8E95A2 !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.5px !important;
+            }
+            .adlens-stat-val {
+                font-size: 15px !important;
+                font-weight: 850 !important;
+                color: #F8FAFC !important;
+                line-height: 1.25 !important;
+                margin-top: 1px !important;
+            }
+            .adlens-spend-gradient {
+                color: #C084FC !important;
+                background: linear-gradient(90deg, #C084FC 0%, #F472B6 100%) !important;
+                -webkit-background-clip: text !important;
+                -webkit-text-fill-color: transparent !important;
+            }
+            .adlens-stat-sub {
+                font-size: 9.5px !important;
+                color: #8E95A2 !important;
+                margin-top: 1px !important;
+            }
+            .adlens-actions-row {
+                display: flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+            }
+            .adlens-btn {
+                border: none !important;
+                outline: none !important;
+                font-family: inherit !important;
+                font-size: 11px !important;
+                font-weight: 700 !important;
+                border-radius: 8px !important;
+                padding: 7px 11px !important;
+                cursor: pointer !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 5px !important;
+                transition: all 0.15s ease !important;
+            }
+            .adlens-btn-download {
+                background: #18202E !important;
+                border: 1px solid rgba(255, 255, 255, 0.12) !important;
+                color: #E2E8F0 !important;
+                flex: 1 !important;
+            }
+            .adlens-btn-download:hover {
+                background: #232C3F !important;
+                border-color: #38BDF8 !important;
+                color: #38BDF8 !important;
+            }
+            .adlens-btn-save {
+                background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(168, 85, 247, 0.3) 100%) !important;
+                border: 1px solid rgba(168, 85, 247, 0.45) !important;
+                color: #E9D5FF !important;
+                flex: 1 !important;
+            }
+            .adlens-btn-save:hover {
+                background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%) !important;
+                color: #FFFFFF !important;
+                box-shadow: 0 2px 10px rgba(99, 102, 241, 0.45) !important;
+            }
+            .adlens-btn-toggle {
+                background: #141923 !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                color: #94A3B8 !important;
+                padding: 7px 10px !important;
+            }
+            .adlens-btn-toggle:hover {
+                background: #1D2332 !important;
+                color: #FFFFFF !important;
+            }
+            .adlens-details-drawer {
+                background: #0B0E14 !important;
+                border: 1px solid rgba(255, 255, 255, 0.08) !important;
+                border-radius: 10px !important;
+                padding: 10px 12px !important;
+                margin-top: 8px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 8px !important;
+            }
+            .adlens-drawer-grid {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 6px !important;
+                font-size: 10.5px !important;
+                color: #94A3B8 !important;
+            }
+            .adlens-drawer-grid span {
+                color: #8E95A2 !important;
+            }
+            .adlens-drawer-grid b {
+                color: #F8FAFC !important;
+                margin-left: 4px !important;
+            }
+            .adlens-drawer-footer {
+                padding-top: 6px !important;
+                border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+                display: flex !important;
+                justify-content: flex-end !important;
+            }
+            .adlens-dashboard-link {
+                font-size: 10.5px !important;
+                font-weight: 700 !important;
+                color: #A78BFA !important;
+                text-decoration: none !important;
+            }
+            .adlens-dashboard-link:hover {
+                text-decoration: underline !important;
+            }
         `;
         (document.head || document.documentElement).appendChild(style);
     }
@@ -621,13 +841,139 @@
         return Math.round(abs).toString();
     }
 
-    // ─── Build Lens Overlay DOM on Each Card (Spendo Minimal UI) ─────────────────
+    // ─── Extract Media from Ad Card (Video or High-Res Image) ─────────────────
+    function findCardMedia(cardEl) {
+        if (!cardEl) return null;
+        // 1. Check for video element
+        const video = cardEl.querySelector('video');
+        if (video) {
+            let src = video.src || '';
+            if (!src) {
+                const s = video.querySelector('source');
+                if (s && s.src) src = s.src;
+            }
+            if (src && !src.startsWith('blob:')) {
+                return { type: 'video', url: src, ext: 'mp4' };
+            }
+        }
+        // 2. High-res image
+        const imgs = Array.from(cardEl.querySelectorAll('img'));
+        let bestImg = null;
+        let maxArea = 0;
+        imgs.forEach(img => {
+            const src = img.src || '';
+            if (src.includes('profile') || src.includes('icon') || src.includes('emoji')) return;
+            const w = img.naturalWidth || img.width || 0;
+            const h = img.naturalHeight || img.height || 0;
+            const area = w * h;
+            if (area > maxArea && (w > 100 || area > 10000)) {
+                maxArea = area;
+                bestImg = img;
+            }
+        });
+        if (bestImg && bestImg.src) {
+            return { type: 'image', url: bestImg.src, ext: 'jpg' };
+        }
+        return null;
+    }
+
+    function triggerDownloadMedia(mediaObj, fallbackName = 'ad_creative') {
+        if (!mediaObj || !mediaObj.url) {
+            alert('No direct video or image file detected on this ad card.');
+            return;
+        }
+        const filename = `${fallbackName}.${mediaObj.ext || 'mp4'}`;
+        try {
+            fetch(mediaObj.url)
+                .then(r => r.blob())
+                .then(blob => {
+                    const blobUrl = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(blobUrl);
+                    }, 2000);
+                })
+                .catch(() => {
+                    const a = document.createElement('a');
+                    a.href = mediaObj.url;
+                    a.target = '_blank';
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                });
+        } catch (e) {
+            window.open(mediaObj.url, '_blank');
+        }
+    }
+
+    // ─── Save Single Ad to Dashboard ───────────────────────────────────────────
+    async function saveSingleAdToDashboard(adData, btnEl) {
+        const originalHtml = btnEl.innerHTML;
+        btnEl.disabled = true;
+        btnEl.innerHTML = '<span>⏳ Saving...</span>';
+
+        const payload = {
+            advertiserName: adData.advertiserName || 'Advertiser',
+            vertical: activeVerticalKey || 'spiritual_coaching',
+            ads: [{
+                libraryId: adData.libraryId,
+                daysActive: adData.perf.daysRunning,
+                tier: adData.perf.tierKey === 'winner' ? 'Winner' : (adData.perf.tierKey === 'tested' ? 'Tested' : 'New'),
+                format: adData.mediaType === 'video' ? 'Video' : 'Image',
+                hook: adData.hookSnippet,
+                bodyText: adData.hookSnippet,
+                platforms: adData.platforms,
+                spend: adData.perf.spend,
+                views: adData.perf.views,
+                clicks: adData.perf.clicks,
+                cpcMid: adData.perf.cpcMid,
+                estPurchases: adData.perf.estPurchases?.mid || 0,
+                creativeCount: adData.creativeCount || 1
+            }]
+        };
+
+        try {
+            const res = await fetch('http://localhost:3001/api/extension/ingest', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const json = await res.json();
+            if (res.ok && json.message === 'success') {
+                btnEl.innerHTML = '<span>✅ Saved!</span>';
+                btnEl.style.background = '#059669';
+                btnEl.style.borderColor = '#10B981';
+                setTimeout(() => {
+                    btnEl.disabled = false;
+                    btnEl.innerHTML = originalHtml;
+                    btnEl.style.background = '';
+                    btnEl.style.borderColor = '';
+                }, 2500);
+            } else {
+                throw new Error(json.error || 'Server error');
+            }
+        } catch (e) {
+            btnEl.innerHTML = '<span>⚠️ Server offline</span>';
+            setTimeout(() => {
+                btnEl.disabled = false;
+                btnEl.innerHTML = originalHtml;
+            }, 2500);
+        }
+    }
+
+    // ─── Build AdLens Overlay DOM on Each Card (AdLens Exact Feature Set) ───────
     function createLensCardElement(data) {
         const perf = data.perf;
         const tier = perf.tier;
 
         const container = document.createElement('div');
-        container.className = 'spendo-lens-card';
+        container.className = 'bloomx-adlens-card spendo-lens-card';
         container.setAttribute('data-bloomx-card', 'true');
         if (data.libraryId) {
             container.setAttribute('data-lib-id-ref', data.libraryId);
@@ -640,115 +986,103 @@
         const viewsPerDay = Math.round(perf.views.mid / perf.daysRunning);
         const viewsPerDayStr = `${formatCompactViews(viewsPerDay)}/day`;
 
-        const confClass = isCalibrated ? 'conf-high' : 'conf-mid';
         const confText = isCalibrated ? 'High confidence' : 'Medium confidence';
 
+        let tierBadgeClass = 'adlens-badge-tested';
+        let tierBadgeText = '⚡ Tested';
+        if (perf.tierKey === 'winner') {
+            tierBadgeClass = 'adlens-badge-winner';
+            tierBadgeText = '🏆 Winner';
+        } else if (perf.tierKey === 'test') {
+            tierBadgeClass = 'adlens-badge-new';
+            tierBadgeText = '🧪 New';
+        }
+
+        const platformsStr = Array.isArray(data.platforms) && data.platforms.length > 0 
+            ? data.platforms.map(p => p === 'Facebook' ? 'FB' : (p === 'Instagram' ? 'IG' : p)).join(' · ')
+            : 'FB · IG';
+
         container.innerHTML = `
-            <!-- Top Collapsible Pill Bar -->
-            <div class="spendo-top-pill" role="button" title="Click to collapse/expand">
-                <div class="spendo-top-left">
-                    <div class="spendo-logo-badge">S</div>
-                    <span class="spendo-brand-name">Actual Spend</span>
-                    <span class="spendo-live-badge">
-                        <span class="spendo-live-dot"></span>
-                        Live
+            <!-- 1. Header with Duration & Status -->
+            <div class="adlens-header-row">
+                <div class="adlens-header-left">
+                    <span class="adlens-tier-badge ${tierBadgeClass}">
+                        <span class="adlens-tier-dot"></span>
+                        ${tierBadgeText} · ${perf.daysRunning}d active
                     </span>
+                    <span class="adlens-platforms-tag">${platformsStr}</span>
                 </div>
-                <div class="spendo-top-right">
-                    <span class="spendo-top-spend">${totalSpendMidStr}</span>
-                    <span class="spendo-chevron">⌃</span>
+                <div class="adlens-header-right">
+                    ${data.libraryId ? `<span class="adlens-lib-copy" title="Click to copy Library ID" data-id="${data.libraryId}">📋 ID: ${data.libraryId}</span>` : ''}
                 </div>
             </div>
 
-            <!-- Card Body -->
-            <div class="spendo-body">
-                <!-- Header Row -->
-                <div class="spendo-head-row">
-                    <span class="spendo-sec-title">SPEND OVERVIEW</span>
-                    <span class="spendo-conf-pill ${confClass}">
-                        <span class="spendo-conf-dot"></span>
-                        ${confText}
-                    </span>
+            <!-- 2. Primary Spend & Impressions Grid (Instantly visible!) -->
+            <div class="adlens-metrics-grid">
+                <div class="adlens-stat-box adlens-stat-spend" title="Estimated cumulative ad spend">
+                    <span class="adlens-stat-label">Est. Total Spend</span>
+                    <span class="adlens-stat-val adlens-spend-gradient">${totalSpendMidStr}</span>
+                    <span class="adlens-stat-sub">${daySpendRange}</span>
                 </div>
 
-                <!-- 3 Stat Boxes Grid -->
-                <div class="spendo-stats-grid">
-                    <div class="spendo-stat-box" title="Estimated daily spend">
-                        <span class="spendo-stat-label">Day spend</span>
-                        <span class="spendo-stat-number">${daySpendStr}</span>
-                        <span class="spendo-stat-unit">${daySpendRange}</span>
-                    </div>
-
-                    <div class="spendo-stat-box spendo-box-primary" title="Cumulative estimated spend">
-                        <span class="spendo-stat-label">Total spend</span>
-                        <span class="spendo-stat-number spendo-spend-gradient">${totalSpendMidStr}</span>
-                        <span class="spendo-stat-unit">${perf.daysRunning} days</span>
-                    </div>
-
-                    <div class="spendo-stat-box" title="Estimated views & daily impressions">
-                        <span class="spendo-stat-label">Views</span>
-                        <span class="spendo-stat-number">${viewsCompactStr}</span>
-                        <span class="spendo-stat-unit">${viewsPerDayStr}</span>
-                    </div>
+                <div class="adlens-stat-box" title="Estimated Views & Impressions">
+                    <span class="adlens-stat-label">Est. Views</span>
+                    <span class="adlens-stat-val">${viewsCompactStr}</span>
+                    <span class="adlens-stat-sub">${viewsPerDayStr}</span>
                 </div>
 
-                <!-- Metadata Row 1 -->
-                <div class="spendo-meta-row">
-                    <span>Running <b>${perf.daysRunning}d</b></span>
-                    <span>Variants <b>${data.creativeCount || 1}</b></span>
-                    <span>CPM <b>₹${BENCHMARKS.metrics.cpm.mid}</b></span>
+                <div class="adlens-stat-box" title="Estimated conversions at benchmark CPA">
+                    <span class="adlens-stat-label">Est. Orders</span>
+                    <span class="adlens-stat-val">~${perf.estPurchases.mid.toLocaleString('en-IN')}</span>
+                    <span class="adlens-stat-sub">CPC ~₹${perf.cpcMid.toFixed(1)}</span>
                 </div>
+            </div>
 
-                <!-- Metadata Row 2 -->
-                <div class="spendo-meta-row">
-                    <span>Status <b>${data.status}</b></span>
-                    ${data.libraryId ? `<span class="spendo-copy-id" title="Click to copy Library ID" data-lib-id="${data.libraryId}">ID: ${data.libraryId}</span>` : ''}
-                    <span>~<b>${perf.estPurchases.mid.toLocaleString('en-IN')}</b> orders</span>
-                </div>
-
-                <!-- Verified Model Pill -->
-                <div class="spendo-verified-pill" title="Calibrated benchmark model applied">
-                    ✔ Price from website · ${activeVerticalName}
-                </div>
-
-                <!-- Gradient Pro CTA -->
-                <button class="spendo-btn-gradient" type="button" title="View comprehensive competitor sales & revenue">
-                    <span class="spendo-btn-grad-text">Total Sales &amp; Revenue</span>
-                    <span class="spendo-pro-tag">🔒 PRO</span>
+            <!-- 3. AdLens Action Toolbar -->
+            <div class="adlens-actions-row">
+                <button class="adlens-btn adlens-btn-download" type="button" title="Download video or image creative">
+                    📥 Download Creative
                 </button>
-
-                <!-- Full Ad Insights Button -->
-                <button class="spendo-btn-insights" type="button" title="Open BloomX Competitor Dashboard">
-                    <span>Full ad insights</span>
-                    <span class="spendo-open-arrow">Open →</span>
+                <button class="adlens-btn adlens-btn-save" type="button" title="Save ad directly to your Competitor Dashboard">
+                    ⭐ Save to Dashboard
                 </button>
+                <button class="adlens-btn adlens-btn-toggle" type="button" title="Toggle detailed math breakdown">
+                    Details ▾
+                </button>
+            </div>
 
-                <!-- Footer Row -->
-                <div class="spendo-plan-footer">
-                    <span>BloomX Intel · <b>Active</b></span>
-                    <a href="http://localhost:3001/" target="_blank" class="spendo-pro-link" title="Open full analytics dashboard">Dashboard ↗</a>
+            <!-- 4. Collapsible Deep Details Drawer -->
+            <div class="adlens-details-drawer" style="display: none;">
+                <div class="adlens-drawer-grid">
+                    <div class="adlens-drawer-item">
+                        <span>Daily Spend:</span>
+                        <b>${daySpendStr} / day</b>
+                    </div>
+                    <div class="adlens-drawer-item">
+                        <span>Benchmark CPM:</span>
+                        <b>₹${BENCHMARKS.metrics.cpm.mid}</b>
+                    </div>
+                    <div class="adlens-drawer-item">
+                        <span>Benchmark CTR:</span>
+                        <b>${BENCHMARKS.metrics.ctr_percent.mid}%</b>
+                    </div>
+                    <div class="adlens-drawer-item">
+                        <span>Model:</span>
+                        <b>${confText} · ${activeVerticalName}</b>
+                    </div>
+                </div>
+                <div class="adlens-drawer-footer">
+                    <a href="http://localhost:3001/" target="_blank" class="adlens-dashboard-link">Open Full Competitor Intelligence Dashboard ↗</a>
                 </div>
             </div>
         `;
 
-        // Interactive toggle on top bar
-        const topPill = container.querySelector('.spendo-top-pill');
-        const bodyEl = container.querySelector('.spendo-body');
-        const chevronEl = container.querySelector('.spendo-chevron');
-
-        topPill.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const isHidden = bodyEl.style.display === 'none';
-            bodyEl.style.display = isHidden ? 'flex' : 'none';
-            chevronEl.textContent = isHidden ? '⌃' : '⌄';
-        });
-
-        // Copy Library ID on click
-        const copyEl = container.querySelector('.spendo-copy-id');
+        // Copy Library ID
+        const copyEl = container.querySelector('.adlens-lib-copy');
         if (copyEl) {
             copyEl.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const libId = copyEl.getAttribute('data-lib-id');
+                const libId = copyEl.getAttribute('data-id');
                 if (libId) {
                     navigator.clipboard.writeText(libId).then(() => {
                         const original = copyEl.textContent;
@@ -759,49 +1093,91 @@
             });
         }
 
-        // Action buttons open dashboard
-        const btnInsights = container.querySelector('.spendo-btn-insights');
-        if (btnInsights) {
-            btnInsights.addEventListener('click', (e) => {
+        // Toggle Details Drawer
+        const toggleBtn = container.querySelector('.adlens-btn-toggle');
+        const drawerEl = container.querySelector('.adlens-details-drawer');
+        if (toggleBtn && drawerEl) {
+            toggleBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                window.open('http://localhost:3001/', '_blank');
+                const isHidden = drawerEl.style.display === 'none';
+                drawerEl.style.display = isHidden ? 'flex' : 'none';
+                toggleBtn.innerHTML = isHidden ? 'Details ▴' : 'Details ▾';
             });
         }
 
-        const btnGradient = container.querySelector('.spendo-btn-gradient');
-        if (btnGradient) {
-            btnGradient.addEventListener('click', (e) => {
+        // Download Creative
+        const downloadBtn = container.querySelector('.adlens-btn-download');
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                window.open('http://localhost:3001/', '_blank');
+                const originalHtml = downloadBtn.innerHTML;
+                const mediaObj = findCardMedia(data.cardEl);
+                if (mediaObj) {
+                    downloadBtn.innerHTML = '⏳ Grabbing...';
+                    triggerDownloadMedia(mediaObj, `ad_${data.libraryId || 'creative'}`);
+                    setTimeout(() => {
+                        downloadBtn.innerHTML = '✅ Downloaded!';
+                        setTimeout(() => { downloadBtn.innerHTML = originalHtml; }, 2000);
+                    }, 800);
+                } else {
+                    alert('No direct video or image file detected on this ad card.');
+                }
+            });
+        }
+
+        // Save Single Ad
+        const saveBtn = container.querySelector('.adlens-btn-save');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                saveSingleAdToDashboard(data, saveBtn);
             });
         }
 
         return container;
     }
 
-    // ─── Find Ad Card Elements ─────────────────────────────────────────────────
+    // ─── Accurate Ad Card Element Boundary Isolation ──────────────────────────
     function findAdCardElement(targetEl) {
-        // Find the outer card container in Facebook Ad Library
-        const outerCard = targetEl.closest('.x1plvlek, [role="region"]');
-        if (outerCard && outerCard !== document.body) {
-            return outerCard;
-        }
+        if (!targetEl) return null;
 
-        let current = targetEl;
-        while (current && current !== document.body) {
-            const currentText = current.innerText || '';
-            if (currentText.includes('Library ID:') && currentText.includes('Started running on')) {
-                if (current.parentElement && current.parentElement !== document.body) {
-                    const parentText = current.parentElement.innerText || '';
-                    const matchCount = (parentText.match(/Library ID:/g) || []).length;
-                    if (matchCount > 1) {
-                        return current;
-                    }
+        let el = targetEl;
+        let cardCandidate = null;
+
+        // Traverse UP from targetEl to find ONLY the boundary of this individual ad card
+        while (el && el !== document.body && el !== document.documentElement) {
+            // Stop climbing if we hit document-level landmark regions (Feed, Region, Main, Header)
+            const role = el.getAttribute ? el.getAttribute('role') : null;
+            if (role === 'region' || role === 'main' || role === 'navigation' || role === 'banner' || role === 'feed') {
+                break;
+            }
+
+            const text = el.innerText || '';
+            const matchCount = (text.match(/Library ID:/gi) || []).length;
+
+            // If it contains more than 1 Library ID, we've climbed into the parent grid or feed!
+            if (matchCount > 1) {
+                break;
+            }
+
+            if (matchCount === 1) {
+                const rect = el.getBoundingClientRect ? el.getBoundingClientRect() : null;
+                // An individual ad card in Meta Ad Library is max ~750px wide. Anything >850px is a section wrapper.
+                if (rect && rect.width > 850) {
+                    break;
+                }
+
+                // Check if this container contains the media, action buttons, or has card-like dimensions
+                const hasMediaOrLinks = el.querySelector('img, video, [role="button"], a[href*="/ads/library/"]') !== null;
+                if (hasMediaOrLinks || (rect && rect.height >= 180)) {
+                    cardCandidate = el;
                 }
             }
-            current = current.parentElement;
+
+            el = el.parentElement;
         }
-        return null;
+
+        return cardCandidate;
     }
 
     // ─── Recalculate All Existing Ads ──────────────────────────────────────────
@@ -1225,19 +1601,31 @@
         isScanning = true;
 
         try {
+            ensureStylesInjected();
+
+            // Collect all unique candidate card containers
+            const cardsFound = new Set();
+
+            // Strategy 1: Find by Library ID text nodes
             const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-            const targetNodes = [];
             let n;
             while ((n = walker.nextNode())) {
                 if (n.nodeValue && n.nodeValue.includes('Library ID:')) {
-                    targetNodes.push(n.parentElement);
+                    const card = findAdCardElement(n.parentElement);
+                    if (card) cardsFound.add(card);
                 }
             }
 
-            targetNodes.forEach((textEl, idx) => {
-                const card = findAdCardElement(textEl);
-                if (!card) return;
+            // Strategy 2: Find by See Ad Details links
+            const detailLinks = document.querySelectorAll('a[href*="/ads/library/?id="], a[href*="id="]');
+            detailLinks.forEach(link => {
+                if (link.innerText && /See ad details|details/i.test(link.innerText)) {
+                    const card = findAdCardElement(link);
+                    if (card) cardsFound.add(card);
+                }
+            });
 
+            cardsFound.forEach((card, idx) => {
                 const cardText = card.innerText || '';
                 const libraryId = detectLibraryId(cardText) || `card_${idx}`;
 
@@ -1264,7 +1652,8 @@
                     perf
                 });
 
-                if (card.getAttribute('data-bloomx-injected') === 'true' || card.querySelector('.spendo-lens-card, .bloomx-lens-card')) {
+                // Do not inject twice into the same card
+                if (card.getAttribute('data-bloomx-injected') === 'true' || card.querySelector('.bloomx-adlens-card, .spendo-lens-card')) {
                     return;
                 }
 
@@ -1274,7 +1663,10 @@
                     platforms,
                     creativeCount,
                     libraryId,
-                    perf
+                    advertiserName,
+                    hookSnippet,
+                    perf,
+                    cardEl: card
                 });
 
                 card.setAttribute('data-bloomx-injected', 'true');
