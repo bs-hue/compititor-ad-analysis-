@@ -146,9 +146,36 @@ document.addEventListener('DOMContentLoaded', async () => {
             btnOpenDashboardLink.href = savedUrl.replace(/\/api.*$/, '');
         }
 
+        checkSarvamStatus(savedUrl);
+
         verticalSelect.value = activeVertical;
         populateFieldsForVertical(activeVertical);
     });
+
+    const sarvamStatusBadge = document.getElementById('sarvamStatusBadge');
+    async function checkSarvamStatus(baseUrl) {
+        if (!sarvamStatusBadge) return;
+        try {
+            const cleanUrl = (baseUrl || 'http://localhost:3000').replace(/\/$/, '');
+            const res = await fetch(`${cleanUrl}/api/transcribe/status`, { cache: 'no-store' });
+            if (res.ok) {
+                const json = await res.json();
+                if (json.data && json.data.configured) {
+                    sarvamStatusBadge.textContent = `● ${json.data.model || 'saaras:v3'} Active`;
+                    sarvamStatusBadge.style.color = '#4ADE80';
+                    sarvamStatusBadge.style.background = 'rgba(74, 222, 128, 0.15)';
+                    sarvamStatusBadge.style.borderColor = 'rgba(74, 222, 128, 0.3)';
+                    return;
+                }
+            }
+        } catch (e) {
+            // ignore network failure
+        }
+        sarvamStatusBadge.textContent = '● Offline / Local Fallback';
+        sarvamStatusBadge.style.color = '#F59E0B';
+        sarvamStatusBadge.style.background = 'rgba(245, 158, 11, 0.15)';
+        sarvamStatusBadge.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+    }
 
     // ─── Populate Form Fields for Selected Vertical ────────────────────────────
     function populateFieldsForVertical(vKey) {
@@ -263,6 +290,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             custom_benchmarks: allBenchmarks,
             dashboard_api_url: customUrl
         }, () => {
+            checkSarvamStatus(customUrl);
             showToast('✅ Saved! Benchmarks & Dashboard URL applied.');
         });
     });

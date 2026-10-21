@@ -86,4 +86,17 @@ router.get('/ads/:id/transcribe', async (req, res) => {
     }
 });
 
+router.post('/transcribe/media', async (req, res) => {
+    try {
+        const { mediaUrl, competitorName, hook, bodyText } = req.body || {};
+        const transcript = await transcriptionService.transcribeMediaPayload({ mediaUrl, competitorName, hook, bodyText });
+        res.json({
+            message: 'success',
+            data: transcript
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = router;

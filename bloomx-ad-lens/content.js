@@ -502,6 +502,165 @@
             .adlens-dashboard-link:hover {
                 text-decoration: underline !important;
             }
+            .adlens-btn-transcribe {
+                background: linear-gradient(135deg, rgba(236, 72, 153, 0.22) 0%, rgba(168, 85, 247, 0.28) 100%) !important;
+                border: 1px solid rgba(236, 72, 153, 0.45) !important;
+                color: #F472B6 !important;
+                flex: 1 !important;
+            }
+            .adlens-btn-transcribe:hover {
+                background: linear-gradient(135deg, #EC4899 0%, #A855F7 100%) !important;
+                color: #FFFFFF !important;
+                box-shadow: 0 2px 10px rgba(236, 72, 153, 0.45) !important;
+            }
+            .adlens-btn-transcribe.active {
+                background: #EC4899 !important;
+                color: #FFFFFF !important;
+            }
+            .adlens-transcript-drawer {
+                background: #090C13 !important;
+                border: 1px solid rgba(236, 72, 153, 0.35) !important;
+                border-radius: 10px !important;
+                padding: 11px 12px !important;
+                margin-top: 8px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 8px !important;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5) !important;
+                animation: adlensFadeIn 0.2s ease !important;
+            }
+            .adlens-transcript-header {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+                padding-bottom: 7px !important;
+            }
+            .adlens-transcript-title {
+                font-size: 11.5px !important;
+                font-weight: 800 !important;
+                color: #F8FAFC !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+            }
+            .adlens-sarvam-badge {
+                font-size: 9px !important;
+                font-weight: 700 !important;
+                color: #F472B6 !important;
+                background: rgba(236, 72, 153, 0.15) !important;
+                border: 1px solid rgba(236, 72, 153, 0.35) !important;
+                padding: 2px 6px !important;
+                border-radius: 10px !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 4px !important;
+            }
+            .adlens-sarvam-dot {
+                width: 5px !important;
+                height: 5px !important;
+                border-radius: 50% !important;
+                background: #F472B6 !important;
+                box-shadow: 0 0 6px #F472B6 !important;
+            }
+            .adlens-transcript-close {
+                background: none !important;
+                border: none !important;
+                color: #8E95A2 !important;
+                cursor: pointer !important;
+                font-size: 13px !important;
+                padding: 0 4px !important;
+                line-height: 1 !important;
+            }
+            .adlens-transcript-close:hover {
+                color: #FFFFFF !important;
+            }
+            .adlens-transcript-loading {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 8px !important;
+                padding: 14px 10px !important;
+                color: #F472B6 !important;
+                font-size: 11px !important;
+                font-weight: 600 !important;
+            }
+            .adlens-spinner {
+                width: 14px !important;
+                height: 14px !important;
+                border: 2px solid rgba(236, 72, 153, 0.25) !important;
+                border-top-color: #F472B6 !important;
+                border-radius: 50% !important;
+                animation: adlensSpin 0.7s linear infinite !important;
+            }
+            @keyframes adlensSpin {
+                to { transform: rotate(360deg); }
+            }
+            .adlens-segment-item {
+                background: #111520 !important;
+                border: 1px solid rgba(255, 255, 255, 0.05) !important;
+                border-left: 3px solid #8B5CF6 !important;
+                border-radius: 6px !important;
+                padding: 7px 9px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 3px !important;
+            }
+            .adlens-segment-hook { border-left-color: #EC4899 !important; }
+            .adlens-segment-problem { border-left-color: #F59E0B !important; }
+            .adlens-segment-mechanism { border-left-color: #38BDF8 !important; }
+            .adlens-segment-cta { border-left-color: #10B981 !important; }
+            .adlens-segment-meta {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                font-size: 9.5px !important;
+                font-weight: 700 !important;
+            }
+            .adlens-segment-tag {
+                text-transform: uppercase !important;
+                letter-spacing: 0.5px !important;
+            }
+            .adlens-segment-hook .adlens-segment-tag { color: #EC4899 !important; }
+            .adlens-segment-problem .adlens-segment-tag { color: #F59E0B !important; }
+            .adlens-segment-mechanism .adlens-segment-tag { color: #38BDF8 !important; }
+            .adlens-segment-cta .adlens-segment-tag { color: #10B981 !important; }
+            .adlens-segment-time {
+                color: #64748B !important;
+                font-family: monospace !important;
+                font-size: 9.5px !important;
+            }
+            .adlens-segment-text {
+                font-size: 11px !important;
+                line-height: 1.4 !important;
+                color: #E2E8F0 !important;
+            }
+            .adlens-segment-notes {
+                font-size: 9.5px !important;
+                color: #8E95A2 !important;
+                font-style: italic !important;
+            }
+            .adlens-transcript-copy-all {
+                width: 100% !important;
+                background: #18202E !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                color: #F8FAFC !important;
+                border-radius: 6px !important;
+                padding: 6px 10px !important;
+                font-size: 11px !important;
+                font-weight: 700 !important;
+                cursor: pointer !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 5px !important;
+                transition: all 0.15s ease !important;
+            }
+            .adlens-transcript-copy-all:hover {
+                background: #232C3F !important;
+                border-color: #EC4899 !important;
+                color: #F472B6 !important;
+            }
         `;
         (document.head || document.documentElement).appendChild(style);
     }
@@ -1050,10 +1209,13 @@
             <!-- 3. AdLens Action Toolbar -->
             <div class="adlens-actions-row">
                 <button class="adlens-btn adlens-btn-download" type="button" title="Download video or image creative">
-                    📥 Download Creative
+                    📥 Media
+                </button>
+                <button class="adlens-btn adlens-btn-transcribe" type="button" title="Transcribe Video Script with Sarvam AI">
+                    🎙️ Script
                 </button>
                 <button class="adlens-btn adlens-btn-save" type="button" title="Save ad directly to your Competitor Dashboard">
-                    ⭐ Save to Dashboard
+                    ⭐ Save
                 </button>
                 <button class="adlens-btn adlens-btn-toggle" type="button" title="Toggle detailed math breakdown">
                     Details ▾
@@ -1084,6 +1246,18 @@
                     <a href="${connectedDashboardUrl}" target="_blank" class="adlens-dashboard-link">Open Full Competitor Intelligence Dashboard ↗</a>
                 </div>
             </div>
+
+            <!-- 5. Collapsible Sarvam AI Script Drawer -->
+            <div class="adlens-transcript-drawer" style="display: none;">
+                <div class="adlens-transcript-header">
+                    <div class="adlens-transcript-title">
+                        <span>🎙️ Video Script Breakdown</span>
+                        <span class="adlens-sarvam-badge"><span class="adlens-sarvam-dot"></span> Sarvam AI (saaras:v3)</span>
+                    </div>
+                    <button class="adlens-transcript-close" type="button" title="Close Script Drawer">✕</button>
+                </div>
+                <div class="adlens-transcript-body"></div>
+            </div>
         `;
 
         // Copy Library ID
@@ -1111,6 +1285,95 @@
                 const isHidden = drawerEl.style.display === 'none';
                 drawerEl.style.display = isHidden ? 'flex' : 'none';
                 toggleBtn.innerHTML = isHidden ? 'Details ▴' : 'Details ▾';
+            });
+        }
+
+        // Toggle & Fetch Sarvam AI Video Transcription
+        const transcribeBtn = container.querySelector('.adlens-btn-transcribe');
+        const transcriptDrawerEl = container.querySelector('.adlens-transcript-drawer');
+        const transcriptBodyEl = container.querySelector('.adlens-transcript-body');
+        const transcriptCloseBtn = container.querySelector('.adlens-transcript-close');
+
+        if (transcriptCloseBtn && transcriptDrawerEl) {
+            transcriptCloseBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                transcriptDrawerEl.style.display = 'none';
+                if (transcribeBtn) transcribeBtn.classList.remove('active');
+            });
+        }
+
+        let cachedTranscript = null;
+
+        if (transcribeBtn && transcriptDrawerEl && transcriptBodyEl) {
+            transcribeBtn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+
+                // If already visible, toggle closed
+                if (transcriptDrawerEl.style.display !== 'none') {
+                    transcriptDrawerEl.style.display = 'none';
+                    transcribeBtn.classList.remove('active');
+                    return;
+                }
+
+                // If details drawer is open, close it to keep card clean
+                if (drawerEl && drawerEl.style.display !== 'none') {
+                    drawerEl.style.display = 'none';
+                    if (toggleBtn) toggleBtn.innerHTML = 'Details ▾';
+                }
+
+                transcriptDrawerEl.style.display = 'flex';
+                transcribeBtn.classList.add('active');
+
+                // If already loaded once, keep displayed
+                if (cachedTranscript) {
+                    renderTranscriptContent(transcriptBodyEl, cachedTranscript);
+                    return;
+                }
+
+                // Loading spinner
+                transcriptBodyEl.innerHTML = `
+                    <div class="adlens-transcript-loading">
+                        <div class="adlens-spinner"></div>
+                        <span>Sarvam AI (saaras:v3) transcribing ad audio & script...</span>
+                    </div>
+                `;
+
+                try {
+                    const mediaObj = findCardMedia(data.cardEl);
+                    const mediaUrl = mediaObj && mediaObj.type === 'video' ? mediaObj.url : null;
+                    const advertiserName = data.advertiserName || document.querySelector('h1')?.innerText || 'Competitor Ad';
+                    const hook = data.hookSnippet || '';
+                    const bodyText = (data.cardEl && data.cardEl.innerText) ? data.cardEl.innerText.substring(0, 300) : '';
+
+                    const response = await fetch(`${connectedDashboardUrl}/api/transcribe/media`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            mediaUrl,
+                            competitorName: advertiserName,
+                            hook,
+                            bodyText
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+
+                    const json = await response.json();
+                    if (json.data) {
+                        cachedTranscript = json.data;
+                        renderTranscriptContent(transcriptBodyEl, cachedTranscript);
+                    } else {
+                        throw new Error('No transcription returned');
+                    }
+                } catch (err) {
+                    transcriptBodyEl.innerHTML = `
+                        <div style="font-size: 11px; color: #F87171; padding: 6px 0; line-height: 1.4;">
+                            ⚠️ Transcription Notice: ${err.message}. Verify that your Competitor Dashboard is active at <b>${connectedDashboardUrl}</b>.
+                        </div>
+                    `;
+                }
             });
         }
 
@@ -1144,6 +1407,61 @@
         }
 
         return container;
+    }
+
+    // Helper: Render structured transcript segments in the ad card
+    function renderTranscriptContent(containerEl, transcriptData) {
+        const segments = transcriptData.segments || [];
+        const fullText = transcriptData.fullTranscript || segments.map(s => s.text).join(' ');
+
+        let segmentsHtml = '';
+        segments.forEach(seg => {
+            const tagLower = (seg.tag || '').toLowerCase();
+            let segClass = 'adlens-segment-hook';
+            let segIcon = '🎯';
+            if (tagLower.includes('problem')) {
+                segClass = 'adlens-segment-problem';
+                segIcon = '⚠️';
+            } else if (tagLower.includes('mechanism') || tagLower.includes('solution')) {
+                segClass = 'adlens-segment-mechanism';
+                segIcon = '💡';
+            } else if (tagLower.includes('cta') || tagLower.includes('call')) {
+                segClass = 'adlens-segment-cta';
+                segIcon = '🚀';
+            }
+
+            segmentsHtml += `
+                <div class="adlens-segment-item ${segClass}">
+                    <div class="adlens-segment-meta">
+                        <span class="adlens-segment-tag">${segIcon} ${seg.tag || 'Script'}</span>
+                        <span class="adlens-segment-time">${seg.start || '00:00'} – ${seg.end || '00:15'}</span>
+                    </div>
+                    <div class="adlens-segment-text">${seg.text || ''}</div>
+                    ${seg.notes ? `<div class="adlens-segment-notes">💡 ${seg.notes}</div>` : ''}
+                </div>
+            `;
+        });
+
+        containerEl.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                ${segmentsHtml}
+            </div>
+            <button class="adlens-transcript-copy-all" type="button">
+                📋 Copy Full Script
+            </button>
+        `;
+
+        const copyBtn = containerEl.querySelector('.adlens-transcript-copy-all');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                navigator.clipboard.writeText(fullText).then(() => {
+                    const originalText = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '✅ Copied Script!';
+                    setTimeout(() => { copyBtn.innerHTML = originalText; }, 1800);
+                });
+            });
+        }
     }
 
     // ─── Accurate Ad Card Element Boundary Isolation ──────────────────────────
@@ -1207,6 +1525,9 @@
                         platforms: ad.platforms,
                         creativeCount: ad.creativeCount,
                         libraryId: ad.libraryId,
+                        advertiserName: ad.advertiserName,
+                        hookSnippet: ad.hookSnippet,
+                        cardEl: ad.element,
                         perf: newPerf
                     });
                     ad.element.replaceChild(newLens, oldLens);

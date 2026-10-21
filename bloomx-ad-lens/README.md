@@ -9,6 +9,9 @@ A Chrome extension designed for **Facebook Ad Library** (`https://www.facebook.c
   - 🟡 **Test (<7 days)**: ₹100–300/day
 - **Est. CPC (Cost Per Click)**
 - **Est. Purchases** (Conversions at benchmark ₹480 CPA)
+- **🎙️ 1-Click Video Script Transcription (Sarvam AI `saaras:v3`)**: Instant direct-response transcript breakdown (Hook, Problem, Mechanism, CTA) with 1-click clipboard copy
+- **📥 Download Creative**: 1-click grab of HD video or image creative
+- **⭐ Save to Dashboard**: 1-click sync into the central Competitor Intelligence Dashboard
 - **Real Platforms Badge** (Facebook, Instagram, Messenger, Audience Network)
 - **Creative Count** (e.g. `X ads use this creative and text`)
 - **Library ID** with 1-click copy

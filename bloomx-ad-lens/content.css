@@ -896,7 +896,187 @@
     text-decoration: none !important;
 }
 
-.adlens-dashboard-link:hover {
-    text-decoration: underline !important;
+.adlens-btn-transcribe {
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.22) 0%, rgba(168, 85, 247, 0.28) 100%) !important;
+    border: 1px solid rgba(236, 72, 153, 0.45) !important;
+    color: #F472B6 !important;
+    flex: 1 !important;
 }
+
+.adlens-btn-transcribe:hover {
+    background: linear-gradient(135deg, #EC4899 0%, #A855F7 100%) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 2px 10px rgba(236, 72, 153, 0.45) !important;
+}
+
+.adlens-btn-transcribe.active {
+    background: #EC4899 !important;
+    color: #FFFFFF !important;
+}
+
+/* ─── Sarvam AI Transcription Drawer ─── */
+.adlens-transcript-drawer {
+    background: #090C13 !important;
+    border: 1px solid rgba(236, 72, 153, 0.35) !important;
+    border-radius: 10px !important;
+    padding: 11px 12px !important;
+    margin-top: 8px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5) !important;
+    animation: adlensFadeIn 0.2s ease !important;
+}
+
+.adlens-transcript-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding-bottom: 7px !important;
+}
+
+.adlens-transcript-title {
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+    color: #F8FAFC !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.adlens-sarvam-badge {
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    color: #F472B6 !important;
+    background: rgba(236, 72, 153, 0.15) !important;
+    border: 1px solid rgba(236, 72, 153, 0.35) !important;
+    padding: 2px 6px !important;
+    border-radius: 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+
+.adlens-sarvam-dot {
+    width: 5px !important;
+    height: 5px !important;
+    border-radius: 50% !important;
+    background: #F472B6 !important;
+    box-shadow: 0 0 6px #F472B6 !important;
+}
+
+.adlens-transcript-close {
+    background: none !important;
+    border: none !important;
+    color: #8E95A2 !important;
+    cursor: pointer !important;
+    font-size: 13px !important;
+    padding: 0 4px !important;
+    line-height: 1 !important;
+}
+
+.adlens-transcript-close:hover {
+    color: #FFFFFF !important;
+}
+
+.adlens-transcript-loading {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    padding: 14px 10px !important;
+    color: #F472B6 !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+}
+
+.adlens-spinner {
+    width: 14px !important;
+    height: 14px !important;
+    border: 2px solid rgba(236, 72, 153, 0.25) !important;
+    border-top-color: #F472B6 !important;
+    border-radius: 50% !important;
+    animation: adlensSpin 0.7s linear infinite !important;
+}
+
+@keyframes adlensSpin {
+    to { transform: rotate(360deg); }
+}
+
+.adlens-segment-item {
+    background: #111520 !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-left: 3px solid #8B5CF6 !important;
+    border-radius: 6px !important;
+    padding: 7px 9px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+}
+
+.adlens-segment-hook { border-left-color: #EC4899 !important; }
+.adlens-segment-problem { border-left-color: #F59E0B !important; }
+.adlens-segment-mechanism { border-left-color: #38BDF8 !important; }
+.adlens-segment-cta { border-left-color: #10B981 !important; }
+
+.adlens-segment-meta {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    font-size: 9.5px !important;
+    font-weight: 700 !important;
+}
+
+.adlens-segment-tag {
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+.adlens-segment-hook .adlens-segment-tag { color: #EC4899 !important; }
+.adlens-segment-problem .adlens-segment-tag { color: #F59E0B !important; }
+.adlens-segment-mechanism .adlens-segment-tag { color: #38BDF8 !important; }
+.adlens-segment-cta .adlens-segment-tag { color: #10B981 !important; }
+
+.adlens-segment-time {
+    color: #64748B !important;
+    font-family: monospace !important;
+    font-size: 9.5px !important;
+}
+
+.adlens-segment-text {
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+    color: #E2E8F0 !important;
+}
+
+.adlens-segment-notes {
+    font-size: 9.5px !important;
+    color: #8E95A2 !important;
+    font-style: italic !important;
+}
+
+.adlens-transcript-copy-all {
+    width: 100% !important;
+    background: #18202E !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #F8FAFC !important;
+    border-radius: 6px !important;
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    transition: all 0.15s ease !important;
+}
+
+.adlens-transcript-copy-all:hover {
+    background: #232C3F !important;
+    border-color: #EC4899 !important;
+    color: #F472B6 !important;
+}
+
 
