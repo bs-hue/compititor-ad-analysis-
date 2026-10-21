@@ -358,15 +358,26 @@
         </div>
     </div>
 
+    <!-- Cloud Dashboard URL Connection -->
+    <div class="section-card" style="margin-top: 10px;">
+        <div class="section-header">
+            <span>🌐 Connected Dashboard URL</span>
+        </div>
+        <div style="padding-top: 2px;">
+            <input type="url" id="dashboard_api_url" class="bench-input" style="width: 100%; text-align: left; padding: 7px 10px; font-size: 11.5px;" placeholder="https://your-dashboard.com or http://localhost:3001">
+            <span style="font-size: 9.5px; color: #94A3B8; display: block; margin-top: 4px;">Points "Save to Dashboard" directly to your hosted server.</span>
+        </div>
+    </div>
+
     <div class="actions-row">
         <button id="btnSave" class="btn-save">💾 Save & Apply</button>
         <button id="btnReset" class="btn-reset">↺ Reset</button>
     </div>
 
-    <div id="toast" class="toast">✅ Saved! Benchmarks updated on Facebook Ad Library.</div>
+    <div id="toast" class="toast">✅ Saved! Benchmarks & Dashboard URL updated.</div>
 
-    <a href="http://localhost:3001/" target="_blank" style="display: block; margin-top: 12px; padding: 9px; text-align: center; background: rgba(51, 182, 247, 0.15); border: 1px solid rgba(51, 182, 247, 0.3); border-radius: 8px; color: #7DD3FC; text-decoration: none; font-size: 11.5px; font-weight: 700;">
-        📊 Open BloomX Dashboard (Port 3001) ↗
+    <a id="btnOpenDashboardLink" href="http://localhost:3001/" target="_blank" style="display: block; margin-top: 12px; padding: 9px; text-align: center; background: rgba(51, 182, 247, 0.15); border: 1px solid rgba(51, 182, 247, 0.3); border-radius: 8px; color: #7DD3FC; text-decoration: none; font-size: 11.5px; font-weight: 700;">
+        📊 Open Competitor Dashboard ↗
     </a>
 
     <script src="popup.js"></script>

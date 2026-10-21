@@ -511,6 +511,7 @@
     let activeVerticalKey = 'spiritual_coaching';
     let isCalibrated = true;
     let activeVerticalName = 'Spiritual / Coaching';
+    let connectedDashboardUrl = 'http://localhost:3001';
 
     let BENCHMARKS = {
         daily_spend_tiers: {
@@ -606,8 +607,11 @@
     // ─── Sync with chrome.storage.local ────────────────────────────────────────
     function loadBenchmarksAndSync(cb) {
         if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-            chrome.storage.local.get(['active_vertical', 'custom_benchmarks'], (result) => {
+            chrome.storage.local.get(['active_vertical', 'custom_benchmarks', 'dashboard_api_url'], (result) => {
                 const targetKey = result.active_vertical || 'spiritual_coaching';
+                if (result.dashboard_api_url) {
+                    connectedDashboardUrl = result.dashboard_api_url;
+                }
 
                 if (result.custom_benchmarks && result.custom_benchmarks[targetKey]) {
                     applyVerticalConfig(targetKey, result.custom_benchmarks[targetKey]);
@@ -642,10 +646,15 @@
     // Listen for real-time changes from extension popup
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
         chrome.storage.onChanged.addListener((changes, area) => {
-            if (area === 'local' && (changes.active_vertical || changes.custom_benchmarks)) {
-                loadBenchmarksAndSync(() => {
-                    recalculateAllAds();
-                });
+            if (area === 'local') {
+                if (changes.dashboard_api_url) {
+                    connectedDashboardUrl = changes.dashboard_api_url.newValue || 'http://localhost:3001';
+                }
+                if (changes.active_vertical || changes.custom_benchmarks) {
+                    loadBenchmarksAndSync(() => {
+                        recalculateAllAds();
+                    });
+                }
             }
         });
     }
@@ -939,7 +948,7 @@
         };
 
         try {
-            const res = await fetch('http://localhost:3001/api/extension/ingest', {
+            const res = await fetch(`${connectedDashboardUrl}/api/extension/ingest`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -1072,7 +1081,7 @@
                     </div>
                 </div>
                 <div class="adlens-drawer-footer">
-                    <a href="http://localhost:3001/" target="_blank" class="adlens-dashboard-link">Open Full Competitor Intelligence Dashboard ↗</a>
+                    <a href="${connectedDashboardUrl}" target="_blank" class="adlens-dashboard-link">Open Full Competitor Intelligence Dashboard ↗</a>
                 </div>
             </div>
         `;
@@ -1452,7 +1461,7 @@
                 };
 
                 try {
-                    const response = await fetch('http://localhost:3001/api/extension/ingest', {
+                    const response = await fetch(`${connectedDashboardUrl}/api/extension/ingest`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -1467,7 +1476,7 @@
                         btnSend.classList.add('btn-send-success');
                         showPanelToast(`🎉 Successfully sent ${ads.length} ads for "${advertiserName}" to your Competitor Dashboard!`);
                         btnSend.onclick = () => {
-                            window.open('http://localhost:3001/', '_blank');
+                            window.open(connectedDashboardUrl, '_blank');
                         };
                     } else {
                         throw new Error(json.error || 'Failed to ingest ads');
@@ -1476,7 +1485,7 @@
                     console.error('[BloomX Ad Lens] Ingest error:', err);
                     btnSend.disabled = false;
                     btnSend.innerHTML = originalText;
-                    showPanelToast(`⚠️ Could not reach http://localhost:3001. Ensure your backend server is running!`, false);
+                    showPanelToast(`⚠️ Could not reach ${connectedDashboardUrl}. Ensure your backend server is online!`, false);
                 }
             });
         }

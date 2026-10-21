@@ -8,8 +8,7 @@
     "activeTab"
   ],
   "host_permissions": [
-    "http://localhost:3001/*",
-    "http://localhost:3000/*"
+    "<all_urls>"
   ],
   "icons": {
     "16": "icons/icon16.png",

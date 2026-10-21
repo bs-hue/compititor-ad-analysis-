@@ -36,6 +36,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnSave = document.getElementById('btnSave');
     const btnReset = document.getElementById('btnReset');
     const toast = document.getElementById('toast');
+    const inputDashboardUrl = document.getElementById('dashboard_api_url');
+    const btnOpenDashboardLink = document.getElementById('btnOpenDashboardLink');
 
     // Embedded fallback benchmarks template
     const EMBEDDED_DEFAULT_BENCHMARKS = {
@@ -129,12 +131,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     let allBenchmarks = JSON.parse(JSON.stringify(defaultBenchmarks.verticals));
 
     // ─── Load from chrome.storage.local ─────────────────────────────────────────
-    chrome.storage.local.get(['active_vertical', 'custom_benchmarks'], (result) => {
+    chrome.storage.local.get(['active_vertical', 'custom_benchmarks', 'dashboard_api_url'], (result) => {
         if (result.active_vertical) {
             activeVertical = result.active_vertical;
         }
         if (result.custom_benchmarks && Object.keys(result.custom_benchmarks).length > 0) {
             allBenchmarks = result.custom_benchmarks;
+        }
+        const savedUrl = result.dashboard_api_url || 'http://localhost:3001';
+        if (inputDashboardUrl) {
+            inputDashboardUrl.value = savedUrl;
+        }
+        if (btnOpenDashboardLink) {
+            btnOpenDashboardLink.href = savedUrl.replace(/\/api.*$/, '');
         }
 
         verticalSelect.value = activeVertical;
@@ -243,11 +252,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         };
 
+        let customUrl = (inputDashboardUrl ? inputDashboardUrl.value.trim() : '') || 'http://localhost:3001';
+        if (customUrl.endsWith('/')) customUrl = customUrl.slice(0, -1);
+        if (btnOpenDashboardLink) {
+            btnOpenDashboardLink.href = customUrl;
+        }
+
         chrome.storage.local.set({
             active_vertical: vKey,
-            custom_benchmarks: allBenchmarks
+            custom_benchmarks: allBenchmarks,
+            dashboard_api_url: customUrl
         }, () => {
-            showToast('✅ Benchmarks saved & applied live!');
+            showToast('✅ Saved! Benchmarks & Dashboard URL applied.');
         });
     });
 
