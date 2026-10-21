@@ -7,7 +7,7 @@ class CompetitorController {
     async addCompetitor(req, res) {
         try {
             const clientId = parseInt(req.params.id, 10);
-            const { name, adLibraryUrl = '', activeAdCount = 0, maxDaysActive = 0, tier = 'Active', notes = '' } = req.body;
+            const { name, adLibraryUrl = '', activeAdCount = 0, maxDaysActive = 0, tier = 'Active', notes = '', vertical = 'spiritual_coaching' } = req.body;
 
             if (!name) {
                 return res.status(400).json({ error: 'Competitor name is required' });
@@ -19,7 +19,8 @@ class CompetitorController {
                 activeAdCount,
                 maxDaysActive,
                 tier,
-                notes
+                notes,
+                vertical
             });
 
             res.json({ message: 'success', data: comp });

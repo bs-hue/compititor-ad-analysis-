@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BloomX Ad Lens - Settings & Benchmarks</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            width: 380px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #0F172A;
+            color: #F8FAFC;
+            padding: 16px 18px;
+            font-size: 12px;
+            line-height: 1.45;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 14px;
+        }
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+        .logo-icon {
+            width: 26px;
+            height: 26px;
+            border-radius: 7px;
+            background: linear-gradient(135deg, #33B6F7 0%, #0284c7 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            box-shadow: 0 2px 8px rgba(51, 182, 247, 0.4);
+        }
+        .title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #FFFFFF;
+            letter-spacing: -0.2px;
+        }
+        .status-badge {
+            font-size: 10px;
+            font-weight: 700;
+            color: #38BDF8;
+            background: rgba(51, 182, 247, 0.15);
+            border: 1px solid rgba(51, 182, 247, 0.3);
+            padding: 2.5px 8px;
+            border-radius: 6px;
+        }
+
+        /* Vertical Selector */
+        .field-group {
+            margin-bottom: 12px;
+        }
+        .field-label {
+            font-size: 10.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #94A3B8;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        select.vertical-select {
+            width: 100%;
+            background: #1E293B;
+            color: #F8FAFC;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 9px 12px;
+            font-size: 12.5px;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        select.vertical-select:focus {
+            border-color: #33B6F7;
+            box-shadow: 0 0 0 2px rgba(51, 182, 247, 0.25);
+        }
+
+        /* Confidence Warning Banner */
+        .confidence-banner {
+            border-radius: 9px;
+            padding: 9px 12px;
+            margin-bottom: 14px;
+            font-size: 11px;
+            line-height: 1.4;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .banner-calibrated {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            color: #6EE7B7;
+        }
+        .banner-uncalibrated {
+            background: rgba(245, 158, 11, 0.18);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            color: #FCD34D;
+        }
+
+        /* Benchmark Sections */
+        .section-card {
+            background: #1E293B;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        .section-header {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: #CBD5E1;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+        }
+        .input-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .sub-label {
+            font-size: 9.5px;
+            color: #94A3B8;
+            font-weight: 600;
+        }
+        input.bench-input {
+            width: 100%;
+            background: #0F172A;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 7px;
+            color: #F8FAFC;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 6px 8px;
+            text-align: right;
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+        input.bench-input:focus {
+            border-color: #33B6F7;
+            background: #131F37;
+        }
+
+        /* Spend Tiers Rows */
+        .tier-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 11px;
+        }
+        .tier-name {
+            width: 100px;
+            font-weight: 700;
+        }
+        .tier-test { color: #F59E0B; }
+        .tier-tested { color: #33B6F7; }
+        .tier-winner { color: #10B981; }
+        .tier-inputs {
+            display: flex;
+            gap: 4px;
+            width: 185px;
+        }
+
+        /* Actions */
+        .actions-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 14px;
+        }
+        .btn-save {
+            flex: 2;
+            padding: 10px;
+            background: linear-gradient(135deg, #33B6F7 0%, #0284c7 100%);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(51, 182, 247, 0.4);
+            transition: all 0.15s ease;
+        }
+        .btn-save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(51, 182, 247, 0.55);
+        }
+        .btn-reset {
+            flex: 1;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #CBD5E1;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-reset:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #FFFFFF;
+        }
+
+        /* Notification Toast */
+        .toast {
+            display: none;
+            margin-top: 8px;
+            padding: 8px 12px;
+            border-radius: 7px;
+            background: rgba(16, 185, 129, 0.22);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #6EE7B7;
+            font-size: 11.5px;
+            font-weight: 600;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="brand-wrap">
+            <div class="logo-icon">⚡</div>
+            <div class="title">BloomX Ad Lens</div>
+        </div>
+        <div class="status-badge">v1.2</div>
+    </div>
+
+    <!-- Vertical Dropdown -->
+    <div class="field-group">
+        <div class="field-label">
+            <span>Industry Vertical</span>
+            <span id="calibrationBadge" style="font-size: 9.5px; font-weight: bold;"></span>
+        </div>
+        <select id="verticalSelect" class="vertical-select">
+            <option value="spiritual_coaching">Spiritual / Coaching (Calibrated)</option>
+            <option value="d2c">D2C (Direct to Consumer)</option>
+            <option value="healthcare">Healthcare & Wellness</option>
+            <option value="fintech">Fintech & Finance</option>
+            <option value="education">Education & EdTech</option>
+            <option value="default">Default / General</option>
+        </select>
+    </div>
+
+    <!-- Confidence Warning Alert -->
+    <div id="confidenceBanner" class="confidence-banner banner-calibrated">
+        <span id="bannerIcon">✅</span>
+        <span id="bannerText">High Confidence: Calibrated with live Meta Ad spend data.</span>
+    </div>
+
+    <!-- Editable Benchmark Values -->
+    <div class="section-card">
+        <div class="section-header">
+            <span>CPM Benchmark (₹ per 1,000 views)</span>
+        </div>
+        <div class="grid-3">
+            <div class="input-wrap">
+                <span class="sub-label">Low (₹)</span>
+                <input type="number" id="cpm_low" class="bench-input" step="1">
+            </div>
+            <div class="input-wrap">
+                <span class="sub-label">Mid (₹)</span>
+                <input type="number" id="cpm_mid" class="bench-input" step="1">
+            </div>
+            <div class="input-wrap">
+                <span class="sub-label">High (₹)</span>
+                <input type="number" id="cpm_high" class="bench-input" step="1">
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header">
+            <span>CTR Benchmark (Click-Through Rate %)</span>
+        </div>
+        <div class="grid-3">
+            <div class="input-wrap">
+                <span class="sub-label">Low (%)</span>
+                <input type="number" id="ctr_low" class="bench-input" step="0.01">
+            </div>
+            <div class="input-wrap">
+                <span class="sub-label">Mid (%)</span>
+                <input type="number" id="ctr_mid" class="bench-input" step="0.01">
+            </div>
+            <div class="input-wrap">
+                <span class="sub-label">High (%)</span>
+                <input type="number" id="ctr_high" class="bench-input" step="0.01">
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header">
+            <span>Target CPA (Cost Per Purchase)</span>
+        </div>
+        <div class="input-wrap">
+            <span class="sub-label">Benchmark CPA (₹)</span>
+            <input type="number" id="cost_per_purchase" class="bench-input" step="10" style="text-align: left; padding-left: 8px;">
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header">
+            <span>Daily Spend Tiers (Low / Mid / High ₹/day)</span>
+        </div>
+        <div class="tier-row">
+            <span class="tier-name tier-test">Test (&lt;7d)</span>
+            <div class="tier-inputs">
+                <input type="number" id="spend_test_low" class="bench-input" placeholder="Low">
+                <input type="number" id="spend_test_mid" class="bench-input" placeholder="Mid">
+                <input type="number" id="spend_test_high" class="bench-input" placeholder="High">
+            </div>
+        </div>
+        <div class="tier-row">
+            <span class="tier-name tier-tested">Tested (7–30d)</span>
+            <div class="tier-inputs">
+                <input type="number" id="spend_tested_low" class="bench-input" placeholder="Low">
+                <input type="number" id="spend_tested_mid" class="bench-input" placeholder="Mid">
+                <input type="number" id="spend_tested_high" class="bench-input" placeholder="High">
+            </div>
+        </div>
+        <div class="tier-row">
+            <span class="tier-name tier-winner">Winner (&gt;30d)</span>
+            <div class="tier-inputs">
+                <input type="number" id="spend_winner_low" class="bench-input" placeholder="Low">
+                <input type="number" id="spend_winner_mid" class="bench-input" placeholder="Mid">
+                <input type="number" id="spend_winner_high" class="bench-input" placeholder="High">
+            </div>
+        </div>
+    </div>
+
+    <div class="actions-row">
+        <button id="btnSave" class="btn-save">💾 Save & Apply</button>
+        <button id="btnReset" class="btn-reset">↺ Reset</button>
+    </div>
+
+    <div id="toast" class="toast">✅ Saved! Benchmarks updated on Facebook Ad Library.</div>
+
+    <a href="http://localhost:3001/" target="_blank" style="display: block; margin-top: 12px; padding: 9px; text-align: center; background: rgba(51, 182, 247, 0.15); border: 1px solid rgba(51, 182, 247, 0.3); border-radius: 8px; color: #7DD3FC; text-decoration: none; font-size: 11.5px; font-weight: 700;">
+        📊 Open BloomX Dashboard (Port 3001) ↗
+    </a>
+
+    <script src="popup.js"></script>
+</body>
+</html>

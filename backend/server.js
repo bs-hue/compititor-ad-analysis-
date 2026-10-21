@@ -1,7 +1,7 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 
 const apiRouter = require('./routes/api');
 
@@ -16,6 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve frontend static assets
 app.use(express.static(frontendPath));
+app.use('/config', express.static(path.join(__dirname, '..', 'config')));
 
 // ─── API Routes ─────────────────────────────────────────────────────────────
 app.use('/api', apiRouter);

@@ -235,6 +235,9 @@ class ApifyService {
             // Classify Marketing Angle
             const angle = this.classifyAngle(bodyText, hook);
 
+            // Extract Real Platforms from Apify Meta Library item
+            const platforms = this.extractPlatforms(item);
+
             return {
                 clientId,
                 competitorId: competitor.id,
@@ -246,10 +249,39 @@ class ApifyService {
                 hook,
                 bodyText: bodyText || headline,
                 angle,
+                platforms,
                 adFormatType: format === 'Video' ? 'Reel / 9:16 Video' : (format === 'Carousel' ? 'Multi-Card Carousel' : 'Single Static Card'),
                 notes: `Auto-ingested via Apify. Running for ${daysActive} days continuous delivery.`
             };
         });
+    }
+
+    extractPlatforms(item) {
+        const raw = item.publisherPlatform || item.publisherPlatforms || item.platforms || item.adDeliveryPublisherPlatforms || item.publisher_platform;
+        if (Array.isArray(raw) && raw.length > 0) {
+            const list = raw.map(p => {
+                const low = String(p).toLowerCase();
+                if (low.includes('facebook') || low === 'fb') return 'Facebook';
+                if (low.includes('instagram') || low === 'ig') return 'Instagram';
+                if (low.includes('messenger')) return 'Messenger';
+                if (low.includes('audience')) return 'Audience Network';
+                return String(p).trim();
+            });
+            return Array.from(new Set(list));
+        }
+        if (typeof raw === 'string' && raw.trim()) {
+            const parts = raw.split(/[,/|]/).map(s => s.trim());
+            const list = parts.map(p => {
+                const low = p.toLowerCase();
+                if (low.includes('facebook') || low === 'fb') return 'Facebook';
+                if (low.includes('instagram') || low === 'ig') return 'Instagram';
+                if (low.includes('messenger')) return 'Messenger';
+                if (low.includes('audience')) return 'Audience Network';
+                return p;
+            });
+            return Array.from(new Set(list));
+        }
+        return ['Facebook', 'Instagram'];
     }
 
     extractHook(body, headline) {

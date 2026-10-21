@@ -1,0 +1,123 @@
+{
+  "verticals": {
+    "spiritual_coaching": {
+      "name": "Spiritual Coaching",
+      "cpm_low": 170,
+      "cpm_mid": 226,
+      "cpm_high": 330,
+      "ctr_low": 0.9,
+      "ctr_mid": 1.22,
+      "ctr_high": 1.7,
+      "frequency": 1.9,
+      "cost_per_purchase_low": 400,
+      "cost_per_purchase_mid": 480,
+      "cost_per_purchase_high": 650,
+      "calibrated": true
+    },
+    "d2c": {
+      "name": "D2C (Direct to Consumer)",
+      "cpm_low": 170,
+      "cpm_mid": 226,
+      "cpm_high": 330,
+      "ctr_low": 0.9,
+      "ctr_mid": 1.22,
+      "ctr_high": 1.7,
+      "frequency": 1.9,
+      "cost_per_purchase_low": 400,
+      "cost_per_purchase_mid": 480,
+      "cost_per_purchase_high": 650,
+      "calibrated": false
+    },
+    "healthcare": {
+      "name": "Healthcare & Wellness",
+      "cpm_low": 170,
+      "cpm_mid": 226,
+      "cpm_high": 330,
+      "ctr_low": 0.9,
+      "ctr_mid": 1.22,
+      "ctr_high": 1.7,
+      "frequency": 1.9,
+      "cost_per_purchase_low": 400,
+      "cost_per_purchase_mid": 480,
+      "cost_per_purchase_high": 650,
+      "calibrated": false
+    },
+    "fintech": {
+      "name": "Fintech & Finance",
+      "cpm_low": 170,
+      "cpm_mid": 226,
+      "cpm_high": 330,
+      "ctr_low": 0.9,
+      "ctr_mid": 1.22,
+      "ctr_high": 1.7,
+      "frequency": 1.9,
+      "cost_per_purchase_low": 400,
+      "cost_per_purchase_mid": 480,
+      "cost_per_purchase_high": 650,
+      "calibrated": false
+    },
+    "education": {
+      "name": "Education & EdTech",
+      "cpm_low": 170,
+      "cpm_mid": 226,
+      "cpm_high": 330,
+      "ctr_low": 0.9,
+      "ctr_mid": 1.22,
+      "ctr_high": 1.7,
+      "frequency": 1.9,
+      "cost_per_purchase_low": 400,
+      "cost_per_purchase_mid": 480,
+      "cost_per_purchase_high": 650,
+      "calibrated": false
+    },
+    "default": {
+      "name": "Default / General",
+      "cpm_low": 170,
+      "cpm_mid": 226,
+      "cpm_high": 330,
+      "ctr_low": 0.9,
+      "ctr_mid": 1.22,
+      "ctr_high": 1.7,
+      "frequency": 1.9,
+      "cost_per_purchase_low": 400,
+      "cost_per_purchase_mid": 480,
+      "cost_per_purchase_high": 650,
+      "calibrated": false
+    }
+  },
+  "spend_tiers": {
+    "test": {
+      "key": "test",
+      "label": "Test",
+      "badge": "Test (<7d)",
+      "min_days": 0,
+      "max_days": 6,
+      "daily_spend_low": 100,
+      "daily_spend_mid": 200,
+      "daily_spend_high": 300,
+      "description": "< 7 days (₹100–300/day)"
+    },
+    "tested": {
+      "key": "tested",
+      "label": "Tested, not scaled",
+      "badge": "Tested (7–30d)",
+      "min_days": 7,
+      "max_days": 30,
+      "daily_spend_low": 300,
+      "daily_spend_mid": 650,
+      "daily_spend_high": 1000,
+      "description": "7–30 days (₹300–1,000/day)"
+    },
+    "winner": {
+      "key": "winner",
+      "label": "Winner",
+      "badge": "Winner (>30d)",
+      "min_days": 31,
+      "max_days": null,
+      "daily_spend_low": 2000,
+      "daily_spend_mid": 3000,
+      "daily_spend_high": 4000,
+      "description": "> 30 days (₹2,000–4,000/day)"
+    }
+  }
+}

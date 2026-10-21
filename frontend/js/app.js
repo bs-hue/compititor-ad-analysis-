@@ -1,877 +1,1164 @@
-// ─── Application State ─────────────────────────────────────────────────────
-let state = {
-  clients: [],
-  activeClientId: 1,
-  clientData: {
-    client: {},
-    competitors: [],
-    ads: []
+/**
+ * Competitor Intelligence & Ad Swipe Engine - Front End Application
+ * Pure front-end prototype with realistic sample data & local UI state
+ */
+
+// ─── 1. REALISTIC EMBEDDED SAMPLE DATA ────────────────────────────────────────
+const SAMPLE_CLIENTS = [
+  {
+    id: 1,
+    name: "Master Kundli Report By Ankit Batra",
+    niche: "Astrology & Kundli Prediction Reports",
+    competitorCount: 4,
+    competitors: [
+      { id: 1, name: "Premium Personalized Kundli By Astro Arun Pandit", activeAds: 94, maxDays: 285, tier: "Winner" },
+      { id: 2, name: "Smart Kundli By Aditya Kundli", activeAds: 48, maxDays: 260, tier: "Winner" },
+      { id: 3, name: "Astrotalk", activeAds: 210, maxDays: 340, tier: "Winner" },
+      { id: 4, name: "InstaAstro", activeAds: 85, maxDays: 240, tier: "Winner" }
+    ],
+    ads: [
+      {
+        id: 1,
+        competitorName: "Premium Personalized Kundli By Astro Arun Pandit",
+        format: "Video",
+        daysActive: 285,
+        tier: "Winner",
+        hook: "Koshish ke baad bhi safalta nahi mil rahi? Check karein aapka Graha Dosh.",
+        bodyText: "Aapki kundali mein chhipe hain aapke career, marriage aur financial growth ke raaz. Abhi download karein apni complete personalized report with accurate predictions.",
+        angle: "Dosha & Problem Agitation",
+        whyStudy: "Identifies high-urgency pain points → offers tailored Vedic diagnosis.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=3271663196351922"
+      },
+      {
+        id: 2,
+        competitorName: "Smart Kundli By Aditya Kundli",
+        format: "Video",
+        daysActive: 260,
+        tier: "Winner",
+        hook: "First Consultation is 100% FREE! Talk to India's top Verified Astrologers now.",
+        bodyText: "Chat with 15,000+ verified Vedic astrologers, tarot readers, and numerologists. Get immediate answers to love, career, and marriage doubts.",
+        angle: "Free Entry Offer",
+        whyStudy: "Zero-friction micro-tripwire offer completely removes initial conversion resistance.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=27273062422376341"
+      },
+      {
+        id: 3,
+        competitorName: "Astrotalk",
+        format: "Video",
+        daysActive: 340,
+        tier: "Winner",
+        hook: "Shadi mein lagatar deri ya rishton mein tanav? Yeh 1 Vedic Upay badal sakta hai sab kuch.",
+        bodyText: "Relationship timing aur Manglik dosha ke vishleshan ke liye Bharat ke shreshtha Jyotishiyon se live baat karein. Pehli chat par vishesh chhoot.",
+        angle: "Relationship & Marriage Timing",
+        whyStudy: "Direct emotional agitation on marital delays paired with empathetic female celebrity endorsement.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=1364512795740314"
+      },
+      {
+        id: 4,
+        competitorName: "Premium Personalized Kundli By Astro Arun Pandit",
+        format: "Image",
+        daysActive: 215,
+        tier: "Winner",
+        hook: "50+ Pages Detailed Janam Kundali Report - Instant WhatsApp Delivery!",
+        bodyText: "Get accurate planetary positions, Sade Sati remedies, Gemstone recommendation, and 5-year future roadmap prepared by expert Vedic algorithms.",
+        angle: "Speed & Exhaustive Value",
+        whyStudy: "High-contrast informational infographic advertising fast instant delivery.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=2428124921027614"
+      },
+      {
+        id: 5,
+        competitorName: "InstaAstro",
+        format: "Video",
+        daysActive: 195,
+        tier: "Winner",
+        hook: "Sirf ₹1 mein baat karein Certified Astrologer se aur payein apni Janam Kundli ka sach!",
+        bodyText: "Pehle 5 minute sirf ₹1 mein! Janam Kundli analysis, Grah Dosh nivaran aur career guidance ke liye aaj hi consult karein.",
+        angle: "Micro-Tripwire Offer",
+        whyStudy: "₹1 first call tripwire drives astronomical conversion volume.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=1775427080457515"
+      },
+      {
+        id: 6,
+        competitorName: "Premium Personalized Kundli By Astro Arun Pandit",
+        format: "Video",
+        daysActive: 140,
+        tier: "Winner",
+        hook: "Original Karungali Mala pehanne ke yeh 3 chamatkari fayde jane aap?",
+        bodyText: "100% Original Karungali (Ebony Wood) Mala certified by Vedic priests. Attracts positive energy, shields from negative vibrations.",
+        angle: "Spiritual Proof & Protection",
+        whyStudy: "Direct product benefits combined with spiritual authority and lab proof.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=1726717605033769"
+      },
+      {
+        id: 7,
+        competitorName: "Smart Kundli By Aditya Kundli",
+        format: "Carousel",
+        daysActive: 88,
+        tier: "Tested",
+        hook: "Pyrite Stone: The Natural Money Magnet everyone is talking about.",
+        bodyText: "Keep Pyrite in your cash locker, office desk, or wear it as a bracelet to attract wealth, career abundance, and business growth.",
+        angle: "Wealth Attraction",
+        whyStudy: "Strong aspirational wealth trigger paired with tangible physical proof.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=1628803672117213"
+      },
+      {
+        id: 8,
+        competitorName: "Astrotalk",
+        format: "Image",
+        daysActive: 75,
+        tier: "Tested",
+        hook: "90% Gemstones in market are fake/treated! Check why Lab Certificate is mandatory.",
+        bodyText: "Buy only 100% Gov-Lab certified unheated and untreated gemstones. Free energized Puja vidhi before dispatch.",
+        angle: "Authenticity & Risk Reversal",
+        whyStudy: "Leverages fear of counterfeit products + lab certification authority.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=1700155781252330"
+      },
+      {
+        id: 9,
+        competitorName: "Premium Personalized Kundli By Astro Arun Pandit",
+        format: "Video",
+        daysActive: 62,
+        tier: "Tested",
+        hook: "Agar aapki Kundli mein yeh 2 grah kamzor hain, toh paisa aakar bhi nahi tikega!",
+        bodyText: "Financial growth aur career stability ke liye jaanein apni Kundli ka sahi vishleshan. Book direct personalized consultation today.",
+        angle: "Wealth & Planetary Dosha",
+        whyStudy: "Focuses on money leaking away despite hard work — extreme audience relevance.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=1455615126252043"
+      },
+      {
+        id: 10,
+        competitorName: "InstaAstro",
+        format: "Image",
+        daysActive: 48,
+        tier: "Tested",
+        hook: "Instant 36 Guna Milan & Manglik Dosh Analysis for Marriage Compatibility",
+        bodyText: "Discover planetary harmony, marital longevity and mental compatibility before marriage with ancient Vedic precision algorithms.",
+        angle: "Relationship & Future Security",
+        whyStudy: "High-urgency relationship and parental marriage approval angle.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=1729086082473464"
+      },
+      {
+        id: 11,
+        competitorName: "Smart Kundli By Aditya Kundli",
+        format: "Carousel",
+        daysActive: 35,
+        tier: "Tested",
+        hook: "Micro Hanuman Chalisa Pendant: Keep the power of Bajrangbali closest to your heart",
+        bodyText: "View the entire Hanuman Chalisa through a magnifying lens inside this energized sacred pendant. Protection on the go.",
+        angle: "Devotion & Divine Shield",
+        whyStudy: "Novel micro-technology gimmick combined with deep religious sentiment.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=2055205121800123"
+      },
+      {
+        id: 12,
+        competitorName: "Premium Personalized Kundli By Astro Arun Pandit",
+        format: "Video",
+        daysActive: 24,
+        tier: "New",
+        hook: "AI Kundli vs Traditional Pandit: Why 45,000+ users switched this month",
+        bodyText: "Zero waiting time, 100% mathematical accuracy without human error. Instant PDF on WhatsApp in 60 seconds.",
+        angle: "Technology vs Tradition",
+        whyStudy: "Direct speed & modern accuracy differentiation against offline pandits.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=1552566123570697"
+      },
+      {
+        id: 13,
+        competitorName: "Astrotalk",
+        format: "Image",
+        daysActive: 19,
+        tier: "New",
+        hook: "Special Navgrah Shanti Rudraksha Bracelet - Limited Festive Energization Batch",
+        bodyText: "Balancing all 9 planetary energies in one authentic wearable bracelet. Handcrafted and energized with Vedic rituals.",
+        angle: "Urgency & Scarcity",
+        whyStudy: "Limited batch scarcity angle for fast immediate purchases.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=1290384728912384"
+      },
+      {
+        id: 14,
+        competitorName: "Smart Kundli By Aditya Kundli",
+        format: "Video",
+        daysActive: 14,
+        tier: "New",
+        hook: "Stop wearing Pukhraj without checking Jupiter placement! It could cause severe health issues.",
+        bodyText: "Yellow Sapphire is powerful, but when wrongly worn, it agitates Pitta dosha and brings sudden expenses. Get verified first.",
+        angle: "Warning / Avoid Mistake",
+        whyStudy: "Negative framing ('Stop doing this') triggers 2x higher click-through rates.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=1948271049281723"
+      },
+      {
+        id: 15,
+        competitorName: "InstaAstro",
+        format: "Video",
+        daysActive: 9,
+        tier: "New",
+        hook: "How to know if your Sade Sati is ending this year: 3 unmistakable signs.",
+        bodyText: "Shani Sade Sati transition brings relief, promotions, and property opportunities. Check your exact transition date.",
+        angle: "Relief & Good Fortune",
+        whyStudy: "Positive transition expectation relieves long-held stress.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=1849201948291048"
+      },
+      {
+        id: 16,
+        competitorName: "Astrotalk",
+        format: "Video",
+        daysActive: 315,
+        tier: "Winner",
+        hook: "Career mein promotion ruka hua hai? Surya aur Shani ki yuti check karein.",
+        bodyText: "Corporate stress aur job stagnation ka Vedic samadhan. Talk to certified astrologers today and get exact planetary remedy roadmap.",
+        angle: "Career Stagnation & Surya Transit",
+        whyStudy: "Direct corporate audience target targeting career stagnation and office politics.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=1839201948291049"
+      },
+      {
+        id: 17,
+        competitorName: "InstaAstro",
+        format: "Carousel",
+        daysActive: 110,
+        tier: "Winner",
+        hook: "5 Signs your Kundli has Kalsarp Dosh (and how to nullify its effects)",
+        bodyText: "Swipe through the 5 warning indicators of Rahu-Ketu affliction and download our free remedies guide prepared by Vedic scholars.",
+        angle: "Educational Warning & Symptoms",
+        whyStudy: "Symptom checklist drives 3x higher carousel engagement and save rates.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=1839201948291050"
+      },
+      {
+        id: 18,
+        competitorName: "Smart Kundli By Aditya Kundli",
+        format: "Image",
+        daysActive: 54,
+        tier: "Tested",
+        hook: "Complete 2026 Yearly Horoscope & Planetary Transit Calendar",
+        bodyText: "Know the exact month of your financial breakthrough, job switch, and favorable travel dates with automated precision charts.",
+        angle: "Yearly Prediction & Curiosity",
+        whyStudy: "Future foresight curiosity triggers massive impulse downloads and shares.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=1839201948291051"
+      }
+    ]
   },
-  currentProductTab: 'ads', // 'ads' | 'hooks' | 'angles' | 'saved'
+  {
+    id: 2,
+    name: "Gemsguruji",
+    niche: "Natural Certified Gemstones & Vedic Remedies",
+    competitorCount: 5,
+    competitors: [
+      { id: 5, name: "Japam", activeAds: 68, maxDays: 310, tier: "Winner" },
+      { id: 6, name: "Divine Hindu", activeAds: 34, maxDays: 215, tier: "Winner" },
+      { id: 7, name: "Crystals by Astrotalk", activeAds: 52, maxDays: 260, tier: "Winner" },
+      { id: 8, name: "Gemsmantra", activeAds: 26, maxDays: 175, tier: "Winner" },
+      { id: 9, name: "Mesmerize", activeAds: 45, maxDays: 140, tier: "Tested" }
+    ],
+    ads: [
+      {
+        id: 101,
+        competitorName: "Japam",
+        format: "Video",
+        daysActive: 310,
+        tier: "Winner",
+        hook: "Why top businessmen wear Original Karungali Wood on their right wrist",
+        bodyText: "Authentic Ebony wood absorbs negative planetary radiation and aligns your solar plexus chakra for focus and business acumen.",
+        angle: "Authority & Protection",
+        whyStudy: "Associates product with elite business success and ancient royalty.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=30192849102"
+      },
+      {
+        id: 102,
+        competitorName: "Gemsmantra",
+        format: "Video",
+        daysActive: 175,
+        tier: "Winner",
+        hook: "Never buy a Yellow Sapphire (Pukhraj) unless it passes this 3-second lab test.",
+        bodyText: "Synthetic glass vs authentic Ceylon untreated Pukhraj. Watch how to spot unheated gemstones with our free microscopic guide.",
+        angle: "Authenticity & Scam Warning",
+        whyStudy: "Educational scam-busting video establishes immense authority and trust.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=30192849103"
+      },
+      {
+        id: 103,
+        competitorName: "Crystals by Astrotalk",
+        format: "Carousel",
+        daysActive: 260,
+        tier: "Winner",
+        hook: "Pyrite vs Green Aventurine: Which money crystal is right for your profession?",
+        bodyText: "Pyrite for cash flow and business leaders; Green Aventurine for job promotions and exams. Energized with Vedic mantras.",
+        angle: "Choice & Personalization",
+        whyStudy: "Product comparison encourages interactive carousel browsing and basket building.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=30192849104"
+      }
+    ]
+  },
+  {
+    id: 3,
+    name: "Smart Kundli",
+    niche: "AI-Powered Instant Kundli & Horoscope Engine",
+    competitorCount: 3,
+    competitors: [
+      { id: 10, name: "Astrotalk", activeAds: 210, maxDays: 340, tier: "Winner" },
+      { id: 11, name: "InstaAstro", activeAds: 85, maxDays: 240, tier: "Winner" },
+      { id: 12, name: "Love Bhushan", activeAds: 38, maxDays: 190, tier: "Tested" }
+    ],
+    ads: [
+      {
+        id: 201,
+        competitorName: "Astrotalk",
+        format: "Video",
+        daysActive: 340,
+        tier: "Winner",
+        hook: "Pehle 5 minute baat karein FREE mein kisi bhi astrologer se!",
+        bodyText: "Install the app now and start immediate live chat with certified astrologers.",
+        angle: "Free Entry Offer",
+        whyStudy: "Category-defining tripwire funnel.",
+        adLibraryUrl: "https://www.facebook.com/ads/library/?id=40192849101"
+      }
+    ]
+  }
+];
+
+// ─── 2. LOCAL UI STATE ────────────────────────────────────────────────────────
+let state = {
+  activeClientId: 1,
+  currentNavTab: 'overview', // 'overview' | 'library' | 'winners' | 'hooks' | 'transcripts' | 'saved'
   filters: {
     competitor: 'all',
-    tier: 'all',
     format: 'all',
+    tier: 'all',
     search: ''
   },
-  savedSwipe: JSON.parse(localStorage.getItem('saved_swipe_library') || '[]'),
-  activeHookModalAd: null,
-  activeAnalyzeAd: null
+  sort: 'longest', // 'longest' | 'newest' | 'competitor'
+  viewMode: 'grid', // 'grid' | 'list'
+  pagination: {
+    page: 1,
+    pageSize: 9
+  },
+  savedSwipe: JSON.parse(localStorage.getItem('bloomx_saved_swipe') || '[]'),
+  activeAdForDrawer: null,
+  simVideoInterval: null,
+  simVideoSeconds: 0,
+  isSimVideoPlaying: false
 };
 
-// ─── Initialization ────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', async () => {
-  document.getElementById('lastUpdatedLabel').textContent = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-  await checkApifyEngineStatus();
-  await loadClientsList();
-  setupSearchInputEvent();
-  updateSavedTabBadgeCount();
+// ─── 3. INITIALIZATION ────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  renderWorkspaceDropdown();
+  updateSidebarCounters();
+  applyClientData();
+  setupLiveSearch();
+
+  // Global Escape key listener to close all popups/drawers
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' || e.key === 'Esc') {
+      closeAllOverlays();
+    }
+  });
+
+  // Global click outside listener to dismiss workspace dropdown
+  document.addEventListener('click', (e) => {
+    const wsBtn = document.getElementById('workspaceSwitcherBtn');
+    const wsDropdown = document.getElementById('workspaceDropdown');
+    if (wsDropdown && wsDropdown.style.display === 'block') {
+      if (!wsBtn.contains(e.target) && !wsDropdown.contains(e.target)) {
+        wsDropdown.style.display = 'none';
+      }
+    }
+  });
 });
 
-// ─── API Loaders ───────────────────────────────────────────────────────────
-async function loadClientsList() {
-  try {
-    const res = await fetch('/api/clients');
-    const result = await res.json();
-    if (result.message === 'success' && result.data.length > 0) {
-      state.clients = result.data;
-      if (!state.clients.find(c => c.id === state.activeClientId)) {
-        state.activeClientId = state.clients[0].id;
-      }
-      renderClientHorizontalTabs();
-      await loadClientOverviewData(state.activeClientId);
-    }
-  } catch (e) {
-    console.error('Error loading clients:', e);
-  }
+function getActiveClient() {
+  return SAMPLE_CLIENTS.find(c => c.id === state.activeClientId) || SAMPLE_CLIENTS[0];
 }
 
-async function loadClientOverviewData(clientId) {
-  state.activeClientId = clientId;
-  renderClientHorizontalTabs();
+// ─── 4. WORKSPACE SWITCHER & CLIENT LOGIC ──────────────────────────────────────
+function renderWorkspaceDropdown() {
+  const container = document.getElementById('workspaceDropdown');
+  if (!container) return;
 
-  try {
-    const res = await fetch(`/api/clients/${clientId}/overview`);
-    const result = await res.json();
-    if (result.message === 'success') {
-      state.clientData = result.data;
-      
-      // Reset competitor filter on client switch
-      state.filters.competitor = 'all';
-
-      // Update UI components
-      renderMetricsCards();
-      renderMarketIntelligenceCards();
-      renderTopAdsSection();
-      renderCompetitorFilterPills();
-      renderActiveProductTab();
-    }
-  } catch (e) {
-    console.error('Error loading client overview:', e);
-  }
-}
-
-function refreshClientData() {
-  fireToast('Refreshing live competitor intelligence...');
-  loadClientOverviewData(state.activeClientId);
-}
-
-// ─── 1. CLIENT HORIZONTAL TABS ─────────────────────────────────────────────
-function renderClientHorizontalTabs() {
-  const container = document.getElementById('clientTabsNavContainer');
-  
-  const tabsHtml = state.clients.map(c => `
-    <button class="client-nav-tab ${c.id === state.activeClientId ? 'active' : ''}" onclick="selectClientWorkspaceTab(${c.id})">
+  container.innerHTML = SAMPLE_CLIENTS.map(c => `
+    <div style="padding: 8px 10px; border-radius: 4px; cursor: pointer; font-size: 12.5px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; ${c.id === state.activeClientId ? 'background: var(--primary-light); color: var(--primary);' : 'color: var(--text-secondary);'}" onclick="selectWorkspace(${c.id})">
       <span>${c.name}</span>
-      <span class="client-tab-count">${c.competitorCount || 0} competitors</span>
-    </button>
-  `).join('');
-
-  container.innerHTML = tabsHtml + `
-    <button class="btn-add-client-tab" onclick="openAddClientModal()">+ Add Client</button>
-  `;
-}
-
-function selectClientWorkspaceTab(clientId) {
-  loadClientOverviewData(clientId);
-}
-
-// ─── 2. SUMMARY METRICS CARDS ──────────────────────────────────────────────
-function renderMetricsCards() {
-  const comps = state.clientData.competitors || [];
-  const ads = state.clientData.ads || [];
-
-  const totalActiveAds = comps.reduce((acc, curr) => acc + (curr.activeAdCount || 0), 0) || ads.length;
-  const maxDays = Math.max(0, ...comps.map(comp => comp.maxDaysActive || 0), ...ads.map(ad => ad.daysActive || 0));
-  const anglesSet = new Set(ads.map(a => a.angle || 'Direct Offer'));
-
-  document.getElementById('metricCompCount').textContent = comps.length;
-  document.getElementById('metricAdsCount').textContent = totalActiveAds;
-  document.getElementById('metricMaxDays').textContent = `${maxDays}d`;
-  document.getElementById('metricAngleCount').textContent = anglesSet.size;
-
-  // Tab count badges
-  document.getElementById('badgeTabAds').textContent = ads.length;
-  document.getElementById('badgeTabHooks').textContent = ads.length;
-  document.getElementById('badgeTabAngles').textContent = anglesSet.size;
-}
-
-// ─── 3. MARKET INTELLIGENCE CARDS ──────────────────────────────────────────
-function renderMarketIntelligenceCards() {
-  const ads = state.clientData.ads || [];
-  const container = document.getElementById('intelCardsGrid');
-
-  if (ads.length === 0) {
-    container.innerHTML = `<div style="grid-column: 1/-1; font-size: 15px; color: var(--text-muted);">No ad signals detected yet for this client workspace.</div>`;
-    return;
-  }
-
-  const insights = [];
-
-  // Insight 1: Offer Pattern
-  const freeAds = ads.filter(a => (a.hook || '').toLowerCase().includes('free') || (a.bodyText || '').toLowerCase().includes('free') || (a.hook || '').toLowerCase().includes('₹1'));
-  if (freeAds.length > 0) {
-    insights.push({
-      tag: "OFFER PATTERN",
-      text: `"Free entry-point offers appear across ${freeAds.length} tracked competitor variations."`,
-      evidence: `${freeAds.length} ads detected`,
-      searchQuery: 'free'
-    });
-  }
-
-  // Insight 2: Format Pattern
-  const videoAds = ads.filter(a => a.format === 'Video');
-  if (videoAds.length > 0) {
-    const pct = Math.round((videoAds.length / ads.length) * 100);
-    insights.push({
-      tag: "FORMAT PATTERN",
-      text: `"Talking-head and video creatives account for ${pct}% of long-running ads."`,
-      evidence: `${videoAds.length} videos detected`,
-      formatFilter: 'Video'
-    });
-  }
-
-  // Insight 3: Longevity Signal
-  const sorted = [...ads].sort((a, b) => (b.daysActive || 0) - (a.daysActive || 0));
-  if (sorted.length > 0) {
-    const top = sorted[0];
-    insights.push({
-      tag: "LONGEVITY SIGNAL",
-      text: `"${top.competitorName}'s longest-running ad has remained active for ${top.daysActive} days."`,
-      evidence: `Potential messaging signal`,
-      competitorFilter: top.competitorName
-    });
-  }
-
-  container.innerHTML = insights.map(item => `
-    <div class="intel-card">
-      <div>
-        <div class="intel-tag">${item.tag}</div>
-        <div class="intel-text" style="margin-top: 10px;">${item.text}</div>
-      </div>
-      <div class="intel-footer">
-        <span class="intel-evidence">${item.evidence}</span>
-        <button class="btn-link" onclick="handleInsightCardClick('${item.competitorFilter || ''}', '${item.formatFilter || ''}', '${item.searchQuery || ''}')">View Ads →</button>
-      </div>
+      <span style="font-size: 11px; opacity: 0.7;">${c.competitorCount} comps</span>
     </div>
   `).join('');
 }
 
-function handleInsightCardClick(comp, format, search) {
-  switchProductTab('ads');
-  if (comp) setFilter('competitor', comp);
-  if (format) setFilter('format', format);
-  if (search) {
-    state.filters.search = search;
-    document.getElementById('filterSearchInput').value = search;
-    applyActiveFiltersAndRender();
-  }
+function toggleWorkspaceDropdown() {
+  const el = document.getElementById('workspaceDropdown');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 
-// ─── 4. TOP ADS TO STUDY (CURATED CARDS) ───────────────────────────────────
-function renderTopAdsSection() {
-  const ads = state.clientData.ads || [];
-  const container = document.getElementById('topAdsGrid');
+function selectWorkspace(clientId) {
+  state.activeClientId = clientId;
+  state.filters.competitor = 'all';
+  state.pagination.page = 1;
+  document.getElementById('workspaceDropdown').style.display = 'none';
 
-  const topAds = [...ads].sort((a, b) => (b.daysActive || 0) - (a.daysActive || 0)).slice(0, 3);
-
-  if (topAds.length === 0) {
-    container.innerHTML = `<div style="grid-column: 1/-1; color: var(--text-muted);">No top ads available.</div>`;
-    return;
-  }
-
-  container.innerHTML = topAds.map(ad => buildAdCardHTML(ad, true)).join('');
+  applyClientData();
+  fireToast(`Switched workspace to "${getActiveClient().name}"`);
 }
 
-// ─── 5. BEAUTIFIED ORIGINAL FILTER SYSTEM ──────────────────────────────────
-function renderCompetitorFilterPills() {
-  const comps = state.clientData.competitors || [];
-  const ads = state.clientData.ads || [];
-  const row = document.getElementById('competitorPillsRow');
+function getBrandInitials(brandName) {
+  if (!brandName) return 'AD';
+  const clean = brandName.replace(/By\s+[a-zA-Z\s]+/gi, '').trim();
+  const words = clean.split(/\s+/).filter(Boolean);
+  if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
+  if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
+  return 'AD';
+}
 
-  let html = `<span class="pill-option ${state.filters.competitor === 'all' ? 'active' : ''}" data-filter="competitor" data-val="all" onclick="setFilter('competitor', 'all', this)">All (${ads.length})</span>`;
+function renderTopAds() {
+  const container = document.getElementById('topAdsContainer');
+  if (!container) return;
+  const client = getActiveClient();
+  const ads = [...(client.ads || [])].sort((a, b) => (b.daysActive || 0) - (a.daysActive || 0));
+  const topWinners = ads.slice(0, 3);
+
+  container.innerHTML = topWinners.map(ad => {
+    const isSaved = state.savedSwipe.some(item => item.id === ad.id);
+    return `
+      <div class="top-ad-card">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="brand-avatar-circle" style="width: 28px; height: 28px; font-size: 11px;">${getBrandInitials(ad.competitorName)}</div>
+              <span style="font-size: 13px; font-weight: 750; color: var(--text-primary);">${ad.competitorName}</span>
+            </div>
+            <span class="top-ad-badge">⭐ Top Winner · ${ad.daysActive}d</span>
+          </div>
+
+          <div style="background: var(--bg-subtle); border-radius: var(--radius-sm); padding: 10px 12px; border-left: 3px solid var(--primary);">
+            <div style="font-size: 10.5px; font-weight: 750; color: var(--primary); text-transform: uppercase; margin-bottom: 2px;">Proven Hook</div>
+            <div style="font-size: 13.5px; font-weight: 700; color: var(--text-primary); line-height: 1.4;">“${ad.hook}”</div>
+          </div>
+
+          <div style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.4;">
+            ${(ad.bodyText || '').substring(0, 95)}...
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <span class="angle-badge" style="font-size: 11px;">🎯 ${ad.angle}</span>
+            <span class="ad-type-chip">${ad.format}</span>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border-subtle); padding-top: 12px; margin-top: 4px;">
+          <div style="display: flex; gap: 8px;">
+            ${ad.format === 'Video' ? `
+              <button class="btn btn-secondary btn-sm" onclick="openTranscribeDrawer(${ad.id})">🎬 Script</button>
+            ` : `
+              <button class="btn btn-secondary btn-sm" onclick="openAnalyzeDrawer(${ad.id})">🔍 Details</button>
+            `}
+            <button class="btn btn-primary btn-sm" onclick="openHookDrawer(${ad.id})">✦ Adapt</button>
+          </div>
+          <button class="btn-card-icon ${isSaved ? 'saved' : ''}" onclick="toggleSaveAd(${ad.id})" title="Save Ad">
+            ${isSaved ? '❤️' : '♡'}
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function applyClientData() {
+  const client = getActiveClient();
+
+  // Update header & breadcrumbs
+  const wsName = document.getElementById('currentWsName');
+  if (wsName) wsName.textContent = client.name;
+  const bcClient = document.getElementById('breadcrumbClientName');
+  if (bcClient) bcClient.textContent = client.name;
+
+  // Update metrics
+  const ads = client.ads || [];
+  const maxDays = ads.reduce((max, a) => Math.max(max, a.daysActive || 0), 0);
+  const metricComp = document.getElementById('metricCompCount');
+  if (metricComp) metricComp.textContent = client.competitors ? client.competitors.length : 4;
+  const metricAd = document.getElementById('metricAdCount');
+  if (metricAd) metricAd.textContent = ads.length;
+  const metricLongest = document.getElementById('metricLongestActive');
+  if (metricLongest) metricLongest.textContent = `${maxDays}d`;
+
+  // Render competitor filter pills
+  renderCompetitorFilterPills(client.competitors);
+
+  // Render Top Ads Spotlight
+  renderTopAds();
+
+  // Render library cards
+  renderAdsLibrary();
+
+  // Update nav counters
+  updateSidebarCounters();
+}
+
+function updateSidebarCounters() {
+  const client = getActiveClient();
+  const ads = client.ads || [];
+  const winnersCount = ads.filter(a => a.tier === 'Winner').length;
+
+  const navAds = document.getElementById('navAdsCount');
+  if (navAds) navAds.textContent = ads.length;
+  const navWinners = document.getElementById('navWinnersCount');
+  if (navWinners) navWinners.textContent = winnersCount;
+  const navSaved = document.getElementById('navSavedCount');
+  if (navSaved) navSaved.textContent = state.savedSwipe.length;
+}
+
+// ─── 5. NAVIGATION TAB SWITCHING ──────────────────────────────────────────────
+function switchNavTab(tabName, el) {
+  state.currentNavTab = tabName;
+  state.pagination.page = 1;
+
+  document.querySelectorAll('.sidebar-nav .nav-link').forEach(l => l.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  const breadcrumb = document.getElementById('breadcrumbActiveSection');
   
-  comps.forEach(c => {
+  if (tabName === 'overview') {
+    if (breadcrumb) breadcrumb.textContent = 'Overview';
+    state.filters.tier = 'all';
+    state.filters.format = 'all';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else if (tabName === 'insights') {
+    if (breadcrumb) breadcrumb.textContent = 'Market Insights';
+    const s = document.getElementById('marketInsightsSection');
+    if (s) s.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else if (tabName === 'winners') {
+    if (breadcrumb) breadcrumb.textContent = 'Top Ads';
+    state.filters.tier = 'Winner';
+    const s = document.getElementById('topAdsSection');
+    if (s) s.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else if (tabName === 'library') {
+    if (breadcrumb) breadcrumb.textContent = 'Ad Library';
+    state.filters.tier = 'all';
+    state.filters.format = 'all';
+    const s = document.getElementById('adLibrarySection');
+    if (s) s.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else if (tabName === 'saved') {
+    if (breadcrumb) breadcrumb.textContent = 'Saved Ads';
+    state.filters.tier = 'all';
+    state.filters.format = 'all';
+    const s = document.getElementById('adLibrarySection');
+    if (s) s.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  syncFilterPillsActiveUI();
+  renderAdsLibrary();
+}
+
+// ─── 6. SEARCH & FILTER CONTROLS ──────────────────────────────────────────────
+function setupLiveSearch() {
+  const input = document.getElementById('searchInput');
+  if (input) {
+    input.addEventListener('input', (e) => {
+      state.filters.search = e.target.value.trim().toLowerCase();
+      state.pagination.page = 1;
+      renderAdsLibrary();
+    });
+  }
+}
+
+function renderCompetitorFilterPills(competitors) {
+  const container = document.getElementById('competitorPillsContainer');
+  let html = `<span class="filter-pill ${state.filters.competitor === 'all' ? 'active' : ''}" data-val="all" onclick="setFilter('competitor', 'all', this)">All</span>`;
+  
+  competitors.forEach(c => {
     const isActive = state.filters.competitor === c.name;
-    const compAds = ads.filter(a => a.competitorName === c.name || a.competitorId === c.id);
-    html += `<span class="pill-option ${isActive ? 'active' : ''}" data-filter="competitor" data-val="${c.name}" onclick="setFilter('competitor', '${c.name.replace(/'/g, "\\'")}', this)">${c.name} (${compAds.length})</span>`;
+    html += `<span class="filter-pill ${isActive ? 'active' : ''}" data-val="${c.name}" onclick="setFilter('competitor', '${c.name.replace(/'/g, "\\'")}', this)">${c.name}</span>`;
   });
 
-  row.innerHTML = html;
+  container.innerHTML = html;
 }
 
 function setFilter(type, val, element) {
   state.filters[type] = val;
+  state.pagination.page = 1;
 
   if (element) {
-    element.parentElement.querySelectorAll('.pill-option').forEach(el => el.classList.remove('active'));
+    element.parentElement.querySelectorAll('.filter-pill').forEach(el => el.classList.remove('active'));
     element.classList.add('active');
-  } else {
-    if (type === 'competitor') renderCompetitorFilterPills();
-    if (type === 'tier') {
-      document.querySelectorAll('#tierPillsRow .pill-option').forEach(el => el.classList.toggle('active', el.dataset.val === val));
-    }
-    if (type === 'format') {
-      document.querySelectorAll('#formatPillsRow .pill-option').forEach(el => el.classList.toggle('active', el.dataset.val === val));
-    }
   }
 
-  applyActiveFiltersAndRender();
+  renderAdsLibrary();
 }
 
-function setupSearchInputEvent() {
-  const input = document.getElementById('filterSearchInput');
-  input.addEventListener('input', (e) => {
-    state.filters.search = e.target.value.trim().toLowerCase();
-    applyActiveFiltersAndRender();
+function syncFilterPillsActiveUI() {
+  document.querySelectorAll('[data-filter="format"]').forEach(p => {
+    p.classList.toggle('active', p.getAttribute('data-val') === state.filters.format);
+  });
+  document.querySelectorAll('[data-filter="tier"]').forEach(p => {
+    p.classList.toggle('active', p.getAttribute('data-val') === state.filters.tier);
   });
 }
 
-function applyActiveFiltersAndRender() {
-  renderActiveProductTab();
+function filterByFormat(format) {
+  state.filters.format = format;
+  syncFilterPillsActiveUI();
+  renderAdsLibrary();
+  document.getElementById('adsGridContainer').scrollIntoView({ behavior: 'smooth' });
 }
 
-// ─── Filter Computation ───────────────────────────────────────────────────
-function getFilteredAdsCollection() {
-  const ads = state.clientData.ads || [];
+function filterByAngle(angle) {
+  state.filters.search = angle.toLowerCase();
+  document.getElementById('searchInput').value = angle;
+  renderAdsLibrary();
+  document.getElementById('adsGridContainer').scrollIntoView({ behavior: 'smooth' });
+}
+
+function focusWinnerAd() {
+  state.filters.tier = 'Winner';
+  syncFilterPillsActiveUI();
+  renderAdsLibrary();
+  document.getElementById('adsGridContainer').scrollIntoView({ behavior: 'smooth' });
+}
+
+function handleSortChange(sortVal) {
+  state.sort = sortVal;
+  renderAdsLibrary();
+}
+
+function setViewMode(mode) {
+  state.viewMode = mode;
+  document.getElementById('btnViewGrid').classList.toggle('active', mode === 'grid');
+  document.getElementById('btnViewList').classList.toggle('active', mode === 'list');
   
-  return ads.filter(ad => {
-    if (state.filters.competitor !== 'all' && ad.competitorName !== state.filters.competitor) return false;
-    if (state.filters.tier !== 'all' && (ad.tier || 'New') !== state.filters.tier) return false;
-    if (state.filters.format !== 'all' && ad.format !== state.filters.format) return false;
-
-    if (state.filters.search) {
-      const q = state.filters.search;
-      const haystack = [ad.competitorName, ad.hook, ad.bodyText, ad.angle, ad.adFormatType].join(' ').toLowerCase();
-      if (!haystack.includes(q)) return false;
-    }
-
-    return true;
-  });
+  const container = document.getElementById('adsGridContainer');
+  container.classList.toggle('list-view', mode === 'list');
 }
 
-// ─── 6. WORKSPACE TABS SWITCHER ────────────────────────────────────────────
-function switchProductTab(tabName) {
-  state.currentProductTab = tabName;
-  
-  document.querySelectorAll('.ws-tab-btn').forEach(btn => btn.classList.remove('active'));
-  if (tabName === 'ads') document.getElementById('wsTabAds').classList.add('active');
-  if (tabName === 'hooks') document.getElementById('wsTabHooks').classList.add('active');
-  if (tabName === 'angles') document.getElementById('wsTabAngles').classList.add('active');
-  if (tabName === 'saved') document.getElementById('wsTabSaved').classList.add('active');
+// ─── 7. FILTERED ADS COMPUTATION & RENDERING ──────────────────────────────────
+function computeFilteredAds() {
+  const client = getActiveClient();
+  let ads = [...(client.ads || [])];
 
-  document.getElementById('productPaneAds').style.display = tabName === 'ads' ? 'block' : 'none';
-  document.getElementById('productPaneHooks').style.display = tabName === 'hooks' ? 'block' : 'none';
-  document.getElementById('productPaneAngles').style.display = tabName === 'angles' ? 'block' : 'none';
-  document.getElementById('productPaneSaved').style.display = tabName === 'saved' ? 'block' : 'none';
-
-  renderActiveProductTab();
-}
-
-function renderActiveProductTab() {
-  if (state.currentProductTab === 'ads') renderAdFeedTab();
-  if (state.currentProductTab === 'hooks') renderHookLibraryTab();
-  if (state.currentProductTab === 'angles') renderAnglesExplorerTab();
-  if (state.currentProductTab === 'saved') renderSavedSwipeTab();
-}
-
-// ─── 7. AD FEED TAB RENDERING ──────────────────────────────────────────────
-function renderAdFeedTab() {
-  const filtered = getFilteredAdsCollection();
-  const container = document.getElementById('allAdsGridContainer');
-  document.getElementById('resultsCountLabel').textContent = `${filtered.length} ads found`;
-
-  if (filtered.length === 0) {
-    container.innerHTML = `
-      <div style="grid-column: 1/-1; background: var(--bg-surface); border: 1px dashed var(--border-subtle); border-radius: var(--radius-lg); padding: 50px 24px; text-align: center;">
-        <div style="font-size: 36px; margin-bottom: 12px;">🔍</div>
-        <h4 style="font-size: 18px; font-weight: 700; color: var(--text-primary);">No matching ads found</h4>
-        <p style="font-size: 14.5px; color: var(--text-muted); margin: 6px auto 16px;">Try adjusting your competitor selection, tier, format, or search query.</p>
-        <button class="btn btn-secondary" onclick="resetFiltersToDefault()">Reset Filters</button>
-      </div>
-    `;
-    return;
+  // If in 'saved' tab, filter by saved IDs
+  if (state.currentNavTab === 'saved') {
+    ads = ads.filter(a => state.savedSwipe.some(item => item.id === a.id));
   }
 
-  container.innerHTML = filtered.map(ad => buildAdCardHTML(ad, false)).join('');
-}
-
-function resetFiltersToDefault() {
-  state.filters = { competitor: 'all', tier: 'all', format: 'all', search: '' };
-  document.getElementById('filterSearchInput').value = '';
-  renderCompetitorFilterPills();
-  setFilter('tier', 'all');
-  setFilter('format', 'all');
-}
-
-// ─── 8. AD CARD BUILDER (HERO HOOK & STRONG HIERARCHY) ─────────────────────
-function buildAdCardHTML(ad, isTopStudyCard = false) {
-  const isSaved = state.savedSwipe.some(item => item.id === ad.id && item.type === 'ad');
-  const days = ad.daysActive || 0;
-  
-  let whyStudyText = "Free entry-point offer removes initial conversion resistance.";
-  if ((ad.angle || '').includes('Dosha') || (ad.angle || '').includes('Problem')) {
-    whyStudyText = "Identifies high-urgency pain points → offers tailored Vedic remedy.";
-  } else if ((ad.angle || '').includes('Wealth') || (ad.angle || '').includes('Money') || (ad.angle || '').includes('Gemstone')) {
-    whyStudyText = "Strong aspirational wealth trigger paired with tangible proof.";
-  } else if ((ad.angle || '').includes('Authenticity')) {
-    whyStudyText = "Leverages fear of counterfeit products + lab certification authority.";
+  // Filter: Competitor
+  if (state.filters.competitor !== 'all') {
+    ads = ads.filter(a => a.competitorName === state.filters.competitor);
   }
 
-  return `
-    <div class="ad-card-item" id="card-${ad.id}">
-      <div>
-        <div class="ad-card-topbar">
-          <div class="competitor-heading-label">
-            <span>${ad.competitorName}</span>
-            <span class="format-badge-pill">${ad.format}</span>
-          </div>
-          <span class="duration-pill-badge">⏱️ ${days} days active</span>
-        </div>
-
-        <div class="ad-card-inner-body">
-          <!-- Hook (Hero Focal Point) -->
-          <div class="ad-hook-spotlight">
-            <div class="spotlight-caption">Hook</div>
-            <div class="spotlight-quote">"${ad.hook || ''}"</div>
-          </div>
-
-          <!-- Angle -->
-          <div class="ad-angle-indicator">
-            <span class="angle-pill-tag">${ad.angle || 'Direct Offer'}</span>
-          </div>
-
-          <!-- Primary Copy Preview -->
-          <div>
-            <div class="ad-primary-copy-box ad-copy-clamped-2lines" id="copy-box-${ad.id}">
-              ${ad.bodyText || 'No primary copy recorded for this ad.'}
-            </div>
-            ${(ad.bodyText || '').length > 90 ? `
-              <button class="btn-link" onclick="toggleCopyClamp(${ad.id})" style="margin-top: 6px;">Read more</button>
-            ` : ''}
-          </div>
-
-          <!-- Why Study This? -->
-          <div class="why-study-box">
-            <span class="why-study-label">WHY STUDY THIS?</span>
-            <span class="why-study-text">${whyStudyText}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card Actions -->
-      <div class="ad-card-footer-actions">
-        <div class="actions-cluster-left">
-          <button class="btn-use-hook-cta" onclick="openHookDrawer(${ad.id})">
-            ✦ Use This Hook
-          </button>
-          <button class="btn-card-util" onclick="openAnalyzeDrawer(${ad.id})">
-            Analyze
-          </button>
-          <button class="btn-card-util" onclick="toggleSaveAdItem(${ad.id})" title="Save to Swipe File">
-            ${isSaved ? '❤️' : '♡'}
-          </button>
-        </div>
-        <a href="${ad.adLibraryUrl || '#'}" target="_blank" class="meta-link-external" title="View on Meta Ad Library">
-          Meta ↗
-        </a>
-      </div>
-    </div>
-  `;
-}
-
-function toggleCopyClamp(adId) {
-  const el = document.getElementById(`copy-box-${adId}`);
-  if (el) {
-    el.classList.toggle('ad-copy-clamped-2lines');
-    const btn = el.parentElement.querySelector('.btn-link');
-    if (btn) btn.textContent = el.classList.contains('ad-copy-clamped-2lines') ? 'Read more' : 'Show less';
-  }
-}
-
-// ─── TAB 2: HOOK LIBRARY ───
-function renderHookLibraryTab() {
-  const ads = state.clientData.ads || [];
-  const container = document.getElementById('hooksGridContainer');
-
-  if (ads.length === 0) {
-    container.innerHTML = `<div style="grid-column: 1/-1; color: var(--text-muted); padding: 40px; text-align: center;">No hooks found.</div>`;
-    return;
+  // Filter: Format
+  if (state.filters.format !== 'all') {
+    ads = ads.filter(a => a.format === state.filters.format);
   }
 
-  container.innerHTML = ads.map(ad => `
-    <div class="hook-deck-tile">
-      <div>
-        <div class="spotlight-caption" style="margin-bottom: 8px;">${(ad.angle || 'Direct Offer').toUpperCase()}</div>
-        <div style="font-size: 17.5px; font-weight: 700; color: var(--text-primary); line-height: 1.45;">"${ad.hook}"</div>
-        <div style="font-size: 14px; color: var(--text-muted); margin-top: 14px;">
-          Used by <strong>${ad.competitorName}</strong> • Format: <strong>${ad.format}</strong>
-        </div>
-      </div>
-      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
-        <span class="duration-pill-badge">⏱️ ${ad.daysActive || 0}d active</span>
-        <button class="btn btn-primary" onclick="openHookDrawer(${ad.id})">
-          ✦ Use as Inspiration
-        </button>
-      </div>
-    </div>
-  `).join('');
-}
-
-// ─── TAB 3: ANGLES EXPLORER ───
-function renderAnglesExplorerTab() {
-  const ads = state.clientData.ads || [];
-  const container = document.getElementById('anglesGridContainer');
-
-  const angleMap = {};
-  ads.forEach(ad => {
-    const angle = ad.angle || 'Direct Offer';
-    if (!angleMap[angle]) {
-      angleMap[angle] = { name: angle, ads: [], competitors: new Set() };
-    }
-    angleMap[angle].ads.push(ad);
-    angleMap[angle].competitors.add(ad.competitorName);
-  });
-
-  const anglesList = Object.values(angleMap);
-
-  container.innerHTML = anglesList.map(item => `
-    <div class="angle-card-tile" onclick="filterByAngleSelection('${item.name}')">
-      <div>
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-          <h4 style="font-size: 18px; font-weight: 750; color: var(--text-primary);">${item.name}</h4>
-          <span style="font-size: 13px; font-weight: 700; color: var(--primary); background: var(--primary-light); padding: 4px 10px; border-radius: 9999px;">${item.ads.length} ads</span>
-        </div>
-        <p style="font-size: 14px; color: var(--text-muted);">
-          Leveraged by <strong>${item.competitors.size} competitor brands</strong> to drive conversion intent.
-        </p>
-      </div>
-      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 14px;">
-        <span style="font-size: 13px; color: var(--text-tertiary);">${item.ads.map(a => a.competitorName).slice(0, 2).join(', ')}...</span>
-        <span style="font-size: 14px; font-weight: 650; color: var(--primary);">Explore Angle →</span>
-      </div>
-    </div>
-  `).join('');
-}
-
-function filterByAngleSelection(angleName) {
-  switchProductTab('ads');
-  state.filters.search = angleName.toLowerCase();
-  document.getElementById('filterSearchInput').value = angleName;
-  applyActiveFiltersAndRender();
-}
-
-// ─── TAB 4: SAVED SWIPE FILE ───
-function renderSavedSwipeTab() {
-  const container = document.getElementById('savedGridContainer');
-  const saved = state.savedSwipe;
-
-  if (saved.length === 0) {
-    container.innerHTML = `
-      <div style="grid-column: 1/-1; background: var(--bg-surface); border: 1px dashed var(--border-subtle); border-radius: var(--radius-lg); padding: 50px 24px; text-align: center;">
-        <div style="font-size: 36px; margin-bottom: 12px;">📁</div>
-        <h4 style="font-size: 18px; font-weight: 750; color: var(--text-primary);">Your swipe file is empty</h4>
-        <p style="font-size: 14.5px; color: var(--text-muted); margin: 6px auto 16px;">Save useful competitor ads and messaging patterns to build your own research library.</p>
-        <button class="btn btn-primary" onclick="switchProductTab('ads')">Explore Ad Intelligence</button>
-      </div>
-    `;
-    return;
+  // Filter: Tier
+  if (state.filters.tier !== 'all') {
+    ads = ads.filter(a => a.tier === state.filters.tier);
   }
 
-  container.innerHTML = saved.map(item => {
-    if (item.type === 'hook') {
-      return `
-        <div class="hook-deck-tile">
-          <div>
-            <div class="spotlight-caption">SAVED HOOK</div>
-            <div style="font-size: 17.5px; font-weight: 700; color: var(--text-primary); line-height: 1.45;">"${item.hook}"</div>
-            <div style="font-size: 14px; color: var(--text-muted); margin-top: 10px;">From ${item.competitorName || 'Competitor'}</div>
-          </div>
-          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
-            <button class="btn btn-primary" onclick="openHookDrawerByItemData('${encodeURIComponent(JSON.stringify(item))}')">✦ Adapt</button>
-            <button class="btn-link" onclick="removeSavedItem('${item.id}')">Remove</button>
-          </div>
+  // Filter: Search Text
+  if (state.filters.search) {
+    const q = state.filters.search;
+    ads = ads.filter(a => {
+      const haystack = [a.competitorName, a.hook, a.bodyText, a.angle].join(' ').toLowerCase();
+      return haystack.includes(q);
+    });
+  }
+
+  // Sort
+  if (state.sort === 'longest') {
+    ads.sort((a, b) => (b.daysActive || 0) - (a.daysActive || 0));
+  } else if (state.sort === 'newest') {
+    ads.sort((a, b) => (a.daysActive || 0) - (b.daysActive || 0));
+  } else if (state.sort === 'competitor') {
+    ads.sort((a, b) => a.competitorName.localeCompare(b.competitorName));
+  }
+
+  return ads;
+}
+
+function renderAdsLibrary() {
+  const container = document.getElementById('adsGridContainer');
+  const allFiltered = computeFilteredAds();
+
+  if (allFiltered.length === 0) {
+    if (state.currentNavTab === 'saved') {
+      container.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1;">
+          <div class="empty-icon">📁</div>
+          <div class="empty-title">Your saved ads collection is empty</div>
+          <div class="empty-desc">Click the heart icon (♡) on any ad to bookmark it for your swipe file.</div>
+          <button class="btn btn-primary btn-sm" style="margin-top: 14px;" onclick="switchNavTab('library')">Browse Ad Library</button>
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1;">
+          <div class="empty-icon">🔍</div>
+          <div class="empty-title">No matching competitor ads found</div>
+          <div class="empty-desc">Try clearing your search query or selecting a different brand or format filter.</div>
+          <button class="btn btn-secondary btn-sm" style="margin-top: 14px;" onclick="resetFilters()">Reset All Filters</button>
         </div>
       `;
     }
-    return buildAdCardHTML(item, false);
-  }).join('');
+    renderPagination(0, 0);
+    return;
+  }
+
+  // Pagination slicing
+  const { page, pageSize } = state.pagination;
+  const total = allFiltered.length;
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, total);
+  const pagedAds = allFiltered.slice(startIndex, endIndex);
+
+  container.innerHTML = pagedAds.map(ad => buildAdCardHTML(ad)).join('');
+
+  renderPagination(startIndex + 1, endIndex, total);
 }
 
-// ─── 9. DRAWERS (USE THIS HOOK & ANALYZE) ──────────────────────────────────
-function openHookDrawer(adId) {
-  const ad = state.clientData.ads.find(a => a.id === adId);
-  if (!ad) return;
-  populateHookDrawer(ad);
+function resetFilters() {
+  state.filters = { competitor: 'all', format: 'all', tier: 'all', search: '' };
+  const input = document.getElementById('searchInput');
+  if (input) input.value = '';
+  document.querySelectorAll('.filter-pill').forEach(p => {
+    p.classList.toggle('active', p.getAttribute('data-val') === 'all');
+  });
+  renderAdsLibrary();
 }
 
-function openHookDrawerByItemData(encoded) {
+function buildAdCardHTML(ad) {
+  const isSaved = state.savedSwipe.some(item => item.id === ad.id);
+  const tierClass = ad.tier === 'Winner' ? 'tier-winner' : (ad.tier === 'Tested' ? 'tier-tested' : 'tier-new');
+  const tierLabel = ad.tier === 'Winner' ? '⭐ Proven Winner' : (ad.tier === 'Tested' ? '⚡ Scaling' : '✨ New Angle');
+
+  return `
+    <article class="ad-card" id="card-${ad.id}">
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        
+        <!-- Header row: Brand Avatar, Name, Format chip, Longevity -->
+        <div class="ad-card-head">
+          <div class="competitor-meta-wrap">
+            <div class="brand-avatar-circle">${getBrandInitials(ad.competitorName)}</div>
+            <div style="display: flex; flex-direction: column;">
+              <span class="competitor-name-tag">${ad.competitorName}</span>
+              <span class="ad-type-chip">${ad.format === 'Video' ? '🎬 Video (9:16)' : (ad.format === 'Carousel' ? '📑 Carousel' : '🖼️ Image')}</span>
+            </div>
+          </div>
+          <span class="longevity-badge ${tierClass}">⏱️ ${ad.daysActive}d active</span>
+        </div>
+
+        <!-- Hook Box (Hero element) -->
+        <div class="ad-hook-box">
+          <div class="hook-caption">Primary Hook</div>
+          <div class="hook-text">“${ad.hook}”</div>
+        </div>
+
+        <!-- Angle & Status Tags -->
+        <div class="ad-angle-row">
+          <span class="angle-badge">🎯 ${ad.angle || 'Direct Offer'}</span>
+          <span class="tag-status-pill">${tierLabel}</span>
+        </div>
+
+        <!-- Primary Copy Excerpt -->
+        <div>
+          <p class="ad-copy-preview" id="copy-${ad.id}">${ad.bodyText || ''}</p>
+          ${(ad.bodyText || '').length > 80 ? `
+            <button class="btn-read-toggle" onclick="toggleCopyExpand(${ad.id})">Read more</button>
+          ` : ''}
+        </div>
+
+        <!-- Why Study Callout -->
+        <div class="why-study-callout">
+          <b>Why it works:</b> ${ad.whyStudy || 'Clear psychological trigger and low conversion friction.'}
+        </div>
+      </div>
+
+      <!-- Footer Actions -->
+      <div class="ad-card-actions">
+        <div class="card-actions-left">
+          ${ad.format === 'Video' ? `
+            <button class="btn-card-video" onclick="openTranscribeDrawer(${ad.id})" title="Watch Video & View Script">
+              🎬 Watch &amp; Script
+            </button>
+          ` : `
+            <button class="btn btn-secondary btn-sm" onclick="openAnalyzeDrawer(${ad.id})">
+              🔍 Details
+            </button>
+          `}
+          <button class="btn-card-cta" onclick="openHookDrawer(${ad.id})">
+            ✦ Adapt Hook
+          </button>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <button class="btn-card-icon ${isSaved ? 'saved' : ''}" onclick="toggleSaveAd(${ad.id})" title="Save to Swipe File">
+            ${isSaved ? '❤️' : '♡'}
+          </button>
+          <a href="${ad.adLibraryUrl || '#'}" target="_blank" class="btn-card-icon" title="View on Meta Ad Library">
+            ↗
+          </a>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function toggleCopyExpand(adId) {
+  const el = document.getElementById(`copy-${adId}`);
+  if (!el) return;
+  el.classList.toggle('expanded');
+  const btn = el.parentElement.querySelector('.btn-read-toggle');
+  if (btn) btn.textContent = el.classList.contains('expanded') ? 'Show less' : 'Read more';
+}
+
+// ─── 8. PAGINATION CONTROLS ───────────────────────────────────────────────────
+function renderPagination(start, end, total = 0) {
+  const bar = document.getElementById('paginationBar');
+  const summary = document.getElementById('paginationSummary');
+  const pagesContainer = document.getElementById('paginationPages');
+
+  if (total === 0) {
+    if (summary) summary.textContent = 'No ads to display';
+    if (pagesContainer) pagesContainer.innerHTML = '';
+    return;
+  }
+
+  if (summary) summary.textContent = `Showing ${start}–${end} of ${total} ads`;
+
+  const totalPages = Math.ceil(total / state.pagination.pageSize);
+  let html = '';
+
+  // Previous button
+  html += `<button class="page-btn" ${state.pagination.page === 1 ? 'disabled' : ''} onclick="goToPage(${state.pagination.page - 1})">‹</button>`;
+
+  // Numbered pages
+  for (let i = 1; i <= totalPages; i++) {
+    html += `<button class="page-btn ${state.pagination.page === i ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+  }
+
+  // Next button
+  html += `<button class="page-btn" ${state.pagination.page === totalPages ? 'disabled' : ''} onclick="goToPage(${state.pagination.page + 1})">›</button>`;
+
+  if (pagesContainer) pagesContainer.innerHTML = html;
+}
+
+function goToPage(pageNum) {
+  state.pagination.page = pageNum;
+  renderAdsLibrary();
+  document.getElementById('adsGridContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ─── 9. DRAWERS & MODALS LOGIC ────────────────────────────────────────────────
+function closeActiveDrawers() {
+  const backdrop = document.getElementById('drawerBackdrop');
+  if (backdrop) backdrop.classList.remove('active');
+
+  ['hookDrawer', 'transcribeDrawer', 'analyzeDrawer'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+
   try {
-    const data = JSON.parse(decodeURIComponent(encoded));
-    populateHookDrawer(data);
-  } catch(e) { console.error(e); }
+    stopSimVideoPlayback();
+  } catch (err) {}
 }
 
-function populateHookDrawer(ad) {
-  state.activeHookModalAd = ad;
-  const currentClient = state.clientData.client || { name: 'Your Brand' };
-
-  document.getElementById('drawerOrigHook').textContent = `"${ad.hook || ''}"`;
-  document.getElementById('drawerTargetClient').textContent = currentClient.name;
-
-  let whyText = "• Low-friction offer removes conversion resistance<br>• Clear benefit with immediate relevance<br>• High curiosity trigger";
-  if ((ad.angle || '').includes('Dosha') || (ad.angle || '').includes('Problem')) {
-    whyText = "• Direct problem-agitation on career/financial friction<br>• Creates urgency to seek immediate diagnosis<br>• Positions personalized remedy as the exact answer";
-  } else if ((ad.angle || '').includes('Wealth') || (ad.angle || '').includes('Money') || (ad.angle || '').includes('Gemstone')) {
-    whyText = "• Aspirational wealth & fortune magnet angle<br>• Strong tangible visual proof<br>• Fear of missing out on planetary luck";
-  }
-  document.getElementById('drawerWhyWorks').innerHTML = whyText;
-
-  renderAdaptationVariants(ad, currentClient);
-
-  document.getElementById('drawerBackdropMask').classList.add('active');
-  document.getElementById('useHookDrawer').classList.add('active');
+function closeAllOverlays() {
+  closeActiveDrawers();
+  closeAddCompetitorModal();
+  const wsDropdown = document.getElementById('workspaceDropdown');
+  if (wsDropdown) wsDropdown.style.display = 'none';
 }
 
-function renderAdaptationVariants(ad, client) {
-  const container = document.getElementById('drawerAdaptationVariants');
-  const clientName = client.name || 'Your Client';
-  const niche = (client.niche || '').toLowerCase();
+// Hook Adaptation Drawer
+function openHookDrawer(adId) {
+  const client = getActiveClient();
+  const ad = client.ads.find(a => a.id === adId);
+  if (!ad) return;
 
-  let adaptations = [];
-  if (niche.includes('gemstone') || niche.includes('crystal') || clientName.includes('Gems')) {
-    adaptations = [
-      `"Never wear an uncertified gemstone without personalized Vedic energization."`,
-      `"Get 100% Certified Natural Gemstones with customized birth chart analysis."`,
-      `"How to choose the exact lucky gemstone for your Rashi in 3 simple steps."`
-    ];
-  } else if (niche.includes('smart') || clientName.includes('Smart Kundli') || niche.includes('ai-powered')) {
-    adaptations = [
-      `"Get your instant AI Kundli report with 50+ page customized Vedic predictions."`,
-      `"Confused about career or marriage timing? Check your AI-generated birth chart today."`,
-      `"Why pay ₹500+ for astrologer consultations when you can generate your full Kundli report instantly?"`
-    ];
-  } else {
-    adaptations = [
-      `"Get your complete 50+ page personalized Kundali report & Vedic remedies."`,
-      `"Confused about career or marriage timing? Check your Mahadasha today."`,
-      `"Discover the exact Graha planetary remedies tailored for your birth chart."`
-    ];
-  }
+  state.activeAdForDrawer = ad;
 
-  container.innerHTML = adaptations.map(item => `
-    <div class="adaptation-variant-box">
-      <span style="font-size: 14.5px; font-weight: 600; color: var(--text-primary); line-height: 1.45;">${item}</span>
-      <button class="btn btn-secondary" style="height: 34px; padding: 0 12px; font-size: 13px;" onclick="copyHookToClipboard('${item.replace(/'/g, "\\'")}', this)">
-        📋 Copy
-      </button>
+  document.getElementById('hookDrawerCompetitor').textContent = `From ${ad.competitorName} • ${ad.format} (${ad.daysActive}d active)`;
+  document.getElementById('drawerOrigHook').textContent = `"${ad.hook}"`;
+  document.getElementById('drawerClientTargetName').textContent = client.name;
+
+  renderHookVariations(ad, client);
+
+  document.getElementById('drawerBackdrop').classList.add('active');
+  document.getElementById('hookDrawer').classList.add('active');
+}
+
+function renderHookVariations(ad, client) {
+  const container = document.getElementById('drawerVariationsList');
+  const brandName = client.name || 'Your Brand';
+
+  const variations = [
+    `"Why 90% of people face career friction without knowing their Graha Dosh — customized ${brandName} guide."`,
+    `"Never wear a gemstone or perform remedies without checking planetary Mahadasha first."`,
+    `"Get your instant personalized Vedic analysis delivered directly to your WhatsApp in 60 seconds."`
+  ];
+
+  container.innerHTML = variations.map(v => `
+    <div style="background: #FFFFFF; border: 1px solid var(--border-default); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+      <span style="font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.4;">${v}</span>
+      <button class="btn btn-secondary btn-sm" onclick="copyText('${v.replace(/'/g, "\\'")}', this)">📋 Copy</button>
     </div>
   `).join('');
 }
 
-function regenerateAdaptationIdeas() {
-  if (state.activeHookModalAd) {
-    const client = state.clientData.client || {};
-    renderAdaptationVariants(state.activeHookModalAd, client);
-    fireToast('Generated fresh variations!');
+function regenerateHookAdaptations() {
+  if (state.activeAdForDrawer) {
+    renderHookVariations(state.activeAdForDrawer, getActiveClient());
+    fireToast('Generated fresh variations! 🎲');
   }
 }
 
-function saveActiveHookToSwipeFile() {
-  if (!state.activeHookModalAd) return;
-  const item = {
-    id: `hook-${Date.now()}`,
+function saveActiveHookToSwipe() {
+  if (!state.activeAdForDrawer) return;
+  const hookObj = {
+    id: `hook-${state.activeAdForDrawer.id}-${Date.now()}`,
     type: 'hook',
-    hook: state.activeHookModalAd.hook,
-    competitorName: state.activeHookModalAd.competitorName,
-    angle: state.activeHookModalAd.angle
+    hook: state.activeAdForDrawer.hook,
+    competitorName: state.activeAdForDrawer.competitorName,
+    angle: state.activeAdForDrawer.angle
   };
-  state.savedSwipe.push(item);
-  saveSwipeStorage();
+
+  state.savedSwipe.push(hookObj);
+  localStorage.setItem('bloomx_saved_swipe', JSON.stringify(state.savedSwipe));
+  updateSidebarCounters();
   fireToast('Hook saved to Swipe File! 📁');
   closeActiveDrawers();
 }
 
-// ─── Analyze Drawer ───
-function openAnalyzeDrawer(adId) {
-  const ad = state.clientData.ads.find(a => a.id === adId);
+// Video & Transcribe Drawer
+function openTranscribeDrawer(adId) {
+  const client = getActiveClient();
+  const ad = client.ads.find(a => a.id === adId);
   if (!ad) return;
 
-  state.activeAnalyzeAd = ad;
+  state.activeAdForDrawer = ad;
 
-  document.getElementById('analyzeDrawerMeta').textContent = `${ad.competitorName} • ${ad.format} • ⏱️ ${ad.daysActive || 0} days active`;
-  document.getElementById('analyzeHookVal').textContent = `"${ad.hook || ''}"`;
-  document.getElementById('analyzeHeadlineVal').textContent = `"${ad.bodyText ? ad.bodyText.slice(0, 80) + '...' : ad.hook}"`;
-  document.getElementById('analyzeOfferVal').textContent = ad.hook && ad.hook.includes('FREE') ? 'Free Consultation / Sample Audit' : 'Personalized Analysis / Specialized Report';
-  document.getElementById('analyzeCtaVal').textContent = ad.format === 'Video' ? 'Watch Video / Book via WhatsApp' : 'Claim Report / Order Now';
-  document.getElementById('analyzeAngleVal').textContent = ad.angle || 'Problem Agitation + Direct Proof';
-  document.getElementById('analyzeLearnVal').textContent = `Long-running ad signal (${ad.daysActive || 0}d). Addresses a specific psychological doubt and removes barrier to entry.`;
-  document.getElementById('analyzeIdeaVal').textContent = `Adapt this structure: Hook on a common misconception → Introduce authority verification → Direct low-friction next step.`;
-  document.getElementById('analyzeMetaLink').href = ad.adLibraryUrl || '#';
+  document.getElementById('transcribeDrawerMeta').textContent = `${ad.competitorName} • ${ad.format} • ⏱️ ${ad.daysActive}d active`;
+  document.getElementById('simVideoBrand').textContent = `⚡ ${ad.competitorName}`;
+  document.getElementById('simVideoHookText').textContent = `"${ad.hook}"`;
+  document.getElementById('simMetaLink').href = ad.adLibraryUrl || '#';
 
-  document.getElementById('drawerBackdropMask').classList.add('active');
+  // Render Transcript Segments
+  const segments = [
+    { start: '00:00', end: '00:05', tag: 'Hook', text: `${ad.hook}? Kya aapke sath bhi baar baar aisa ho raha hai?`, notes: 'Pattern interrupt targeting latent doubt.' },
+    { start: '00:05', end: '00:18', tag: 'Problem', text: `Log saalon tak mehnat karte hain par jab tak kundali ke mukhya grah shant na hon, tab tak results aate aate ruk jate hain. ${ad.bodyText.split('.')[0] || 'Koshish ke baad bhi kaam ruk jata hai'}.`, notes: 'Validates viewer pain points, shifts blame to external planetary timing.' },
+    { start: '00:18', end: '00:40', tag: 'Mechanism', text: `Iska sabse saral aur pramanit samadhan hai aapka personalized horoscope report. Isme certified algorithms se aapke grahon ki exact sthiti aur simple Vedic upay bataye jate hain.`, notes: 'Introduces authentic mechanism with social proof.' },
+    { start: '00:40', end: '00:54', tag: 'Call to Action', text: `Aaj hi neeche diye gaye link par click karein aur apna first consultation 100% FREE ya sirf ₹1 mein claim karein. Slots limited hain!`, notes: 'Frictionless entry offer paired with scarcity.' }
+  ];
+
+  document.getElementById('transcribeSegmentsContainer').innerHTML = segments.map(s => `
+    <div class="script-segment-item">
+      <div class="segment-badge-row">
+        <span class="time-stamp-pill">${s.start} - ${s.end}</span>
+        <span style="font-size: 10.5px; font-weight: 750; text-transform: uppercase; color: var(--primary); background: var(--primary-light); padding: 2px 7px; border-radius: 4px;">${s.tag}</span>
+      </div>
+      <div style="font-size: 13.5px; font-weight: 600; color: var(--text-primary); line-height: 1.45;">"${s.text}"</div>
+      <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px; font-style: italic;">💡 ${s.notes}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('transcribeTakeawaysContainer').innerHTML = `
+    <li>Opens with high-urgency rhetorical question within first 3 seconds.</li>
+    <li>Shifts blame away from viewer to planetary dosha, immediately dissolving sales skepticism.</li>
+    <li>Free / micro-tripwire entry offer eliminates buyer resistance.</li>
+  `;
+
+  document.getElementById('drawerBackdrop').classList.add('active');
+  document.getElementById('transcribeDrawer').classList.add('active');
+}
+
+function toggleSimVideoPlayback() {
+  const btn = document.getElementById('btnSimPlay');
+  const label = document.getElementById('simTimerLabel');
+
+  if (state.isSimVideoPlaying) {
+    stopSimVideoPlayback();
+  } else {
+    state.isSimVideoPlaying = true;
+    btn.textContent = '⏸';
+    state.simVideoInterval = setInterval(() => {
+      state.simVideoSeconds++;
+      if (state.simVideoSeconds > 54) state.simVideoSeconds = 0;
+      const min = String(Math.floor(state.simVideoSeconds / 60)).padStart(2, '0');
+      const sec = String(state.simVideoSeconds % 60).padStart(2, '0');
+      label.textContent = `${min}:${sec} / 00:54`;
+    }, 1000);
+  }
+}
+
+function stopSimVideoPlayback() {
+  state.isSimVideoPlaying = false;
+  if (state.simVideoInterval) {
+    clearInterval(state.simVideoInterval);
+    state.simVideoInterval = null;
+  }
+  state.simVideoSeconds = 0;
+  const btn = document.getElementById('btnSimPlay');
+  const label = document.getElementById('simTimerLabel');
+  if (btn) btn.textContent = '▶';
+  if (label) label.textContent = '00:00 / 00:54';
+}
+
+function adaptFromTranscribe() {
+  if (state.activeAdForDrawer) {
+    const ad = state.activeAdForDrawer;
+    closeActiveDrawers();
+    openHookDrawer(ad.id);
+  }
+}
+
+function copyFullTranscriptText(btn) {
+  const fullText = Array.from(document.querySelectorAll('.script-segment-item'))
+    .map(el => el.innerText.trim())
+    .join('\n\n');
+
+  copyText(fullText, btn);
+}
+
+// Analyze Drawer
+function openAnalyzeDrawer(adId) {
+  const client = getActiveClient();
+  const ad = client.ads.find(a => a.id === adId);
+  if (!ad) return;
+
+  state.activeAdForDrawer = ad;
+
+  document.getElementById('analyzeDrawerMeta').textContent = `${ad.competitorName} • ${ad.format} • ⏱️ ${ad.daysActive}d active`;
+  document.getElementById('analyzeHookVal').textContent = `"${ad.hook}"`;
+  document.getElementById('analyzeBodyVal').textContent = `"${ad.bodyText}"`;
+  document.getElementById('analyzeAngleVal').textContent = ad.angle || 'Dosha & Problem Agitation';
+  document.getElementById('analyzeIdeaVal').textContent = `Structure adaptation: Hook on a common misconception → Introduce authority verification → Direct low-friction next step.`;
+
+  document.getElementById('drawerBackdrop').classList.add('active');
   document.getElementById('analyzeDrawer').classList.add('active');
 }
 
-function openHookFromAnalyzeDrawer() {
-  if (state.activeAnalyzeAd) {
-    const ad = state.activeAnalyzeAd;
+function openHookFromAnalyze() {
+  if (state.activeAdForDrawer) {
+    const ad = state.activeAdForDrawer;
     closeActiveDrawers();
-    populateHookDrawer(ad);
+    openHookDrawer(ad.id);
   }
 }
 
-function saveAdFromAnalyzeDrawer() {
-  if (state.activeAnalyzeAd) {
-    toggleSaveAdItem(state.activeAnalyzeAd.id);
-  }
-}
-
-function closeActiveDrawers() {
-  document.getElementById('drawerBackdropMask').classList.remove('active');
-  document.getElementById('useHookDrawer').classList.remove('active');
-  document.getElementById('analyzeDrawer').classList.remove('active');
-}
-
-// ─── Save & Swipe Storage Helpers ───
-function toggleSaveAdItem(adId) {
-  const ad = state.clientData.ads.find(a => a.id === adId);
+// ─── 10. SAVE / SWIPE FILE ACTIONS ────────────────────────────────────────────
+function toggleSaveAd(adId) {
+  const client = getActiveClient();
+  const ad = client.ads.find(a => a.id === adId);
   if (!ad) return;
 
-  const idx = state.savedSwipe.findIndex(item => item.id === ad.id && item.type === 'ad');
-  if (idx !== -1) {
-    state.savedSwipe.splice(idx, 1);
+  const existingIdx = state.savedSwipe.findIndex(item => item.id === ad.id);
+  if (existingIdx !== -1) {
+    state.savedSwipe.splice(existingIdx, 1);
     fireToast('Removed from Swipe File');
   } else {
-    state.savedSwipe.push({ ...ad, type: 'ad' });
-    fireToast('Saved to Swipe File ❤️');
+    state.savedSwipe.push({ ...ad, savedAt: new Date().toISOString() });
+    fireToast('Saved ad to Swipe File ❤️');
   }
 
-  saveSwipeStorage();
-  renderActiveProductTab();
+  localStorage.setItem('bloomx_saved_swipe', JSON.stringify(state.savedSwipe));
+  updateSidebarCounters();
+  renderAdsLibrary();
 }
 
-function removeSavedItem(id) {
-  state.savedSwipe = state.savedSwipe.filter(item => item.id != id);
-  saveSwipeStorage();
-  renderSavedSwipeTab();
-  fireToast('Item removed');
+// ─── 11. ADD COMPETITOR MODAL ─────────────────────────────────────────────────
+function openAddCompetitorModal() {
+  const backdrop = document.getElementById('addCompModalBackdrop');
+  const modal = document.getElementById('addCompetitorModal');
+  if (backdrop) backdrop.classList.add('active');
+  if (modal) modal.classList.add('active');
 }
 
-function saveSwipeStorage() {
-  localStorage.setItem('saved_swipe_library', JSON.stringify(state.savedSwipe));
-  updateSavedTabBadgeCount();
+function closeAddCompetitorModal() {
+  const backdrop = document.getElementById('addCompModalBackdrop');
+  const modal = document.getElementById('addCompetitorModal');
+  if (backdrop) backdrop.classList.remove('active');
+  if (modal) modal.classList.remove('active');
 }
 
-function updateSavedTabBadgeCount() {
-  document.getElementById('badgeTabSaved').textContent = state.savedSwipe.length;
-}
-
-// ─── Modal Helpers (New Client) ───
-function openAddClientModal() {
-  document.getElementById('newClientModal').classList.add('active');
-}
-
-function closeAddClientModal() {
-  document.getElementById('newClientModal').classList.remove('active');
-}
-
-async function handleCreateClientSubmit(e) {
+function handleCreateCompetitorSubmit(e) {
   e.preventDefault();
-  const name = document.getElementById('modalInputClientName').value;
-  const niche = document.getElementById('modalInputClientNiche').value;
+  const name = document.getElementById('compNameInput').value.trim();
+  const url = document.getElementById('compUrlInput').value.trim();
+  
+  if (!name) return;
 
-  try {
-    const res = await fetch('/api/clients', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, niche })
-    });
-    const data = await res.json();
-    if (data.message === 'success') {
-      closeAddClientModal();
-      fireToast('Client workspace created!');
-      await loadClientsList();
-      await loadClientOverviewData(data.data.id);
-    }
-  } catch(err) {
-    alert('Failed to create client');
-  }
+  const client = getActiveClient();
+  const newComp = {
+    id: Date.now(),
+    name,
+    activeAds: 12,
+    maxDays: 45,
+    tier: 'Tested',
+    url
+  };
+
+  client.competitors.push(newComp);
+  closeAddCompetitorModal();
+  applyClientData();
+  fireToast(`Added "${name}" to tracking! 🚀`);
+  document.getElementById('compNameInput').value = '';
 }
 
-// ─── Utilities & CSV Export ───
-function copyHookToClipboard(text, btn) {
+// ─── 12. UTILITIES & CSV EXPORT ───────────────────────────────────────────────
+function copyText(text, btn) {
   navigator.clipboard.writeText(text).then(() => {
-    fireToast('Hook copied to clipboard! 📋');
     if (btn) {
       const orig = btn.innerHTML;
       btn.innerHTML = '✅ Copied!';
-      setTimeout(() => btn.innerHTML = orig, 1500);
+      setTimeout(() => { btn.innerHTML = orig; }, 1400);
     }
+    fireToast('Copied to clipboard! 📋');
   });
-}
-
-function fireToast(msg) {
-  const dock = document.getElementById('toastDock');
-  const toast = document.createElement('div');
-  toast.className = 'toast-pill';
-  toast.innerHTML = `<span>⚡</span><span>${msg}</span>`;
-  dock.appendChild(toast);
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    setTimeout(() => toast.remove(), 200);
-  }, 2500);
 }
 
 function exportDataCSV() {
-  const ads = state.clientData.ads || [];
+  const client = getActiveClient();
+  const ads = computeFilteredAds();
+
   if (ads.length === 0) {
-    alert('No ads available to export.');
+    fireToast('No ads to export.');
     return;
   }
-  const headers = ['Competitor', 'Days Active', 'Tier', 'Format', 'Angle', 'Hook', 'Body Text', 'Meta Ad Library URL'];
-  const rows = [headers.join(',')];
-  ads.forEach(ad => {
-    rows.push([
-      `"${(ad.competitorName || '').replace(/"/g, '""')}"`,
-      ad.daysActive || 0,
-      `"${ad.tier || 'New'}"`,
-      `"${ad.format || ''}"`,
-      `"${ad.angle || ''}"`,
-      `"${(ad.hook || '').replace(/"/g, '""')}"`,
-      `"${(ad.bodyText || '').replace(/"/g, '""')}"`,
-      `"${(ad.adLibraryUrl || '').replace(/"/g, '""')}"`
-    ].join(','));
-  });
-  downloadCsvContent(rows.join('\n'), `${(state.clientData.client.name || 'Client').replace(/\s+/g, '_')}_Ad_Intelligence.csv`);
-}
 
-function exportSavedSwipeCSV() {
-  if (state.savedSwipe.length === 0) {
-    alert('No saved swipe items to export.');
-    return;
-  }
-  const headers = ['Type', 'Competitor', 'Hook', 'Angle', 'Format'];
-  const rows = [headers.join(',')];
-  state.savedSwipe.forEach(item => {
-    rows.push([
-      `"${item.type || 'ad'}"`,
-      `"${(item.competitorName || '').replace(/"/g, '""')}"`,
-      `"${(item.hook || '').replace(/"/g, '""')}"`,
-      `"${(item.angle || '').replace(/"/g, '""')}"`,
-      `"${(item.format || '').replace(/"/g, '""')}"`
-    ].join(','));
-  });
-  downloadCsvContent(rows.join('\n'), 'Saved_Competitor_Swipe_File.csv');
-}
+  const headers = ['Competitor', 'Format', 'Days Active', 'Tier', 'Hook', 'Angle', 'Body Text', 'Meta URL'];
+  const rows = ads.map(a => [
+    `"${(a.competitorName || '').replace(/"/g, '""')}"`,
+    `"${a.format || ''}"`,
+    a.daysActive || 0,
+    `"${a.tier || ''}"`,
+    `"${(a.hook || '').replace(/"/g, '""')}"`,
+    `"${(a.angle || '').replace(/"/g, '""')}"`,
+    `"${(a.bodyText || '').replace(/"/g, '""')}"`,
+    `"${a.adLibraryUrl || ''}"`
+  ]);
 
-function downloadCsvContent(content, filename) {
-  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+  const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  const link = document.createElement('a');
+
+  link.setAttribute('href', url);
+  link.setAttribute('download', `${client.name.replace(/[^a-zA-Z0-9]/g, '_')}_Competitor_Swipe.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  fireToast(`Exported ${ads.length} ads to CSV! 📥`);
 }
 
-// ─── 8. APIFY AUTOMATED SCRAPER INTEGRATION ────────────────────────────────
-async function checkApifyEngineStatus() {
-  try {
-    const res = await fetch('/api/apify/status');
-    const json = await res.json();
-    if (json.status === 'success' && json.data) {
-      const label = document.getElementById('apifyEngineLabel');
-      const pill = document.getElementById('apifyStatusPill');
-      if (json.data.configured) {
-        label.textContent = 'Apify Cloud Active';
-        pill.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-        pill.title = `Connected to Apify Actor: ${json.data.actorId} (Sync every ${json.data.autoSyncHours}h)`;
-      } else {
-        label.textContent = 'Apify Engine (Ready)';
-        pill.title = 'Add APIFY_API_TOKEN in .env to enable scheduled cloud scraping';
-      }
-    }
-  } catch (err) {
-    console.error('Error checking Apify status:', err);
-  }
-}
+function fireToast(msg) {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
 
-async function triggerApifyAutoSync() {
-  const btn = document.getElementById('btnApifySync');
-  if (!btn) return;
-  const originalHtml = btn.innerHTML;
-  btn.innerHTML = '⏳ Scraping Meta Ad Library...';
-  btn.disabled = true;
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = msg;
 
-  fireToast('Connecting to Apify Actor to scrape live competitor ads...');
-
-  try {
-    const res = await fetch(`/api/sync/apify/client/${state.activeClientId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    });
-    const result = await res.json();
-
-    if (result.status === 'success') {
-      let totalWinners = 0;
-      let totalScraped = 0;
-      (result.data.synced || []).forEach(s => {
-        totalWinners += s.winnersIdentified || 0;
-        totalScraped += s.totalScrapedAds || 0;
-      });
-
-      fireToast(`🚀 Synced ${totalScraped} live ads! Found ${totalWinners} winning scale ads (>90d).`);
-      await loadClientOverviewData(state.activeClientId);
-    } else {
-      alert(`Sync Error: ${result.message}`);
-    }
-  } catch (err) {
-    console.error('Apify sync error:', err);
-    alert('Failed to run Apify sync. Check console for details.');
-  } finally {
-    btn.innerHTML = originalHtml;
-    btn.disabled = false;
-  }
-}
-
-async function syncSingleCompetitorApify(competitorId, competitorName) {
-  fireToast(`Scraping latest Meta Ads for ${competitorName}...`);
-  try {
-    const res = await fetch(`/api/sync/apify/competitor/${competitorId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clientId: state.activeClientId })
-    });
-    const result = await res.json();
-    if (result.status === 'success') {
-      fireToast(`✅ ${competitorName} updated! ${result.data.winnersIdentified} winner ads detected.`);
-      await loadClientOverviewData(state.activeClientId);
-    } else {
-      alert(`Competitor sync error: ${result.message}`);
-    }
-  } catch (err) {
-    console.error('Error syncing competitor:', err);
-  }
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(8px)';
+    toast.style.transition = 'all 0.2s ease';
+    setTimeout(() => { toast.remove(); }, 200);
+  }, 2400);
 }

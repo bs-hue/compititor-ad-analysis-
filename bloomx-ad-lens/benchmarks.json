@@ -1,0 +1,107 @@
+{
+  "active_vertical": "spiritual_coaching",
+  "verticals": {
+    "spiritual_coaching": {
+      "name": "Spiritual / Coaching",
+      "calibrated": true,
+      "cpm_low": 170,
+      "cpm_mid": 226,
+      "cpm_high": 330,
+      "ctr_low": 0.9,
+      "ctr_mid": 1.22,
+      "ctr_high": 1.7,
+      "frequency": 1.9,
+      "cost_per_purchase": 480,
+      "spend_tiers": {
+        "test": { "low": 100, "mid": 200, "high": 300 },
+        "tested": { "low": 300, "mid": 650, "high": 1000 },
+        "winner": { "low": 2000, "mid": 3000, "high": 4000 }
+      }
+    },
+    "d2c": {
+      "name": "D2C (Direct to Consumer)",
+      "calibrated": false,
+      "cpm_low": 170,
+      "cpm_mid": 226,
+      "cpm_high": 330,
+      "ctr_low": 0.9,
+      "ctr_mid": 1.22,
+      "ctr_high": 1.7,
+      "frequency": 1.9,
+      "cost_per_purchase": 480,
+      "spend_tiers": {
+        "test": { "low": 100, "mid": 200, "high": 300 },
+        "tested": { "low": 300, "mid": 650, "high": 1000 },
+        "winner": { "low": 2000, "mid": 3000, "high": 4000 }
+      }
+    },
+    "healthcare": {
+      "name": "Healthcare & Wellness",
+      "calibrated": false,
+      "cpm_low": 170,
+      "cpm_mid": 226,
+      "cpm_high": 330,
+      "ctr_low": 0.9,
+      "ctr_mid": 1.22,
+      "ctr_high": 1.7,
+      "frequency": 1.9,
+      "cost_per_purchase": 480,
+      "spend_tiers": {
+        "test": { "low": 100, "mid": 200, "high": 300 },
+        "tested": { "low": 300, "mid": 650, "high": 1000 },
+        "winner": { "low": 2000, "mid": 3000, "high": 4000 }
+      }
+    },
+    "fintech": {
+      "name": "Fintech & Finance",
+      "calibrated": false,
+      "cpm_low": 170,
+      "cpm_mid": 226,
+      "cpm_high": 330,
+      "ctr_low": 0.9,
+      "ctr_mid": 1.22,
+      "ctr_high": 1.7,
+      "frequency": 1.9,
+      "cost_per_purchase": 480,
+      "spend_tiers": {
+        "test": { "low": 100, "mid": 200, "high": 300 },
+        "tested": { "low": 300, "mid": 650, "high": 1000 },
+        "winner": { "low": 2000, "mid": 3000, "high": 4000 }
+      }
+    },
+    "education": {
+      "name": "Education & EdTech",
+      "calibrated": false,
+      "cpm_low": 170,
+      "cpm_mid": 226,
+      "cpm_high": 330,
+      "ctr_low": 0.9,
+      "ctr_mid": 1.22,
+      "ctr_high": 1.7,
+      "frequency": 1.9,
+      "cost_per_purchase": 480,
+      "spend_tiers": {
+        "test": { "low": 100, "mid": 200, "high": 300 },
+        "tested": { "low": 300, "mid": 650, "high": 1000 },
+        "winner": { "low": 2000, "mid": 3000, "high": 4000 }
+      }
+    },
+    "default": {
+      "name": "Default / General",
+      "calibrated": false,
+      "cpm_low": 170,
+      "cpm_mid": 226,
+      "cpm_high": 330,
+      "ctr_low": 0.9,
+      "ctr_mid": 1.22,
+      "ctr_high": 1.7,
+      "frequency": 1.9,
+      "cost_per_purchase": 480,
+      "spend_tiers": {
+        "test": { "low": 100, "mid": 200, "high": 300 },
+        "tested": { "low": 300, "mid": 650, "high": 1000 },
+        "winner": { "low": 2000, "mid": 3000, "high": 4000 }
+      }
+    }
+  }
+}

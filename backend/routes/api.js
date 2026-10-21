@@ -13,6 +13,16 @@ router.get('/health', async (req, res) => {
     res.json(health);
 });
 
+// ─── Benchmarks Endpoint ───────────────────────────────────────────────────
+router.get('/benchmarks', (req, res) => {
+    try {
+        const benchmarks = require('../../config/benchmarks.json');
+        res.json({ message: 'success', data: benchmarks });
+    } catch (e) {
+        res.status(500).json({ error: 'Failed to load benchmarks configuration' });
+    }
+});
+
 // ─── Apify Sync & Webhook Endpoints ─────────────────────────────────────────
 router.get('/apify/status', (req, res) => syncController.getStatus(req, res));
 router.post('/sync/apify/client/:id', (req, res) => syncController.syncClient(req, res));
@@ -29,8 +39,39 @@ router.delete('/clients/:id', (req, res) => clientController.deleteClient(req, r
 router.post('/clients/:id/competitors', (req, res) => competitorController.addCompetitor(req, res));
 router.delete('/competitors/:id', (req, res) => competitorController.deleteCompetitor(req, res));
 
-// ─── Ads (Swipe Data) Endpoints ─────────────────────────────────────────────
-router.post('/clients/:id/ads', (req, res) => adController.addAd(req, res));
-router.delete('/ads/:id', (req, res) => adController.deleteAd(req, res));
+// ─── Direct Chrome Extension Ingestion Endpoint ───────────────────────────
+router.post('/extension/ingest', async (req, res) => {
+    try {
+        const { advertiserName, vertical = 'spiritual_coaching', clientId, ads = [] } = req.body;
+        if (!advertiserName) {
+            return res.status(400).json({ error: 'Advertiser name is required' });
+        }
+        if (!Array.isArray(ads) || ads.length === 0) {
+            return res.status(400).json({ error: 'No ads provided to ingest' });
+        }
+
+        const result = await dbService.ingestFromExtension({ advertiserName, vertical, clientId, ads });
+        res.json({
+            message: 'success',
+            data: result
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ─── Transcribe Ad Video & Script Endpoint ──────────────────────────────────
+router.get('/ads/:id/transcribe', async (req, res) => {
+    try {
+        const adId = parseInt(req.params.id, 10);
+        const transcript = await dbService.getAdTranscript(adId);
+        res.json({
+            message: 'success',
+            data: transcript
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 module.exports = router;
