@@ -1140,31 +1140,29 @@
         if (!cardEl) return ['Facebook'];
 
         // Requirement 9: Locate the dedicated "Platforms" section inside the card
-        let platformsSection = null;
+        let platformsScope = null;
         const allElements = cardEl.querySelectorAll('div, span, section');
         for (const el of allElements) {
             if (/^Platforms$/i.test((el.textContent || '').trim())) {
-                platformsSection = el.parentElement;
+                platformsScope = el.parentElement ? (el.parentElement.parentElement || el.parentElement) : el;
                 break;
             }
         }
 
-        const targetScope = platformsSection || cardEl;
-        const iconNodes = targetScope.querySelectorAll('[aria-label], [title], [alt], img, svg');
+        const scope = platformsScope || cardEl;
+        const iconNodes = scope.querySelectorAll('[aria-label], [title], [alt], [data-tooltip-content], img, svg');
         iconNodes.forEach(icon => {
-            const descriptor = ((icon.getAttribute('aria-label') || '') + ' ' + (icon.getAttribute('title') || '') + ' ' + (icon.getAttribute('alt') || '')).toLowerCase();
+            const descriptor = ((icon.getAttribute('aria-label') || '') + ' ' + (icon.getAttribute('title') || '') + ' ' + (icon.getAttribute('alt') || '') + ' ' + (icon.getAttribute('data-tooltip-content') || '')).toLowerCase();
             if (descriptor.includes('facebook') && !platforms.includes('Facebook')) platforms.push('Facebook');
             if (descriptor.includes('instagram') && !platforms.includes('Instagram')) platforms.push('Instagram');
             if (descriptor.includes('messenger') && !platforms.includes('Messenger')) platforms.push('Messenger');
             if (descriptor.includes('audience network') && !platforms.includes('Audience Network')) platforms.push('Audience Network');
         });
 
-        if (platforms.length === 0 && platformsSection) {
-            const txt = platformsSection.innerText.toLowerCase();
-            if (txt.includes('facebook') && !platforms.includes('Facebook')) platforms.push('Facebook');
-            if (txt.includes('instagram') && !platforms.includes('Instagram')) platforms.push('Instagram');
-            if (txt.includes('messenger') && !platforms.includes('Messenger')) platforms.push('Messenger');
-            if (txt.includes('audience network') && !platforms.includes('Audience Network')) platforms.push('Audience Network');
+        // Fallback: Check if card header contains Instagram icon if not yet found
+        if (!platforms.includes('Instagram')) {
+            const anyIg = cardEl.querySelector('[aria-label*="Instagram" i], [title*="Instagram" i], [alt*="Instagram" i]');
+            if (anyIg) platforms.push('Instagram');
         }
 
         return platforms.length > 0 ? platforms : ['Facebook'];
@@ -1763,7 +1761,9 @@
         } else if (perf.isEuMode) {
             badgeHtml = `<span class="adlens-tier-badge adlens-badge-eu" title="Verified via European Union Ad Transparency data"><span class="adlens-tier-dot"></span>Real EU reach · High confidence</span>`;
         } else {
-            badgeHtml = `<span class="adlens-tier-badge ${perf.confidenceBadgeClass}" title="${perf.confidenceText}"><span class="adlens-tier-dot"></span>${perf.confidenceText}</span>`;
+            const tierEmoji = perf.tierKey === 'winner' ? '🔥' : (perf.tierKey === 'tested' ? '⚡' : '🧪');
+            const tierTitle = perf.tierKey === 'winner' ? 'Proven Winner' : (perf.tierKey === 'tested' ? 'Tested' : 'New Test');
+            badgeHtml = `<span class="adlens-tier-badge ${perf.confidenceBadgeClass}" title="${perf.confidenceText}"><span class="adlens-tier-dot"></span>${tierEmoji} ${tierTitle}</span>`;
         }
 
         const durationTag = isDatesUnclear ? 'Dates unclear (Inactive)' : `${perf.daysRunning}d ${data.status === 'Inactive' ? 'ran (Inactive)' : 'active'}`;
@@ -1818,6 +1818,7 @@
             <div class="adlens-header-row">
                 <div class="adlens-header-left">
                     ${badgeHtml}
+                    ${data.advertiserName ? `<span class="adlens-platforms-tag" title="Advertiser">👤 ${data.advertiserName}</span>` : ''}
                     <span class="adlens-platforms-tag">${durationTag}</span>
                     <span class="adlens-platforms-tag">${platformsStr}</span>
                 </div>
