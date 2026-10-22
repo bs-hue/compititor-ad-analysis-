@@ -1742,50 +1742,38 @@ function triggerBlobDownload(blobUrl, filename) {
   }, 2000);
 }
 
-async function triggerBrowserAttachmentDownload(url, filename) {
-  // Method 1: Fetch as Blob and create in-memory ObjectURL
-  // This bypasses browser download protections against relative URLs and writes directly to disk
-  try {
-    const res = await fetch(url);
-    if (res.ok) {
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        if (document.body.contains(a)) document.body.removeChild(a);
-        URL.revokeObjectURL(blobUrl);
-      }, 10000);
-      return;
-    }
-  } catch (err) {
-    console.warn('Blob download fetch error, falling back to direct navigation:', err);
-  }
-
-  // Method 2: Hidden iframe trigger
-  try {
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = url;
-    document.body.appendChild(iframe);
-    setTimeout(() => {
-      if (document.body.contains(iframe)) document.body.removeChild(iframe);
-    }, 30000);
-  } catch (err) {}
-
-  // Method 3: Direct anchor trigger with target _blank
+function triggerBrowserAttachmentDownload(url, filename) {
+  // Method 1: Immediate synchronous anchor trigger (preserves user gesture!)
   const a = document.createElement('a');
   a.href = url;
-  a.download = filename;
-  a.target = '_blank';
+  if (filename) a.setAttribute('download', filename);
+  a.style.display = 'none';
   document.body.appendChild(a);
   a.click();
   setTimeout(() => {
     if (document.body.contains(a)) document.body.removeChild(a);
-  }, 2000);
+  }, 1500);
+
+  // Method 2: Blob fallback in background
+  fetch(url)
+    .then(r => {
+      if (r.ok) return r.blob();
+      throw new Error(`HTTP ${r.status}`);
+    })
+    .then(blob => {
+      const blobUrl = URL.createObjectURL(blob);
+      const bLink = document.createElement('a');
+      bLink.href = blobUrl;
+      bLink.download = filename;
+      bLink.style.display = 'none';
+      document.body.appendChild(bLink);
+      bLink.click();
+      setTimeout(() => {
+        if (document.body.contains(bLink)) document.body.removeChild(bLink);
+        URL.revokeObjectURL(blobUrl);
+      }, 4000);
+    })
+    .catch(() => {});
 }
 
 // ─── STUDIO-QUALITY 1080x1350 CANVAS CREATIVE GENERATOR ─────────────────────

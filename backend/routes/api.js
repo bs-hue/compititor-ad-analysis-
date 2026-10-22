@@ -163,7 +163,7 @@ router.get('/ads/:id/download-creative', async (req, res) => {
                 }
             } else if (targetAd && targetAd.videoUrl && targetAd.videoUrl.startsWith('http')) {
                 try {
-                    const upRes = await fetch(targetAd.videoUrl);
+                    const upRes = await fetch(targetAd.videoUrl, { signal: AbortSignal.timeout(3000) });
                     if (upRes.ok) {
                         res.setHeader('Content-Type', 'video/mp4');
                         res.setHeader('Content-Disposition', `attachment; filename="${compName}_Ad_${adId}_Reel.mp4"`);
@@ -171,7 +171,9 @@ router.get('/ads/:id/download-creative', async (req, res) => {
                         res.setHeader('Content-Length', buf.byteLength);
                         return res.send(Buffer.from(buf));
                     }
-                } catch (e) {}
+                } catch (e) {
+                    console.warn(`[Download] Remote video fetch failed, using sample reel fallback: ${e.message}`);
+                }
             }
             if (fsModule.existsSync(videoPath)) {
                 const stat = fsModule.statSync(videoPath);
@@ -191,7 +193,7 @@ router.get('/ads/:id/download-creative', async (req, res) => {
                 }
             } else if (targetAd && targetAd.imageUrl && targetAd.imageUrl.startsWith('http')) {
                 try {
-                    const upRes = await fetch(targetAd.imageUrl);
+                    const upRes = await fetch(targetAd.imageUrl, { signal: AbortSignal.timeout(3000) });
                     if (upRes.ok) {
                         res.setHeader('Content-Type', 'image/png');
                         res.setHeader('Content-Disposition', `attachment; filename="${compName}_Ad_${adId}_Creative.png"`);
@@ -199,7 +201,9 @@ router.get('/ads/:id/download-creative', async (req, res) => {
                         res.setHeader('Content-Length', buf.byteLength);
                         return res.send(Buffer.from(buf));
                     }
-                } catch (e) {}
+                } catch (e) {
+                    console.warn(`[Download] Remote image fetch failed, using sample image fallback: ${e.message}`);
+                }
             }
             if (fsModule.existsSync(imagePath)) {
                 const stat = fsModule.statSync(imagePath);

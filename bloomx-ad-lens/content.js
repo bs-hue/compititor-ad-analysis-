@@ -1244,8 +1244,11 @@
                 const s = video.querySelector('source');
                 if (s && s.src) src = s.src;
             }
-            if (src && !src.startsWith('blob:')) {
-                return { type: 'video', url: src, ext: 'mp4' };
+            if (src) {
+                return { type: 'video', url: src, poster: video.poster || null, ext: 'mp4' };
+            }
+            if (video.poster) {
+                return { type: 'image', url: video.poster, ext: 'png' };
             }
         }
         // 2. High-res image
@@ -1254,17 +1257,17 @@
         let maxArea = 0;
         imgs.forEach(img => {
             const src = img.src || '';
-            if (src.includes('profile') || src.includes('icon') || src.includes('emoji')) return;
+            if (src.includes('profile') || src.includes('icon') || src.includes('emoji') || src.startsWith('data:image')) return;
             const w = img.naturalWidth || img.width || 0;
             const h = img.naturalHeight || img.height || 0;
             const area = w * h;
-            if (area > maxArea && (w > 100 || area > 10000)) {
+            if (area > maxArea && (w > 80 || area > 6000)) {
                 maxArea = area;
                 bestImg = img;
             }
         });
         if (bestImg && bestImg.src) {
-            return { type: 'image', url: bestImg.src, ext: 'jpg' };
+            return { type: 'image', url: bestImg.src, ext: 'png' };
         }
         return null;
     }
@@ -1275,8 +1278,29 @@
             return;
         }
         const filename = `${fallbackName}.${mediaObj.ext || 'mp4'}`;
+
+        // Strategy 1: Chrome Extension Native Download API via background script
+        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+            chrome.runtime.sendMessage({
+                action: 'download_media',
+                url: mediaObj.url,
+                filename: filename
+            }, (response) => {
+                if (response && response.success) {
+                    console.log('[BloomX Ad Lens] Native download started:', filename);
+                    return;
+                }
+                // Fallback to in-page blob / direct trigger if background worker unavailable
+                fallbackDownloadTrigger(mediaObj.url, filename);
+            });
+        } else {
+            fallbackDownloadTrigger(mediaObj.url, filename);
+        }
+    }
+
+    function fallbackDownloadTrigger(url, filename) {
         try {
-            fetch(mediaObj.url)
+            fetch(url)
                 .then(r => r.blob())
                 .then(blob => {
                     const blobUrl = URL.createObjectURL(blob);
@@ -1292,15 +1316,15 @@
                 })
                 .catch(() => {
                     const a = document.createElement('a');
-                    a.href = mediaObj.url;
+                    a.href = url;
                     a.target = '_blank';
                     a.download = filename;
                     document.body.appendChild(a);
                     a.click();
-                    document.body.removeChild(a);
+                    setTimeout(() => { document.body.removeChild(a); }, 1500);
                 });
         } catch (e) {
-            window.open(mediaObj.url, '_blank');
+            window.open(url, '_blank');
         }
     }
 

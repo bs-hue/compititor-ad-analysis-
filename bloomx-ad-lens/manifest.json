@@ -5,8 +5,12 @@
   "description": "Real-time Ad Spend, Views, CPC & Conversion estimator for Facebook Ad Library.",
   "permissions": [
     "storage",
-    "activeTab"
+    "activeTab",
+    "downloads"
   ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "host_permissions": [
     "<all_urls>"
   ],
