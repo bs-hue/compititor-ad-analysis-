@@ -1552,63 +1552,18 @@ function openCreativeDownloadModal(adId) {
   const angleEl = document.getElementById('modalPreviewAngle');
   if (angleEl) angleEl.textContent = `🎯 ${ad.angle || 'Problem Agitation'}`;
 
-  // Update direct link buttons to specific ad ID
-  const directVid = document.getElementById('btnDirectVideoLink');
-  if (directVid) directVid.href = `/api/ads/${ad.id}/download-creative?type=video`;
+  // Update Meta Ad Library action links
+  const metaLink1 = document.getElementById('modalMetaAdLibLink');
+  if (metaLink1) metaLink1.href = ad.adLibraryUrl || 'https://www.facebook.com/ads/library/';
 
-  const directImg = document.getElementById('btnDirectImageLink');
-  if (directImg) directImg.href = `/api/ads/${ad.id}/download-creative?type=image`;
+  const metaLink2 = document.getElementById('btnDirectMetaVideoLink');
+  if (metaLink2) metaLink2.href = ad.adLibraryUrl || 'https://www.facebook.com/ads/library/';
+
+  const copyPreview = document.getElementById('modalBodyCopyPreview');
+  if (copyPreview) copyPreview.textContent = `"${ad.bodyText || ad.hook || ''}"`;
 
   const directSpec = document.getElementById('btnDirectSpecLink');
   if (directSpec) directSpec.href = `/api/ads/${ad.id}/download-creative?type=spec`;
-
-  const directMedia = document.getElementById('btnDirectMediaLink');
-  if (directMedia) {
-    directMedia.href = isVideo
-      ? `/api/ads/${ad.id}/download-creative?type=video`
-      : `/api/ads/${ad.id}/download-creative?type=image`;
-  }
-
-  // Update live preview element based on format
-  const videoWrap = document.getElementById('modalVideoWrap');
-  const imageWrap = document.getElementById('modalImageWrap');
-  const previewVideo = document.getElementById('modalPreviewVideo');
-  const previewImg = document.getElementById('modalPreviewImage');
-  const previewLabel = document.getElementById('modalMediaPreviewLabel');
-
-  if (isVideo) {
-    if (videoWrap) videoWrap.style.display = 'block';
-    if (imageWrap) imageWrap.style.display = 'none';
-    if (previewLabel) previewLabel.textContent = 'Reel Preview (9:16 Vertical Video)';
-    if (previewVideo) {
-      previewVideo.src = ad.videoUrl || `/api/ads/${ad.id}/download-creative?type=video`;
-      previewVideo.load();
-    }
-  } else {
-    if (videoWrap) videoWrap.style.display = 'none';
-    if (imageWrap) imageWrap.style.display = 'block';
-    if (previewLabel) previewLabel.textContent = 'HD Creative Preview (1080×1350 Graphic)';
-    if (previewImg) {
-      previewImg.src = ad.imageUrl || `/api/ads/${ad.id}/download-creative?type=image`;
-    }
-  }
-
-  // Priority styling on relevant option
-  const cardVideo = document.getElementById('cardOptionVideo');
-  const cardImage = document.getElementById('cardOptionImage');
-  if (cardVideo && cardImage) {
-    if (isVideo) {
-      cardVideo.style.borderColor = 'var(--primary)';
-      cardVideo.style.boxShadow = '0 0 0 1px var(--primary)';
-      cardImage.style.borderColor = 'var(--border-default)';
-      cardImage.style.boxShadow = 'none';
-    } else {
-      cardImage.style.borderColor = '#DB2777';
-      cardImage.style.boxShadow = '0 0 0 1px #DB2777';
-      cardVideo.style.borderColor = 'var(--border-default)';
-      cardVideo.style.boxShadow = 'none';
-    }
-  }
 
   const backdrop = document.getElementById('creativeModalBackdrop');
   const modal = document.getElementById('creativeDownloadModal');
@@ -1643,9 +1598,7 @@ function executeDownload(format) {
   const ad = state.activeAdForDownload;
   if (!ad) return;
 
-  if (format === 'video') {
-    downloadVideoAsset(ad);
-  } else if (format === 'image') {
+  if (format === 'image') {
     downloadImageAsset(ad);
   } else if (format === 'spec') {
     downloadSpecAsset(ad);
@@ -1656,12 +1609,12 @@ function downloadActiveDrawerCreative(type) {
   const ad = state.activeAdForDrawer;
   if (!ad) return;
 
-  if (type === 'modal') {
-    openCreativeDownloadModal(ad.id);
-  } else if (type === 'video') {
-    downloadVideoAsset(ad);
-  } else if (type === 'image') {
+  if (type === 'image') {
     downloadImageAsset(ad);
+  } else if (type === 'spec') {
+    downloadSpecAsset(ad);
+  } else {
+    openCreativeDownloadModal(ad.id);
   }
 }
 
@@ -1670,14 +1623,12 @@ function downloadAdCreative(adId, preferredFormat = null) {
   const ad = (client.ads || []).find(a => a.id === adId);
   if (!ad) return;
 
-  if (preferredFormat === 'video') {
-    downloadVideoAsset(ad);
-  } else if (preferredFormat === 'image') {
+  if (preferredFormat === 'image') {
     downloadImageAsset(ad);
   } else if (preferredFormat === 'spec') {
     downloadSpecAsset(ad);
   } else {
-    // Open comprehensive modal with all creative assets
+    // Open comprehensive modal focused on PNG and script spec
     openCreativeDownloadModal(adId);
   }
 }
