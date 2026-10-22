@@ -12,18 +12,18 @@
       "name": "Spiritual / Coaching",
       "calibrated": true,
       "k": 1550,
-      "cpm_low": 170,
-      "cpm_mid": 226,
-      "cpm_high": 330,
+      "cpm_low": 250,
+      "cpm_mid": 400,
+      "cpm_high": 500,
       "ctr_low": 0.9,
       "ctr_mid": 1.22,
       "ctr_high": 1.7,
       "frequency": 1.9,
       "cost_per_purchase": 480,
       "spend_tiers": {
-        "test": { "low": 100, "mid": 200, "high": 300 },
-        "tested": { "low": 300, "mid": 650, "high": 1000 },
-        "winner": { "low": 2000, "mid": 3000, "high": 4000 }
+        "test": { "low": 150, "mid": 250, "high": 400 },
+        "tested": { "low": 800, "mid": 1800, "high": 2600 },
+        "winner": { "low": 2500, "mid": 3473, "high": 4500 }
       }
     },
     "d2c": {

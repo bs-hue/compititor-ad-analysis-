@@ -748,9 +748,9 @@
                 name: 'Test',
                 min_days: 0,
                 max_days: 6,
-                low: 100,
-                mid: 200,
-                high: 300,
+                low: 150,
+                mid: 250,
+                high: 400,
                 label: 'Test (<7d)',
                 color: '#f59e0b',
                 badge_bg: '#fef3c7',
@@ -761,9 +761,9 @@
                 name: 'Tested',
                 min_days: 7,
                 max_days: 30,
-                low: 300,
-                mid: 650,
-                high: 1000,
+                low: 800,
+                mid: 1800,
+                high: 2600,
                 label: 'Tested (7-30d)',
                 color: '#3b82f6',
                 badge_bg: '#dbeafe',
@@ -774,9 +774,9 @@
                 name: 'Winner',
                 min_days: 31,
                 max_days: null,
-                low: 2000,
-                mid: 3000,
-                high: 4000,
+                low: 2500,
+                mid: 3473,
+                high: 4500,
                 label: 'Winner (>30d)',
                 color: '#10b981',
                 badge_bg: '#d1fae5',
@@ -785,7 +785,7 @@
             }
         },
         metrics: {
-            cpm: { low: 170, mid: 226, high: 330 },
+            cpm: { low: 250, mid: 400, high: 500 },
             ctr_percent: { low: 0.9, mid: 1.22, high: 1.7 },
             cost_per_purchase: { target: 480 }
         },
@@ -1264,6 +1264,31 @@
     }
 
     // ─── Time-Aware Daily Spend Model Engine ──────────────────────────────────
+    // ─── Daily Rate Calculator by Lifecycle Age & Maturity ───────────────────
+    function getAdDailySpendRate(daysRunning, creativeMultiplier = 1.0, kScale = 1.0) {
+        const tiers = BENCHMARKS.daily_spend_tiers;
+        let baseRate = 250;
+        if (daysRunning < 3) {
+            // Learning Phase (<3d): Low testing budget
+            baseRate = tiers.test?.mid || 250; // ₹250/day
+        } else if (daysRunning < 7) {
+            // Validation Phase (3-6d): Early test validation
+            baseRate = tiers.test?.high ? Math.round(tiers.test.high * 0.9) : 360; // ~₹360/day
+        } else if (daysRunning < 15) {
+            // Early Scaled Phase (7-14d): Scaled test
+            baseRate = tiers.tested?.low ? Math.round(tiers.tested.low * 1.5) : 1200; // ~₹1,200/day
+        } else if (daysRunning < 28) {
+            // Growth Scaled Phase (15-27d): Scaled winner testing
+            baseRate = tiers.tested?.high ? Math.round(tiers.tested.high * 0.95) : 2470; // ~₹2,470/day
+        } else {
+            // Evergreen Winner / Scaled Champion (28d+):
+            // In spiritual coaching / calibrated winner: ₹3,473/day
+            baseRate = tiers.winner?.mid || 3473;
+        }
+        return Math.round(baseRate * (creativeMultiplier || 1.0) * (kScale || 1.0));
+    }
+
+    // ─── Time-Aware Daily Spend Model Engine ──────────────────────────────────
     function computeBudgetFirstModel(adsList, windowDates, today = new Date()) {
         const ads = Array.isArray(adsList) ? adsList : Array.from(adsList || []);
         const todayMid = new Date(today);
@@ -1303,9 +1328,9 @@
             }
         });
 
-        // Setup time normalization for each valid ad
         const oneDayMs = 86400000;
         let earliestStartMs = todayMid.getTime();
+        const kScale = (activeK || 1550) / 1550;
 
         validAds.forEach(a => {
             a._startMs = a.startDate ? new Date(a.startDate).setHours(0, 0, 0, 0) : todayMid.getTime();
@@ -1332,13 +1357,9 @@
             const count = typeof a.creativeCount === 'number' && a.creativeCount > 1 ? a.creativeCount : 1;
             a.creativeMultiplier = count > 1 ? Math.min(1 + 0.1 * (count - 1), 1.5) : 1.0;
 
-            // Initialize time-aware accumulators
-            a.lifetimeSpendMid = 0;
-            a.windowSpendMid = 0;
-            a.daysInWindow = 0;
-            a.todaySpendMid = 0;
-            a.todaySharePercent = 0;
-            a.todayWeight = 0;
+            // Calculate daily spend rate strictly based on maturity
+            a.dailySpendMid = getAdDailySpendRate(a.daysRunning, a.creativeMultiplier, kScale);
+            a.lifetimeSpendMid = Math.round(a.daysRunning * a.dailySpendMid);
 
             if (a._startMs < earliestStartMs) {
                 earliestStartMs = a._startMs;
@@ -1349,116 +1370,85 @@
         const winStartMs = windowDates?.start ? new Date(windowDates.start).setHours(0, 0, 0, 0) : null;
         const winEndMs = windowDates?.end ? new Date(windowDates.end).setHours(23, 59, 59, 999) : todayEnd.getTime();
 
-        let totalWindowBudgetMid = 0;
-        let windowDaysWithAdsCount = 0;
-        const dailyHistory = [];
-
-        // FOR EACH CALENDAR DAY d (from earliest ad start date to today):
-        for (let curMs = earliestStartMs; curMs <= todayMid.getTime(); curMs += oneDayMs) {
-            const curDate = new Date(curMs);
-
-            // 1. running(d) = ads where start <= d <= end (Active ads: end = today; Inactive: their end date; skip "dates unclear" ads)
-            const runningD = [];
-            for (let i = 0; i < validAds.length; i++) {
-                const a = validAds[i];
-                if (a._startMs <= curMs && curMs <= a._endMs) {
-                    runningD.push(a);
+        // Calculate days in window for each ad
+        validAds.forEach(a => {
+            let inWinDays = 0;
+            for (let curMs = a._startMs; curMs <= Math.min(a._endMs, todayMid.getTime()); curMs += oneDayMs) {
+                if ((!winStartMs || curMs >= winStartMs) && curMs <= winEndMs) {
+                    inWinDays++;
                 }
             }
+            a.daysInWindow = inWinDays;
+            a.windowSpendMid = Math.round(inWinDays * a.dailySpendMid);
+        });
 
+        // Today active ads
+        const activeAdsToday = validAds.filter(a => a.status === 'Active' && a._startMs <= todayMid.getTime() && todayMid.getTime() <= a._endMs);
+        const N_activeToday = activeAdsToday.length;
+
+        // Today active advertiser budget = sum of active ads' daily spend
+        const todayActiveBudgetMid = activeAdsToday.reduce((sum, a) => sum + a.dailySpendMid, 0);
+        const todayActiveBudgetLow = Math.round(todayActiveBudgetMid * 0.75);
+        const todayActiveBudgetHigh = Math.round(todayActiveBudgetMid * 1.35);
+        const estMonthlyBudget = todayActiveBudgetMid * 30;
+
+        // Set each active ad's today spend and share
+        validAds.forEach(a => {
+            if (a.status === 'Active') {
+                a.todaySpendMid = a.dailySpendMid;
+                a.todaySharePercent = todayActiveBudgetMid > 0 ? (a.todaySpendMid / todayActiveBudgetMid) * 100 : 0;
+            } else {
+                a.todaySpendMid = a.dailySpendMid;
+                a.todaySharePercent = 0;
+            }
+        });
+
+        // Daily history for the collapsible calculation drawer (Last 10 Days)
+        const dailyHistory = [];
+        const histStartMs = Math.max(earliestStartMs, todayMid.getTime() - 9 * oneDayMs);
+        for (let curMs = histStartMs; curMs <= todayMid.getTime(); curMs += oneDayMs) {
+            const curDate = new Date(curMs);
+            const runningD = validAds.filter(a => a._startMs <= curMs && curMs <= a._endMs);
             const Nd = runningD.length;
             if (Nd === 0) continue;
 
-            // 3. budget(d) = k * N(d)^0.6 (k from active vertical, no velocity factor, no page total results)
-            const budgetD = activeK * Math.pow(Nd, 0.6);
-
-            // 4. Ad age on that day: age = d - ad start date.
-            // weight(ad, d) = 0.5 if age < 3 (learning phase), 1 if age 3-6, 3 if age 7-30, 10 if age > 30.
-            // Multiply by the creative-duplicate factor (max 1.5).
-            let sumWeightsD = 0;
-            const dayWeights = [];
-
-            for (let i = 0; i < Nd; i++) {
-                const a = runningD[i];
-                const age = Math.max(0, Math.floor((curMs - a._startMs) / oneDayMs));
-                let baseWeight = 0.5;
-                if (age > 30) {
-                    baseWeight = 10;
-                } else if (age >= 7) {
-                    baseWeight = 3;
-                } else if (age >= 3) {
-                    baseWeight = 1;
-                } else {
-                    baseWeight = 0.5; // age < 3 (learning phase)
-                }
-
-                const w = baseWeight * a.creativeMultiplier;
-                dayWeights.push({ ad: a, w, age, baseWeight });
-                sumWeightsD += w;
-            }
-
-            const isToday = (curMs === todayMid.getTime());
-            const inWindow = (!winStartMs || curMs >= winStartMs) && (curMs <= winEndMs);
-
-            if (inWindow) {
-                windowDaysWithAdsCount++;
-                totalWindowBudgetMid += budgetD;
-            }
-
+            let dayBudget = 0;
             const dayLogAds = [];
-
-            // 5. spend(ad, d) = budget(d) * weight(ad, d) / sum of weights of all ads in running(d)
-            for (let i = 0; i < Nd; i++) {
-                const { ad: a, w, age } = dayWeights[i];
-                const share = sumWeightsD > 0 ? (w / sumWeightsD) : (1 / Nd);
-                const spendD = budgetD * share;
-
-                a.lifetimeSpendMid += spendD;
-
-                if (inWindow) {
-                    a.windowSpendMid += spendD;
-                    a.daysInWindow++;
-                }
-
-                if (isToday) {
-                    a.todaySpendMid = Math.round(spendD);
-                    a.todaySharePercent = share * 100;
-                    a.todayWeight = w;
-                }
-
+            runningD.forEach(a => {
+                const age = Math.max(0, Math.floor((curMs - a._startMs) / oneDayMs));
+                const spendOnDay = getAdDailySpendRate(age, a.creativeMultiplier, kScale);
+                dayBudget += spendOnDay;
                 dayLogAds.push({
                     libraryId: a.libraryId,
                     hook: a.hookSnippet,
                     age,
-                    weight: w,
-                    sharePct: share * 100,
-                    spendMid: Math.round(spendD)
+                    spendMid: spendOnDay
                 });
-            }
+            });
+
+            dayLogAds.forEach(item => {
+                item.sharePct = dayBudget > 0 ? (item.spendMid / dayBudget) * 100 : (100 / Nd);
+                item.weight = item.spendMid;
+            });
 
             dailyHistory.push({
                 curMs,
                 date: curDate,
                 dateStr: curDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
                 Nd,
-                budgetD: Math.round(budgetD),
-                sumWeightsD,
+                budgetD: Math.round(dayBudget),
+                sumWeightsD: Math.round(dayBudget),
                 ads: dayLogAds
             });
         }
 
-        // Panel "Advertiser daily budget" = budget(today) using ONLY currently Active ads
-        const activeAdsToday = validAds.filter(a => a.status === 'Active' && a._startMs <= todayMid.getTime() && todayMid.getTime() <= a._endMs);
-        const N_activeToday = activeAdsToday.length;
-        const todayActiveBudgetMid = N_activeToday > 0 ? Math.round(activeK * Math.pow(N_activeToday, 0.6)) : 0;
-        const todayActiveBudgetLow = Math.round(todayActiveBudgetMid * 0.6);
-        const todayActiveBudgetHigh = Math.round(todayActiveBudgetMid * 1.6);
-        const estMonthlyBudget = todayActiveBudgetMid * 30;
+        // Panel "Spend in window" = sum of windowSpendMid of valid ads
+        const totalWindowSpendMid = validAds.reduce((sum, a) => sum + a.windowSpendMid, 0);
+        const totalWindowSpendLow = Math.round(totalWindowSpendMid * 0.75);
+        const totalWindowSpendHigh = Math.round(totalWindowSpendMid * 1.35);
 
-        // Panel "Spend in window" = sum of budget(d) for days in selected window where N(d) >= 1
-        const totalWindowSpendMid = Math.round(totalWindowBudgetMid);
-        const totalWindowSpendLow = Math.round(totalWindowSpendMid * 0.6);
-        const totalWindowSpendHigh = Math.round(totalWindowSpendMid * 1.6);
+        // Active days count in window
+        const activeDaysCount = dailyHistory.filter(d => (!winStartMs || d.curMs >= winStartMs) && d.curMs <= winEndMs).length || Math.min(30, Math.max(1, Math.round((todayMid.getTime() - earliestStartMs) / oneDayMs)));
 
         // EU Mode check & formatting for each ad
         const cpm = BENCHMARKS.metrics.cpm;
@@ -1466,20 +1456,13 @@
         const costPerPurchase = BENCHMARKS.metrics.cost_per_purchase.target || 480;
 
         validAds.forEach(a => {
-            // Card "Est. total spend" = sum of spend(ad, d) over ALL days the ad ran
             let displaySpendMid = Math.round(a.lifetimeSpendMid);
-            let displaySpendLow = Math.round(displaySpendMid * 0.6);
-            let displaySpendHigh = Math.round(displaySpendMid * 1.6);
+            let displaySpendLow = Math.round(displaySpendMid * 0.75);
+            let displaySpendHigh = Math.round(displaySpendMid * 1.35);
 
-            // Card "Daily" = spend(ad, today) for active ads; for inactive ads show their average daily spend
-            let dailySpendMid = 0;
-            if (a.status === 'Active') {
-                dailySpendMid = a.todaySpendMid || Math.round(a.lifetimeSpendMid / Math.max(1, a.daysRunning));
-            } else {
-                dailySpendMid = Math.round(a.lifetimeSpendMid / Math.max(1, a.daysRunning));
-            }
-            const dailySpendLow = Math.round(dailySpendMid * 0.6);
-            const dailySpendHigh = Math.round(dailySpendMid * 1.6);
+            let dailySpendMid = a.dailySpendMid;
+            let dailySpendLow = Math.round(dailySpendMid * 0.75);
+            let dailySpendHigh = Math.round(dailySpendMid * 1.35);
 
             // Preserve EU Real-Reach Mode if parsed
             if (a.euData && typeof a.euData.reach === 'number' && a.euData.reach > 0) {
@@ -1494,10 +1477,13 @@
                 displaySpendLow = Math.round(displaySpendMid * 0.85);
                 displaySpendHigh = Math.round(displaySpendMid * 1.15);
                 dailySpendMid = Math.round(displaySpendMid / Math.max(1, a.daysRunning));
+                dailySpendLow = Math.round(dailySpendMid * 0.85);
+                dailySpendHigh = Math.round(dailySpendMid * 1.15);
                 a.viewsMid = impressions;
                 a.isEuMode = true;
             } else {
-                a.viewsMid = Math.round((displaySpendMid / (cpm.mid || 226)) * 1000);
+                const cpmMidInr = cpm.mid || 400;
+                a.viewsMid = Math.round((displaySpendMid / cpmMidInr) * 1000);
                 a.isEuMode = false;
             }
 
@@ -1505,19 +1491,17 @@
             a.cpcMid = a.clicksMid > 0 ? (displaySpendMid / a.clicksMid) : 0;
             a.estPurchasesMid = Math.round(displaySpendMid / costPerPurchase);
 
-            const avgDaily = Math.round(displaySpendMid / Math.max(1, a.daysRunning));
             const shareZ = a.status === 'Active' ? (a.todaySharePercent || 0).toFixed(1) : '0';
             const budgetB = formatIndianNumber(todayActiveBudgetMid, false);
 
-            // Card tooltip: "Ran X days · avg ₹Y/day · today's share Z% of ₹B/day (N ads live)"
             const tooltipStr = (a.status === 'Active' && N_activeToday > 0)
-                ? `Ran ${a.daysRunning} days · avg ₹${avgDaily.toLocaleString('en-IN')}/day · today's share ${shareZ}% of ₹${budgetB}/day (${N_activeToday} ads live)`
-                : `Ran ${a.daysRunning} days (Inactive) · avg ₹${avgDaily.toLocaleString('en-IN')}/day · Lifetime total: ${formatIndianNumber(displaySpendMid, true)}`;
+                ? `Ran ${a.daysRunning} days · ₹${dailySpendMid.toLocaleString('en-IN')}/day · ${shareZ}% share of ₹${budgetB}/day (${N_activeToday} ads live)`
+                : `Ran ${a.daysRunning} days (Inactive) · avg ₹${dailySpendMid.toLocaleString('en-IN')}/day · Lifetime total: ${formatIndianNumber(displaySpendMid, true)}`;
 
             const tooltips = {
                 daily: tooltipStr,
                 spend: tooltipStr,
-                views: `Spend (${formatIndianNumber(displaySpendMid, true)}) ÷ ₹${cpm.mid} CPM × 1,000 = ${formatCompactViews(a.viewsMid)} views`,
+                views: `Spend (${formatIndianNumber(displaySpendMid, true)}) ÷ ₹${cpm.mid || 400} CPM × 1,000 = ${formatCompactViews(a.viewsMid)} views`,
                 orders: `Spend (${formatIndianNumber(displaySpendMid, true)}) ÷ ₹${costPerPurchase} Target CPA = ~${a.estPurchasesMid} orders`
             };
 
@@ -1544,7 +1528,7 @@
                 confidenceBadgeClass: isCalibrated ? 'adlens-badge-med-conf' : 'adlens-badge-low-conf',
                 confidenceType: isCalibrated ? 'calibrated' : 'uncalibrated',
                 spend: { low: displaySpendLow, mid: displaySpendMid, high: displaySpendHigh },
-                windowSpend: { low: Math.round(a.windowSpendMid * 0.6), mid: Math.round(a.windowSpendMid), high: Math.round(a.windowSpendMid * 1.6) },
+                windowSpend: { low: Math.round(a.windowSpendMid * 0.75), mid: Math.round(a.windowSpendMid), high: Math.round(a.windowSpendMid * 1.35) },
                 views: { low: Math.round(a.viewsMid * 0.8), mid: a.viewsMid, high: Math.round(a.viewsMid * 1.2) },
                 clicks: { low: Math.round(a.clicksMid * 0.8), mid: a.clicksMid, high: Math.round(a.clicksMid * 1.2) },
                 cpcMid: a.cpcMid,
@@ -1553,7 +1537,7 @@
             };
         });
 
-        const totalWindowViewsMid = Math.round((totalWindowSpendMid / (cpm.mid || 226)) * 1000);
+        const totalWindowViewsMid = Math.round((totalWindowSpendMid / (cpm.mid || 400)) * 1000);
         const totalWindowPurchasesMid = Math.round(totalWindowSpendMid / costPerPurchase);
 
         return {
@@ -1573,7 +1557,7 @@
             dailyBudgetLow: todayActiveBudgetLow,
             dailyBudgetHigh: todayActiveBudgetHigh,
             estMonthlyBudget,
-            activeDaysCount: windowDaysWithAdsCount,
+            activeDaysCount,
             totalWindowSpendMid,
             totalWindowSpendLow,
             totalWindowSpendHigh,
@@ -2291,10 +2275,64 @@
         return cardCandidate;
     }
 
+    // ─── Primary Advertiser Detection Helper ───────────────────────────────────
+    function detectPrimaryAdvertiser(cards) {
+        // 1. Check if document has H1 with advertiser name
+        const h1 = document.querySelector('h1');
+        if (h1 && h1.innerText && h1.innerText.trim().length > 1 && !/Ad Library|Search/i.test(h1.innerText)) {
+            return h1.innerText.trim();
+        }
+        // 2. Count advertiser names across visible cards
+        const nameCounts = new Map();
+        if (cards && typeof cards.forEach === 'function') {
+            cards.forEach(card => {
+                const name = detectAdvertiserName(card);
+                if (name && name !== 'Advertiser') {
+                    nameCounts.set(name, (nameCounts.get(name) || 0) + 1);
+                }
+            });
+        }
+        let bestName = null;
+        let maxCount = 0;
+        nameCounts.forEach((count, name) => {
+            if (count > maxCount) {
+                maxCount = count;
+                bestName = name;
+            }
+        });
+        if (bestName) return bestName;
+
+        // 3. From search input
+        const searchInput = document.querySelector('input[placeholder*="Search"], input[type="text"]');
+        if (searchInput && searchInput.value && searchInput.value.trim().length > 1) {
+            return searchInput.value.trim();
+        }
+        return null;
+    }
+
     // ─── Recalculate All Existing Ads ──────────────────────────────────────────
     function recalculateAllAds() {
         const windowDates = getActiveWindowDates();
-        const model = computeBudgetFirstModel(Array.from(detectedAdsMap.values()), windowDates);
+        const primaryAdvertiser = detectPrimaryAdvertiser(null);
+        const adsByAdvertiser = new Map();
+
+        detectedAdsMap.forEach((ad, libId) => {
+            if (primaryAdvertiser && ad.advertiserName && ad.advertiserName !== 'Advertiser' && ad.advertiserName !== primaryAdvertiser) {
+                detectedAdsMap.delete(libId);
+                return;
+            }
+            const adv = ad.advertiserName || primaryAdvertiser || 'Advertiser';
+            if (!adsByAdvertiser.has(adv)) adsByAdvertiser.set(adv, []);
+            adsByAdvertiser.get(adv).push(ad);
+        });
+
+        let primaryModel = null;
+        adsByAdvertiser.forEach((advAds, advName) => {
+            const model = computeBudgetFirstModel(advAds, windowDates);
+            if (!primaryModel || advName === primaryAdvertiser) {
+                primaryModel = model;
+            }
+        });
 
         detectedAdsMap.forEach((ad, key) => {
             if (ad.element) {
@@ -2317,8 +2355,8 @@
             }
         });
 
-        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-            chrome.storage.local.set({ last_detected_page_spend: model.totalWindowSpendMid });
+        if (primaryModel && typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.set({ last_detected_page_spend: primaryModel.totalWindowSpendMid });
         }
 
         renderFloatingPanel();
@@ -2351,10 +2389,15 @@
         panel.style.display = 'block';
 
         const windowDates = getActiveWindowDates();
-        // Compute Budget-First Model across all detected ads for this advertiser
-        const model = computeBudgetFirstModel(ads, windowDates);
+        const primaryAdvertiser = detectPrimaryAdvertiser(null);
+        let targetAds = ads;
+        if (primaryAdvertiser) {
+            const matched = ads.filter(a => a.advertiserName === primaryAdvertiser);
+            if (matched.length > 0) targetAds = matched;
+        }
+        const model = computeBudgetFirstModel(targetAds, windowDates);
         const validAds = model.validAds;
-        const advertiserName = ads[0]?.advertiserName || 'Advertiser';
+        const advertiserName = primaryAdvertiser || targetAds[0]?.advertiserName || 'Advertiser';
 
         const sortedWinners = [...validAds]
             .sort((a, b) => b.daysRunning - a.daysRunning)
@@ -2877,9 +2920,29 @@
             });
 
             if (newCardsCount > 0 || detectedAdsMap.size > 0) {
-                // Compute Budget-First Model across all detected ads
+                const primaryAdvertiser = detectPrimaryAdvertiser(cardsFound);
+
+                // Group detected ads by advertiser, pruning any stale ads from previous advertiser
+                const adsByAdvertiser = new Map();
+                detectedAdsMap.forEach((ad, libId) => {
+                    if (primaryAdvertiser && ad.advertiserName && ad.advertiserName !== 'Advertiser' && ad.advertiserName !== primaryAdvertiser) {
+                        detectedAdsMap.delete(libId);
+                        return;
+                    }
+                    const adv = ad.advertiserName || primaryAdvertiser || 'Advertiser';
+                    if (!adsByAdvertiser.has(adv)) adsByAdvertiser.set(adv, []);
+                    adsByAdvertiser.get(adv).push(ad);
+                });
+
                 const windowDates = getActiveWindowDates();
-                const model = computeBudgetFirstModel(Array.from(detectedAdsMap.values()), windowDates);
+                let primaryModel = null;
+
+                adsByAdvertiser.forEach((advAds, advName) => {
+                    const model = computeBudgetFirstModel(advAds, windowDates);
+                    if (!primaryModel || advName === primaryAdvertiser) {
+                        primaryModel = model;
+                    }
+                });
 
                 detectedAdsMap.forEach((ad) => {
                     const card = ad.element;
@@ -2907,8 +2970,8 @@
                     }
                 });
 
-                if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-                    chrome.storage.local.set({ last_detected_page_spend: model.totalWindowSpendMid });
+                if (primaryModel && typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+                    chrome.storage.local.set({ last_detected_page_spend: primaryModel.totalWindowSpendMid });
                 }
             }
 
@@ -2951,6 +3014,7 @@
     // ─── Reset on Navigation & Advertiser Change (Requirement 2) ───────────────
     let lastKnownUrl = window.location.href;
     let lastAdvertiserKey = getAdvertiserKeyFromUrl(window.location.href);
+    let lastPageAdvertiser = detectPrimaryAdvertiser(null);
 
     function getAdvertiserKeyFromUrl(urlStr) {
         try {
@@ -2981,10 +3045,14 @@
     function checkNavigationChange() {
         const currentUrl = window.location.href;
         const currentAdvertiserKey = getAdvertiserKeyFromUrl(currentUrl);
+        const currentPageAdvertiser = detectPrimaryAdvertiser(null);
 
-        if (currentUrl !== lastKnownUrl || currentAdvertiserKey !== lastAdvertiserKey) {
+        if (currentUrl !== lastKnownUrl || 
+            currentAdvertiserKey !== lastAdvertiserKey ||
+            (currentPageAdvertiser && lastPageAdvertiser && currentPageAdvertiser !== lastPageAdvertiser)) {
             lastKnownUrl = currentUrl;
             lastAdvertiserKey = currentAdvertiserKey;
+            lastPageAdvertiser = currentPageAdvertiser;
             resetOnNavigation();
         }
     }
