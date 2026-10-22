@@ -640,7 +640,7 @@ function switchNavTab(tabName, el) {
   if (el) el.classList.add('active');
 
   const breadcrumb = document.getElementById('breadcrumbActiveSection');
-  
+
   if (tabName === 'overview') {
     if (breadcrumb) breadcrumb.textContent = 'Overview';
     state.filters.tier = 'all';
@@ -693,7 +693,7 @@ function renderCompetitorFilterPills(competitors) {
   const ads = (state.ads && state.ads.length > 0) ? state.ads : (client && client.ads ? client.ads : []);
   const totalCount = ads ? ads.length : 0;
   let html = `<span class="filter-pill ${state.filters.competitor === 'all' ? 'active' : ''}" data-val="all" onclick="setFilter('competitor', 'all', this)">All <span class="pill-count-bubble">${totalCount}</span></span>`;
-  
+
   if (Array.isArray(competitors)) {
     competitors.forEach(c => {
       const isActive = state.filters.competitor === c.name;
@@ -765,7 +765,7 @@ function setViewMode(mode) {
   state.viewMode = mode;
   document.getElementById('btnViewGrid').classList.toggle('active', mode === 'grid');
   document.getElementById('btnViewList').classList.toggle('active', mode === 'list');
-  
+
   const container = document.getElementById('adsGridContainer');
   container.classList.toggle('list-view', mode === 'list');
 }
@@ -870,10 +870,10 @@ function resetFilters() {
 function updateResetButtonVisibility() {
   const btn = document.getElementById('btnResetFilters');
   if (!btn) return;
-  const isFiltered = state.filters.competitor !== 'all' || 
-                     state.filters.format !== 'all' || 
-                     state.filters.tier !== 'all' || 
-                     Boolean(state.filters.search && state.filters.search.trim());
+  const isFiltered = state.filters.competitor !== 'all' ||
+    state.filters.format !== 'all' ||
+    state.filters.tier !== 'all' ||
+    Boolean(state.filters.search && state.filters.search.trim());
   btn.style.display = isFiltered ? 'inline-flex' : 'none';
 }
 
@@ -1036,7 +1036,7 @@ function closeActiveDrawers() {
 
   try {
     stopSimVideoPlayback();
-  } catch (err) {}
+  } catch (err) { }
 }
 
 function closeAllOverlays() {
@@ -1153,7 +1153,7 @@ function openTranscribeDrawer(adId) {
         }
       }
     })
-    .catch(() => {});
+    .catch(() => { });
 
   document.getElementById('transcribeTakeawaysContainer').innerHTML = `
     <li>Opens with high-urgency rhetorical question within first 3 seconds.</li>
@@ -1278,7 +1278,7 @@ function handleCreateCompetitorSubmit(e) {
   e.preventDefault();
   const name = document.getElementById('compNameInput').value.trim();
   const url = document.getElementById('compUrlInput').value.trim();
-  
+
   if (!name) return;
 
   const client = getActiveClient();
@@ -1598,7 +1598,9 @@ function executeDownload(format) {
   const ad = state.activeAdForDownload;
   if (!ad) return;
 
-  if (format === 'image') {
+  if (format === 'video') {
+    downloadVideoAsset(ad);
+  } else if (format === 'image') {
     downloadImageAsset(ad);
   } else if (format === 'spec') {
     downloadSpecAsset(ad);
@@ -1609,12 +1611,23 @@ function downloadActiveDrawerCreative(type) {
   const ad = state.activeAdForDrawer;
   if (!ad) return;
 
-  if (type === 'image') {
-    downloadImageAsset(ad);
-  } else if (type === 'spec') {
-    downloadSpecAsset(ad);
-  } else {
+  if (type === 'modal') {
     openCreativeDownloadModal(ad.id);
+  } else if (type === 'video') {
+    downloadVideoAsset(ad);
+  } else if (type === 'image') {
+    downloadImageAsset(ad);
+  }
+}
+
+function executeDownload(format) {
+  const ad = state.activeAdForDownload;
+  if (!ad) return;
+
+  if (format === 'image') {
+    downloadImageAsset(ad);
+  } else if (format === 'spec') {
+    downloadSpecAsset(ad);
   }
 }
 
