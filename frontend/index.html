@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700;750;800&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=2.2">
+  <link rel="stylesheet" href="css/style.css?v=2.5">
 </head>
 
 <body>
@@ -121,6 +121,10 @@
             title="Trigger live Meta Ad Library auto-scrape via Apify">
             🔄 Sync via Apify
           </button>
+          <a href="http://localhost:3000/index.html" target="_blank" class="btn btn-secondary btn-sm"
+            title="Open in Chrome / External Browser for full file-saving & extensions support">
+            🌐 Open in Chrome ↗
+          </a>
           <button class="btn btn-primary btn-sm" onclick="openAddCompetitorModal()">
             + Add Competitor
           </button>
@@ -645,7 +649,7 @@
 
   <!-- Modal: Download Ad Creative (Video, Image, Spec) -->
   <div class="modal-backdrop" id="creativeModalBackdrop" onclick="closeCreativeDownloadModal()"></div>
-  <div class="modal-dialog creative-modal" id="creativeDownloadModal">
+  <div class="modal-dialog creative-modal" id="creativeDownloadModal" style="max-width: 620px;">
     <div class="drawer-header">
       <div class="drawer-title-group">
         <div style="display: flex; align-items: center; gap: 8px;">
@@ -657,7 +661,7 @@
       <button type="button" class="drawer-close-btn" aria-label="Close" onclick="closeCreativeDownloadModal()">&times;</button>
     </div>
 
-    <div class="drawer-body" style="gap: 16px;">
+    <div class="drawer-body" style="gap: 14px; max-height: 75vh; overflow-y: auto;">
       <!-- Selected Ad Context Preview Card -->
       <div class="creative-modal-preview">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
@@ -674,65 +678,116 @@
         </div>
       </div>
 
+      <!-- Live Media Preview Screen (Video Player or HD Image) -->
+      <div id="modalMediaPreviewContainer" style="background: #0F172A; border-radius: var(--radius-md); padding: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.1);">
+        <div style="font-size: 11px; font-weight: 700; color: #94A3B8; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+          <span>👁️ Live Creative Preview</span>
+          <span id="modalMediaPreviewLabel" style="color: #38BDF8;">Reel Preview (9:16)</span>
+        </div>
+        <div id="modalVideoWrap" style="display: block;">
+          <video id="modalPreviewVideo" controls autoplay loop muted playsinline style="max-height: 220px; max-width: 100%; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+            <source src="assets/videos/sample_reel_astrology.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div id="modalImageWrap" style="display: none;">
+          <img id="modalPreviewImage" src="assets/images/sample_ad_1.png" alt="Creative Preview" style="max-height: 220px; max-width: 100%; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); object-fit: contain;">
+        </div>
+      </div>
+
       <!-- Download Options Grid -->
       <div class="creative-options-grid">
         <!-- Option 1: Video Reel (.mp4) -->
-        <div class="creative-option-card" id="cardOptionVideo" onclick="executeDownload('video')">
+        <div class="creative-option-card" id="cardOptionVideo">
           <div class="creative-option-icon">🎬</div>
           <div class="creative-option-info">
             <div class="creative-option-title">
               <span>Video Reel Creative</span>
               <span class="creative-badge mp4-badge">.MP4</span>
             </div>
-            <div class="creative-option-desc">9:16 Vertical Video Reel formatted for Meta/Instagram with audio and hook animation.</div>
+            <div class="creative-option-desc">9:16 Vertical Video Reel formatted for Meta/Instagram with audio.</div>
           </div>
-          <button type="button" class="btn btn-primary btn-sm creative-action-btn" id="btnDlVideo">
-            📥 Download MP4
-          </button>
+          <div style="display: flex; gap: 5px; align-items: center;">
+            <button type="button" class="btn btn-primary btn-sm" onclick="executeDownload('video')">
+              📥 Save MP4
+            </button>
+            <a id="btnDirectVideoLink" href="/api/ads/1/download-creative?type=video" target="_blank" class="btn btn-secondary btn-sm" title="Open Video File Directly in New Tab" style="font-size: 11px; padding: 6px 9px; text-decoration: none;">
+              ↗ Open
+            </a>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="copyCreativeLink('video')" title="Copy Direct Download URL" style="font-size: 11px; padding: 6px 8px;">
+              📋
+            </button>
+          </div>
         </div>
 
         <!-- Option 2: HD Studio Image Creative (.png) -->
-        <div class="creative-option-card" id="cardOptionImage" onclick="executeDownload('image')">
+        <div class="creative-option-card" id="cardOptionImage">
           <div class="creative-option-icon">🖼️</div>
           <div class="creative-option-info">
             <div class="creative-option-title">
               <span>HD Studio Image Creative</span>
               <span class="creative-badge png-badge">.PNG</span>
             </div>
-            <div class="creative-option-desc">1080×1350 High-res ad graphic with verified brand header, hook contrast, spend badge &amp; CTA button.</div>
+            <div class="creative-option-desc">1080×1350 High-res ad graphic with verified brand header &amp; CTA button.</div>
           </div>
-          <button type="button" class="btn btn-secondary btn-sm creative-action-btn" id="btnDlImage" style="background: var(--bg-surface); border-color: var(--border-default); color: var(--text-primary);">
-            📥 Download PNG
-          </button>
+          <div style="display: flex; gap: 5px; align-items: center;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="executeDownload('image')" style="background: var(--bg-surface); border-color: var(--border-default); color: var(--text-primary); font-weight: 700;">
+              📥 Save PNG
+            </button>
+            <a id="btnDirectImageLink" href="/api/ads/1/download-creative?type=image" target="_blank" class="btn btn-secondary btn-sm" title="Open Image File Directly in New Tab" style="font-size: 11px; padding: 6px 9px; text-decoration: none;">
+              ↗ Open
+            </a>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="copyCreativeLink('image')" title="Copy Direct Download URL" style="font-size: 11px; padding: 6px 8px;">
+              📋
+            </button>
+          </div>
         </div>
 
         <!-- Option 3: Swipe File Spec (.txt) -->
-        <div class="creative-option-card" id="cardOptionSpec" onclick="executeDownload('spec')">
+        <div class="creative-option-card" id="cardOptionSpec">
           <div class="creative-option-icon">📄</div>
           <div class="creative-option-info">
             <div class="creative-option-title">
               <span>Swipe File Copy Spec</span>
               <span class="creative-badge txt-badge">.TXT</span>
             </div>
-            <div class="creative-option-desc">Full verbatim script, body copy, estimated spend &amp; reach metrics, and Meta Ad Library link.</div>
+            <div class="creative-option-desc">Full verbatim script, body copy, estimated spend &amp; reach metrics.</div>
           </div>
-          <button type="button" class="btn btn-secondary btn-sm creative-action-btn" id="btnDlSpec" style="background: var(--bg-surface); border-color: var(--border-default); color: var(--text-primary);">
-            📥 Download Spec
-          </button>
+          <div style="display: flex; gap: 5px; align-items: center;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="executeDownload('spec')" style="background: var(--bg-surface); border-color: var(--border-default); color: var(--text-primary);">
+              📥 Save Spec
+            </button>
+            <a id="btnDirectSpecLink" href="/api/ads/1/download-creative?type=spec" target="_blank" class="btn btn-secondary btn-sm" title="Open Text Spec in New Tab" style="font-size: 11px; padding: 6px 9px; text-decoration: none;">
+              ↗ Open
+            </a>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="copyCreativeLink('spec')" title="Copy Direct Download URL" style="font-size: 11px; padding: 6px 8px;">
+              📋
+            </button>
+          </div>
         </div>
+      </div>
+
+      <!-- Helper banner for IDE Webview vs External Browser -->
+      <div style="background: #F8FAFC; border: 1px solid var(--border-default); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 11.5px; color: var(--text-secondary); display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+        <div>
+          <span>💡 <strong>Quick save tip:</strong> You can right-click the video preview above and choose <em>"Save video as..."</em>, or click <strong>↗ Open</strong> to view and save in browser.</span>
+        </div>
+        <a href="http://localhost:3000/index.html" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 11px; white-space: nowrap; text-decoration: none;">
+          🌐 Open in Chrome
+        </a>
       </div>
     </div>
 
     <div class="drawer-footer" style="justify-content: space-between;">
-      <span style="font-size: 11.5px; color: var(--text-muted);">⚡ Instant 1-click download saved directly to your Downloads folder</span>
+      <span style="font-size: 11.5px; color: var(--text-muted);">Tip: Click "Save", "↗ Open", or right-click media preview</span>
       <button type="button" class="btn btn-secondary" onclick="closeCreativeDownloadModal()">Close</button>
     </div>
   </div>
 
+
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <script src="js/app.js?v=2.2"></script>
+  <script src="js/app.js?v=2.5"></script>
 </body>
 
 </html>

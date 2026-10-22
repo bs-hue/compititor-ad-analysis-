@@ -179,6 +179,10 @@ class DbService {
         return newAd;
     }
 
+    async getAdById(adId) {
+        return memoryStore.ads.find(a => a.id === adId || String(a.id) === String(adId)) || null;
+    }
+
     async deleteAd(adId) {
         memoryStore.ads = memoryStore.ads.filter(a => a.id !== adId);
         persistStore();

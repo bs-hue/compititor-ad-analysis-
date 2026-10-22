@@ -1548,6 +1548,40 @@ function openCreativeDownloadModal(adId) {
   const angleEl = document.getElementById('modalPreviewAngle');
   if (angleEl) angleEl.textContent = `🎯 ${ad.angle || 'Problem Agitation'}`;
 
+  // Update direct link buttons to specific ad ID
+  const directVid = document.getElementById('btnDirectVideoLink');
+  if (directVid) directVid.href = `/api/ads/${ad.id}/download-creative?type=video`;
+
+  const directImg = document.getElementById('btnDirectImageLink');
+  if (directImg) directImg.href = `/api/ads/${ad.id}/download-creative?type=image`;
+
+  const directSpec = document.getElementById('btnDirectSpecLink');
+  if (directSpec) directSpec.href = `/api/ads/${ad.id}/download-creative?type=spec`;
+
+  // Update live preview element based on format
+  const videoWrap = document.getElementById('modalVideoWrap');
+  const imageWrap = document.getElementById('modalImageWrap');
+  const previewVideo = document.getElementById('modalPreviewVideo');
+  const previewImg = document.getElementById('modalPreviewImage');
+  const previewLabel = document.getElementById('modalMediaPreviewLabel');
+
+  if (isVideo) {
+    if (videoWrap) videoWrap.style.display = 'block';
+    if (imageWrap) imageWrap.style.display = 'none';
+    if (previewLabel) previewLabel.textContent = 'Reel Preview (9:16 Vertical Video)';
+    if (previewVideo) {
+      previewVideo.src = ad.videoUrl || `/api/ads/${ad.id}/download-creative?type=video`;
+      previewVideo.load();
+    }
+  } else {
+    if (videoWrap) videoWrap.style.display = 'none';
+    if (imageWrap) imageWrap.style.display = 'block';
+    if (previewLabel) previewLabel.textContent = 'HD Creative Preview (1080×1350 Graphic)';
+    if (previewImg) {
+      previewImg.src = ad.imageUrl || `/api/ads/${ad.id}/download-creative?type=image`;
+    }
+  }
+
   // Priority styling on relevant option
   const cardVideo = document.getElementById('cardOptionVideo');
   const cardImage = document.getElementById('cardOptionImage');
@@ -1578,6 +1612,22 @@ function closeCreativeDownloadModal() {
   if (modal) modal.classList.remove('active');
 }
 
+function copyCreativeLink(type) {
+  const ad = state.activeAdForDownload;
+  if (!ad) return;
+  const origin = window.location.origin || 'http://localhost:3000';
+  const url = `${origin}/api/ads/${ad.id}/download-creative?type=${type}`;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(() => {
+      fireToast(`📋 Direct ${type.toUpperCase()} link copied!`);
+    }).catch(() => {
+      prompt('Copy download link:', url);
+    });
+  } else {
+    prompt('Copy download link:', url);
+  }
+}
+
 function executeDownload(format) {
   const ad = state.activeAdForDownload;
   if (!ad) return;
@@ -1589,7 +1639,6 @@ function executeDownload(format) {
   } else if (format === 'spec') {
     downloadSpecAsset(ad);
   }
-  closeCreativeDownloadModal();
 }
 
 function downloadActiveDrawerCreative(type) {
@@ -1629,7 +1678,7 @@ function downloadVideoAsset(ad) {
   const downloadUrl = `/api/ads/${ad.id}/download-creative?type=video`;
 
   triggerBrowserAttachmentDownload(downloadUrl, fileName);
-  fireToast(`🎬 Downloaded Video Reel (${fileName})`);
+  fireToast(`🎬 Downloading Video Reel (${fileName})...`);
 }
 
 function downloadImageAsset(ad) {
@@ -1639,9 +1688,8 @@ function downloadImageAsset(ad) {
   const downloadUrl = `/api/ads/${ad.id}/download-creative?type=image`;
 
   triggerBrowserAttachmentDownload(downloadUrl, fileName);
-  fireToast(`🖼️ Downloaded HD Creative Image (${fileName})`);
+  fireToast(`🖼️ Downloading HD Creative Image (${fileName})...`);
 }
-
 
 function downloadSpecAsset(ad) {
   const compName = (ad.competitorName || 'Competitor').replace(/[^a-zA-Z0-9]/g, '_');
@@ -1690,14 +1738,49 @@ function triggerBlobDownload(blobUrl, filename) {
   }, 2000);
 }
 
-function triggerBrowserAttachmentDownload(url, filename) {
+async function triggerBrowserAttachmentDownload(url, filename) {
+  // Method 1: Fetch as Blob and create in-memory ObjectURL
+  // This bypasses browser download protections against relative URLs and writes directly to disk
+  try {
+    const res = await fetch(url);
+    if (res.ok) {
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        if (document.body.contains(a)) document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+      }, 10000);
+      return;
+    }
+  } catch (err) {
+    console.warn('Blob download fetch error, falling back to direct navigation:', err);
+  }
+
+  // Method 2: Hidden iframe trigger
+  try {
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = url;
+    document.body.appendChild(iframe);
+    setTimeout(() => {
+      if (document.body.contains(iframe)) document.body.removeChild(iframe);
+    }, 30000);
+  } catch (err) {}
+
+  // Method 3: Direct anchor trigger with target _blank
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
+  a.target = '_blank';
   document.body.appendChild(a);
   a.click();
   setTimeout(() => {
-    document.body.removeChild(a);
+    if (document.body.contains(a)) document.body.removeChild(a);
   }, 2000);
 }
 

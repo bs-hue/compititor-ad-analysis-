@@ -140,14 +140,19 @@ router.get('/ads/:id/download-creative', async (req, res) => {
         const pathModule = require('path');
         const fsModule = require('fs');
 
-        const overview = await dbService.getClientOverview(1);
-        let targetAd = null;
-        if (overview && overview.ads) {
-            targetAd = overview.ads.find(a => a.id === adId);
+        let targetAd = await dbService.getAdById(adId);
+        if (!targetAd) {
+            const overview = await dbService.getClientOverview(1);
+            if (overview && overview.ads) {
+                targetAd = overview.ads.find(a => a.id === adId);
+            }
         }
 
         const compName = targetAd ? (targetAd.competitorName || 'Competitor').replace(/[^a-zA-Z0-9]/g, '_') : 'Creative';
         const isVideo = targetAd ? (targetAd.format === 'Video') : true;
+
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition, Content-Length');
 
         if (formatType === 'video' || (formatType === 'auto' && isVideo)) {
             let videoPath = pathModule.join(__dirname, '..', '..', 'frontend', 'assets', 'videos', 'sample_reel_astrology.mp4');
@@ -163,12 +168,15 @@ router.get('/ads/:id/download-creative', async (req, res) => {
                         res.setHeader('Content-Type', 'video/mp4');
                         res.setHeader('Content-Disposition', `attachment; filename="${compName}_Ad_${adId}_Reel.mp4"`);
                         const buf = await upRes.arrayBuffer();
+                        res.setHeader('Content-Length', buf.byteLength);
                         return res.send(Buffer.from(buf));
                     }
                 } catch (e) {}
             }
             if (fsModule.existsSync(videoPath)) {
+                const stat = fsModule.statSync(videoPath);
                 res.setHeader('Content-Type', 'video/mp4');
+                res.setHeader('Content-Length', stat.size);
                 res.setHeader('Content-Disposition', `attachment; filename="${compName}_Ad_${adId}_Reel.mp4"`);
                 return fsModule.createReadStream(videoPath).pipe(res);
             }
@@ -188,12 +196,15 @@ router.get('/ads/:id/download-creative', async (req, res) => {
                         res.setHeader('Content-Type', 'image/png');
                         res.setHeader('Content-Disposition', `attachment; filename="${compName}_Ad_${adId}_Creative.png"`);
                         const buf = await upRes.arrayBuffer();
+                        res.setHeader('Content-Length', buf.byteLength);
                         return res.send(Buffer.from(buf));
                     }
                 } catch (e) {}
             }
             if (fsModule.existsSync(imagePath)) {
+                const stat = fsModule.statSync(imagePath);
                 res.setHeader('Content-Type', 'image/png');
+                res.setHeader('Content-Length', stat.size);
                 res.setHeader('Content-Disposition', `attachment; filename="${compName}_Ad_${adId}_Creative.png"`);
                 return fsModule.createReadStream(imagePath).pipe(res);
             }
