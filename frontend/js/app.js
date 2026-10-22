@@ -1562,6 +1562,13 @@ function openCreativeDownloadModal(adId) {
   const directSpec = document.getElementById('btnDirectSpecLink');
   if (directSpec) directSpec.href = `/api/ads/${ad.id}/download-creative?type=spec`;
 
+  const directMedia = document.getElementById('btnDirectMediaLink');
+  if (directMedia) {
+    directMedia.href = isVideo
+      ? `/api/ads/${ad.id}/download-creative?type=video`
+      : `/api/ads/${ad.id}/download-creative?type=image`;
+  }
+
   // Update live preview element based on format
   const videoWrap = document.getElementById('modalVideoWrap');
   const imageWrap = document.getElementById('modalImageWrap');
@@ -1675,24 +1682,50 @@ function downloadAdCreative(adId, preferredFormat = null) {
   }
 }
 
-function downloadVideoAsset(ad) {
+async function downloadVideoAsset(ad) {
   if (!ad) return;
   const compName = (ad.competitorName || 'Competitor').replace(/[^a-zA-Z0-9]/g, '_');
   const fileName = `${compName}_Ad_${ad.id}_Reel.mp4`;
+  fireToast(`🎬 Downloading Video Reel (${fileName})...`);
+
   const downloadUrl = `/api/ads/${ad.id}/download-creative?type=video`;
 
+  // Fetch as Blob and trigger direct browser save
+  try {
+    const res = await fetch(downloadUrl);
+    if (res.ok) {
+      const blob = await res.blob();
+      triggerBlobDownload(blob, fileName);
+      return;
+    }
+  } catch (e) {
+    console.warn('[Video Download] Blob fetch failed, falling back to direct link:', e);
+  }
+
+  // Fallback direct link
   triggerBrowserAttachmentDownload(downloadUrl, fileName);
-  fireToast(`🎬 Downloading Video Reel (${fileName})...`);
 }
 
-function downloadImageAsset(ad) {
+async function downloadImageAsset(ad) {
   if (!ad) return;
   const compName = (ad.competitorName || 'Competitor').replace(/[^a-zA-Z0-9]/g, '_');
-  const fileName = `${compName}_Ad_${ad.id}_Creative.png`;
-  const downloadUrl = `/api/ads/${ad.id}/download-creative?type=image`;
+  const fileName = `${compName}_Ad_${ad.id}_HD_Creative.png`;
+  fireToast(`🎨 Generating & Downloading HD Creative (${fileName})...`);
 
+  // Primary: Instant client-side studio canvas generator (100% reliable, zero backend dependencies!)
+  try {
+    const blob = await generateAdCreativeCanvas(ad);
+    if (blob) {
+      triggerBlobDownload(blob, fileName);
+      return;
+    }
+  } catch (err) {
+    console.warn('Canvas generator failed, falling back to server asset:', err);
+  }
+
+  // Secondary fallback: Server asset
+  const downloadUrl = `/api/ads/${ad.id}/download-creative?type=image`;
   triggerBrowserAttachmentDownload(downloadUrl, fileName);
-  fireToast(`🖼️ Downloading HD Creative Image (${fileName})...`);
 }
 
 function downloadSpecAsset(ad) {
@@ -1725,55 +1758,45 @@ Generated directly from BloomX Ad Lens Engine.
 `;
 
   const blob = new Blob([creativeContent], { type: 'text/plain;charset=utf-8' });
-  const blobUrl = URL.createObjectURL(blob);
-  triggerBlobDownload(blobUrl, `${compName}_Ad_${ad.id}_swipe_spec.txt`);
+  triggerBlobDownload(blob, `${compName}_Ad_${ad.id}_swipe_spec.txt`);
   fireToast(`📥 Downloaded creative swipe package for "${ad.competitorName || 'Ad'}"`);
 }
 
-function triggerBlobDownload(blobUrl, filename) {
+function triggerBlobDownload(blobOrUrl, filename) {
+  let blobUrl = blobOrUrl;
+  let isCreated = false;
+  if (blobOrUrl instanceof Blob) {
+    blobUrl = URL.createObjectURL(blobOrUrl);
+    isCreated = true;
+  }
   const a = document.createElement('a');
   a.href = blobUrl;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => {
-    document.body.removeChild(a);
-    URL.revokeObjectURL(blobUrl);
-  }, 2000);
-}
-
-function triggerBrowserAttachmentDownload(url, filename) {
-  // Method 1: Immediate synchronous anchor trigger (preserves user gesture!)
-  const a = document.createElement('a');
-  a.href = url;
-  if (filename) a.setAttribute('download', filename);
-  a.style.display = 'none';
+  a.setAttribute('download', filename);
+  a.style.position = 'fixed';
+  a.style.left = '-9999px';
+  a.style.top = '-9999px';
+  a.style.opacity = '0';
   document.body.appendChild(a);
   a.click();
   setTimeout(() => {
     if (document.body.contains(a)) document.body.removeChild(a);
-  }, 1500);
+    if (isCreated) URL.revokeObjectURL(blobUrl);
+  }, 4000);
+}
 
-  // Method 2: Blob fallback in background
-  fetch(url)
-    .then(r => {
-      if (r.ok) return r.blob();
-      throw new Error(`HTTP ${r.status}`);
-    })
-    .then(blob => {
-      const blobUrl = URL.createObjectURL(blob);
-      const bLink = document.createElement('a');
-      bLink.href = blobUrl;
-      bLink.download = filename;
-      bLink.style.display = 'none';
-      document.body.appendChild(bLink);
-      bLink.click();
-      setTimeout(() => {
-        if (document.body.contains(bLink)) document.body.removeChild(bLink);
-        URL.revokeObjectURL(blobUrl);
-      }, 4000);
-    })
-    .catch(() => {});
+function triggerBrowserAttachmentDownload(url, filename) {
+  const a = document.createElement('a');
+  a.href = url;
+  if (filename) a.setAttribute('download', filename);
+  a.style.position = 'fixed';
+  a.style.left = '-9999px';
+  a.style.top = '-9999px';
+  a.style.opacity = '0';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    if (document.body.contains(a)) document.body.removeChild(a);
+  }, 2000);
 }
 
 // ─── STUDIO-QUALITY 1080x1350 CANVAS CREATIVE GENERATOR ─────────────────────
