@@ -1622,61 +1622,26 @@ function downloadAdCreative(adId, preferredFormat = null) {
   }
 }
 
-async function downloadVideoAsset(ad) {
+function downloadVideoAsset(ad) {
+  if (!ad) return;
   const compName = (ad.competitorName || 'Competitor').replace(/[^a-zA-Z0-9]/g, '_');
   const fileName = `${compName}_Ad_${ad.id}_Reel.mp4`;
+  const downloadUrl = `/api/ads/${ad.id}/download-creative?type=video`;
 
-  fireToast(`🎬 Preparing Video Reel download for "${ad.competitorName || 'Ad'}"...`);
-
-  // 1. If ad has external http video URL
-  if (ad.mediaUrl && ad.mediaUrl.startsWith('http')) {
-    triggerBrowserAttachmentDownload(`/api/media/download?url=${encodeURIComponent(ad.mediaUrl)}&filename=${encodeURIComponent(fileName)}`, fileName);
-    return;
-  }
-  if (ad.videoUrl && ad.videoUrl.startsWith('http')) {
-    triggerBrowserAttachmentDownload(`/api/media/download?url=${encodeURIComponent(ad.videoUrl)}&filename=${encodeURIComponent(fileName)}`, fileName);
-    return;
-  }
-
-  // 2. Local pre-rendered MP4 video reel
-  const localUrl = ad.videoUrl || ((ad.id % 2 === 0) ? 'assets/videos/sample_reel_astrology.mp4' : 'assets/videos/sample_reel_gemstones.mp4');
-
-  try {
-    const res = await fetch(localUrl);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const blob = await res.blob();
-    const blobUrl = URL.createObjectURL(blob);
-    triggerBlobDownload(blobUrl, fileName);
-    fireToast(`✅ Downloaded video reel (${fileName})`);
-  } catch (err) {
-    // Fallback to server endpoint
-    triggerBrowserAttachmentDownload(`/api/ads/${ad.id}/download-creative?type=video`, fileName);
-    fireToast(`✅ Downloaded video reel (${fileName})`);
-  }
+  triggerBrowserAttachmentDownload(downloadUrl, fileName);
+  fireToast(`🎬 Downloaded Video Reel (${fileName})`);
 }
 
-async function downloadImageAsset(ad) {
+function downloadImageAsset(ad) {
+  if (!ad) return;
   const compName = (ad.competitorName || 'Competitor').replace(/[^a-zA-Z0-9]/g, '_');
   const fileName = `${compName}_Ad_${ad.id}_Creative.png`;
+  const downloadUrl = `/api/ads/${ad.id}/download-creative?type=image`;
 
-  fireToast(`🖼️ Generating 1080×1350 HD Ad Creative Image...`);
-
-  // If ad has external image URL
-  if (ad.imageUrl && ad.imageUrl.startsWith('http')) {
-    triggerBrowserAttachmentDownload(`/api/media/download?url=${encodeURIComponent(ad.imageUrl)}&filename=${encodeURIComponent(fileName)}`, fileName);
-    return;
-  }
-
-  // Generate high-definition studio PNG ad creative directly on canvas
-  try {
-    const blob = await generateAdCreativeCanvas(ad);
-    const blobUrl = URL.createObjectURL(blob);
-    triggerBlobDownload(blobUrl, fileName);
-    fireToast(`✅ Downloaded HD Creative Image (${fileName})`);
-  } catch (err) {
-    fireToast(`⚠️ Could not generate image: ${err.message}`);
-  }
+  triggerBrowserAttachmentDownload(downloadUrl, fileName);
+  fireToast(`🖼️ Downloaded HD Creative Image (${fileName})`);
 }
+
 
 function downloadSpecAsset(ad) {
   const compName = (ad.competitorName || 'Competitor').replace(/[^a-zA-Z0-9]/g, '_');

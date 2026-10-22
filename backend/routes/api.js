@@ -156,6 +156,16 @@ router.get('/ads/:id/download-creative', async (req, res) => {
                 if (fsModule.existsSync(localCandidate)) {
                     videoPath = localCandidate;
                 }
+            } else if (targetAd && targetAd.videoUrl && targetAd.videoUrl.startsWith('http')) {
+                try {
+                    const upRes = await fetch(targetAd.videoUrl);
+                    if (upRes.ok) {
+                        res.setHeader('Content-Type', 'video/mp4');
+                        res.setHeader('Content-Disposition', `attachment; filename="${compName}_Ad_${adId}_Reel.mp4"`);
+                        const buf = await upRes.arrayBuffer();
+                        return res.send(Buffer.from(buf));
+                    }
+                } catch (e) {}
             }
             if (fsModule.existsSync(videoPath)) {
                 res.setHeader('Content-Type', 'video/mp4');
@@ -164,16 +174,62 @@ router.get('/ads/:id/download-creative', async (req, res) => {
             }
         }
 
-        res.json({
-            message: 'success',
-            adId,
-            competitor: compName,
-            format: targetAd ? targetAd.format : 'Image'
-        });
+        if (formatType === 'image' || (formatType === 'auto' && !isVideo)) {
+            let imagePath = pathModule.join(__dirname, '..', '..', 'frontend', 'assets', 'images', 'sample_ad_1.png');
+            if (targetAd && targetAd.imageUrl && !targetAd.imageUrl.startsWith('http')) {
+                const localCandidate = pathModule.join(__dirname, '..', '..', 'frontend', targetAd.imageUrl.replace(/^\//, ''));
+                if (fsModule.existsSync(localCandidate)) {
+                    imagePath = localCandidate;
+                }
+            } else if (targetAd && targetAd.imageUrl && targetAd.imageUrl.startsWith('http')) {
+                try {
+                    const upRes = await fetch(targetAd.imageUrl);
+                    if (upRes.ok) {
+                        res.setHeader('Content-Type', 'image/png');
+                        res.setHeader('Content-Disposition', `attachment; filename="${compName}_Ad_${adId}_Creative.png"`);
+                        const buf = await upRes.arrayBuffer();
+                        return res.send(Buffer.from(buf));
+                    }
+                } catch (e) {}
+            }
+            if (fsModule.existsSync(imagePath)) {
+                res.setHeader('Content-Type', 'image/png');
+                res.setHeader('Content-Disposition', `attachment; filename="${compName}_Ad_${adId}_Creative.png"`);
+                return fsModule.createReadStream(imagePath).pipe(res);
+            }
+        }
+
+        // Spec file download
+        const specText = `=====================================================
+BLOOMX AD LENS - COMPETITOR CREATIVE ASSET SPEC
+=====================================================
+Brand: ${targetAd ? targetAd.competitorName : 'Competitor'}
+Format: ${targetAd ? targetAd.format : 'Video'}
+Days Active: ${targetAd ? targetAd.daysActive : 90} days continuous delivery
+Tier: ${targetAd ? targetAd.tier : 'Winner'}
+
+PRIMARY HOOK:
+"${targetAd ? targetAd.hook : ''}"
+
+BODY COPY:
+${targetAd ? targetAd.bodyText : ''}
+
+TARGET ANGLE:
+${targetAd ? targetAd.angle : ''}
+
+META AD LIBRARY LINK:
+${targetAd ? (targetAd.adLibraryUrl || 'https://www.facebook.com/ads/library/') : ''}
+=====================================================
+Generated directly from BloomX Ad Lens Engine.
+`;
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="${compName}_Ad_${adId}_swipe_spec.txt"`);
+        return res.send(specText);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
+
 
 module.exports = router;
 

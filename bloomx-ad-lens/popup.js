@@ -142,18 +142,61 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (inputDashboardUrl) {
             inputDashboardUrl.value = savedUrl;
         }
-        if (btnOpenDashboardLink) {
-            btnOpenDashboardLink.href = savedUrl.replace(/\/api.*$/, '');
-        }
-
+        updateDashboardLinks(savedUrl);
+        checkDashboardHealth(savedUrl);
         checkSarvamStatus(savedUrl);
 
         verticalSelect.value = activeVertical;
         populateFieldsForVertical(activeVertical);
     });
 
+    const btnOpenDashboardLink2 = document.getElementById('btnOpenDashboardLink2');
+    const dashboardHealthBadge = document.getElementById('dashboardHealthBadge');
+
+    function updateDashboardLinks(baseUrl) {
+        const cleanUrl = (baseUrl || 'http://localhost:3000').replace(/\/$/, '');
+        if (btnOpenDashboardLink) {
+            btnOpenDashboardLink.href = cleanUrl;
+            btnOpenDashboardLink.onclick = (e) => {
+                e.preventDefault();
+                if (typeof chrome !== 'undefined' && chrome.tabs) {
+                    chrome.tabs.create({ url: cleanUrl });
+                } else {
+                    window.open(cleanUrl, '_blank');
+                }
+            };
+        }
+        if (btnOpenDashboardLink2) {
+            btnOpenDashboardLink2.href = cleanUrl;
+            btnOpenDashboardLink2.onclick = (e) => {
+                e.preventDefault();
+                if (typeof chrome !== 'undefined' && chrome.tabs) {
+                    chrome.tabs.create({ url: cleanUrl });
+                } else {
+                    window.open(cleanUrl, '_blank');
+                }
+            };
+        }
+    }
+
+    async function checkDashboardHealth(baseUrl) {
+        if (!dashboardHealthBadge) return;
+        try {
+            const cleanUrl = (baseUrl || 'http://localhost:3000').replace(/\/$/, '');
+            const res = await fetch(`${cleanUrl}/api/health`, { cache: 'no-store' });
+            if (res.ok) {
+                dashboardHealthBadge.textContent = '● Online';
+                dashboardHealthBadge.style.color = '#4ADE80';
+                return;
+            }
+        } catch (e) {}
+        dashboardHealthBadge.textContent = '● Offline / Check URL';
+        dashboardHealthBadge.style.color = '#F59E0B';
+    }
+
     const sarvamStatusBadge = document.getElementById('sarvamStatusBadge');
     async function checkSarvamStatus(baseUrl) {
+
         if (!sarvamStatusBadge) return;
         try {
             const cleanUrl = (baseUrl || 'http://localhost:3000').replace(/\/$/, '');
@@ -281,19 +324,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let customUrl = (inputDashboardUrl ? inputDashboardUrl.value.trim() : '') || 'http://localhost:3000';
         if (customUrl.endsWith('/')) customUrl = customUrl.slice(0, -1);
-        if (btnOpenDashboardLink) {
-            btnOpenDashboardLink.href = customUrl;
-        }
+        updateDashboardLinks(customUrl);
 
         chrome.storage.local.set({
             active_vertical: vKey,
             custom_benchmarks: allBenchmarks,
             dashboard_api_url: customUrl
         }, () => {
+            checkDashboardHealth(customUrl);
             checkSarvamStatus(customUrl);
             showToast('✅ Saved! Benchmarks & Dashboard URL applied.');
         });
     });
+
 
     // ─── Reset to Factory Defaults ─────────────────────────────────────────────
     btnReset.addEventListener('click', () => {

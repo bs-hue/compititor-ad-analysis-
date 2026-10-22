@@ -15,8 +15,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve frontend static assets
-app.use(express.static(frontendPath));
+app.use(express.static(frontendPath, {
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        }
+    }
+}));
 app.use('/config', express.static(path.join(__dirname, '..', 'config')));
+
 
 // ─── API Routes ─────────────────────────────────────────────────────────────
 app.use('/api', apiRouter);
