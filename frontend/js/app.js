@@ -1552,12 +1552,13 @@ function openCreativeDownloadModal(adId) {
   const angleEl = document.getElementById('modalPreviewAngle');
   if (angleEl) angleEl.textContent = `🎯 ${ad.angle || 'Problem Agitation'}`;
 
-  // Update Meta Ad Library action links
+  // Update Meta Ad Library action links using live video search URL
+  const metaUrl = getLiveMetaAdUrl(ad);
   const metaLink1 = document.getElementById('modalMetaAdLibLink');
-  if (metaLink1) metaLink1.href = ad.adLibraryUrl || 'https://www.facebook.com/ads/library/';
+  if (metaLink1) metaLink1.href = metaUrl;
 
   const metaLink2 = document.getElementById('btnDirectMetaVideoLink');
-  if (metaLink2) metaLink2.href = ad.adLibraryUrl || 'https://www.facebook.com/ads/library/';
+  if (metaLink2) metaLink2.href = metaUrl;
 
   const copyPreview = document.getElementById('modalBodyCopyPreview');
   if (copyPreview) copyPreview.textContent = `"${ad.bodyText || ad.hook || ''}"`;
@@ -1569,6 +1570,65 @@ function openCreativeDownloadModal(adId) {
   const modal = document.getElementById('creativeDownloadModal');
   if (backdrop) backdrop.classList.add('active');
   if (modal) modal.classList.add('active');
+}
+
+function getLiveMetaAdUrl(ad) {
+  if (!ad) return 'https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=IN&media_type=video';
+
+  const compName = ad.competitorName || '';
+  let queryTerm = compName;
+  if (compName.toLowerCase().includes('astrotalk')) {
+    queryTerm = 'Astrotalk';
+  } else if (compName.toLowerCase().includes('arun pandit')) {
+    queryTerm = 'Astro Arun Pandit';
+  } else if (compName.toLowerCase().includes('instastro') || compName.toLowerCase().includes('instaastro')) {
+    queryTerm = 'InstaAstro';
+  } else if (compName.toLowerCase().includes('aditya') || compName.toLowerCase().includes('smart kundli')) {
+    queryTerm = 'Smart Kundli';
+  } else if (compName.toLowerCase().includes('japam')) {
+    queryTerm = 'Japam';
+  } else if (compName.toLowerCase().includes('divine hindu')) {
+    queryTerm = 'Divine Hindu';
+  }
+
+  // If the ad already has a verified view_all_page_id URL from Apify or seedData:
+  if (ad.adLibraryUrl && ad.adLibraryUrl.includes('view_all_page_id=')) {
+    let url = ad.adLibraryUrl;
+    if (!url.includes('media_type=')) {
+      url += '&media_type=video';
+    }
+    return url;
+  }
+
+  // Build verified live video reels search on Facebook Ad Library
+  return `https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=IN&media_type=video&q=${encodeURIComponent(queryTerm)}&search_type=keyword_unordered`;
+}
+
+function openMetaAdLibraryLink(event) {
+  if (event) {
+    if (typeof event.preventDefault === 'function') event.preventDefault();
+    if (typeof event.stopPropagation === 'function') event.stopPropagation();
+  }
+
+  const ad = state.activeAdForDownload || state.activeAdForDrawer;
+  const targetUrl = getLiveMetaAdUrl(ad);
+
+  fireToast(`🌐 Opening Meta Ad Library Video Reels...`);
+
+  try {
+    const newWin = window.open(targetUrl, '_blank', 'noopener,noreferrer');
+    if (!newWin || newWin.closed || typeof newWin.closed === 'undefined') {
+      const a = document.createElement('a');
+      a.href = targetUrl;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => a.remove(), 250);
+    }
+  } catch (err) {
+    window.location.href = targetUrl;
+  }
 }
 
 function closeCreativeDownloadModal() {
@@ -1598,9 +1658,7 @@ function executeDownload(format) {
   const ad = state.activeAdForDownload;
   if (!ad) return;
 
-  if (format === 'video') {
-    downloadVideoAsset(ad);
-  } else if (format === 'image') {
+  if (format === 'image') {
     downloadImageAsset(ad);
   } else if (format === 'spec') {
     downloadSpecAsset(ad);
@@ -1611,23 +1669,12 @@ function downloadActiveDrawerCreative(type) {
   const ad = state.activeAdForDrawer;
   if (!ad) return;
 
-  if (type === 'modal') {
-    openCreativeDownloadModal(ad.id);
-  } else if (type === 'video') {
-    downloadVideoAsset(ad);
-  } else if (type === 'image') {
+  if (type === 'image') {
     downloadImageAsset(ad);
-  }
-}
-
-function executeDownload(format) {
-  const ad = state.activeAdForDownload;
-  if (!ad) return;
-
-  if (format === 'image') {
-    downloadImageAsset(ad);
-  } else if (format === 'spec') {
+  } else if (type === 'spec') {
     downloadSpecAsset(ad);
+  } else {
+    openCreativeDownloadModal(ad.id);
   }
 }
 
