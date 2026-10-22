@@ -11,6 +11,7 @@
     "spiritual_coaching": {
       "name": "Spiritual / Coaching",
       "calibrated": true,
+      "k": 1550,
       "cpm_low": 170,
       "cpm_mid": 226,
       "cpm_high": 330,
@@ -28,6 +29,7 @@
     "d2c": {
       "name": "D2C (Direct to Consumer)",
       "calibrated": false,
+      "k": 1550,
       "cpm_low": 170,
       "cpm_mid": 226,
       "cpm_high": 330,
@@ -45,6 +47,7 @@
     "healthcare": {
       "name": "Healthcare & Wellness",
       "calibrated": false,
+      "k": 1550,
       "cpm_low": 170,
       "cpm_mid": 226,
       "cpm_high": 330,
@@ -62,6 +65,7 @@
     "fintech": {
       "name": "Fintech & Finance",
       "calibrated": false,
+      "k": 1550,
       "cpm_low": 170,
       "cpm_mid": 226,
       "cpm_high": 330,
@@ -79,6 +83,7 @@
     "education": {
       "name": "Education & EdTech",
       "calibrated": false,
+      "k": 1550,
       "cpm_low": 170,
       "cpm_mid": 226,
       "cpm_high": 330,
@@ -96,6 +101,7 @@
     "default": {
       "name": "Default / General",
       "calibrated": false,
+      "k": 1550,
       "cpm_low": 170,
       "cpm_mid": 226,
       "cpm_high": 330,

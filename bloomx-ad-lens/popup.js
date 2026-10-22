@@ -11,6 +11,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const bannerIcon = document.getElementById('bannerIcon');
     const bannerText = document.getElementById('bannerText');
 
+    const verticalK = document.getElementById('vertical_k');
+    const kCalibStatus = document.getElementById('kCalibStatus');
+    const kCalibCountBadge = document.getElementById('kCalibCountBadge');
+
     const cpmLow = document.getElementById('cpm_low');
     const cpmMid = document.getElementById('cpm_mid');
     const cpmHigh = document.getElementById('cpm_high');
@@ -39,14 +43,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     const euCpmHigh = document.getElementById('eu_cpm_high');
     const eurToInrRate = document.getElementById('eur_to_inr_rate');
 
-    // Calibration Mode elements
+    // Calibration Mode elements (Requirement 4)
     const realPageSpend = document.getElementById('real_page_spend');
     const btnCalculateCalibration = document.getElementById('btnCalculateCalibration');
     const calibrationResultBox = document.getElementById('calibrationResultBox');
     const calibDetectedSpendText = document.getElementById('calibDetectedSpendText');
     const calibDiffPercentText = document.getElementById('calibDiffPercentText');
-    const calibSuggestedTiersText = document.getElementById('calibSuggestedTiersText');
-    const btnApplySuggestedTiers = document.getElementById('btnApplySuggestedTiers');
+    const calibKOldText = document.getElementById('calibKOldText');
+    const calibKNewText = document.getElementById('calibKNewText');
+    const calibKAvgText = document.getElementById('calibKAvgText');
+    const calibHistorySummaryText = document.getElementById('calibHistorySummaryText');
+    const btnApplyCalibrationK = document.getElementById('btnApplyCalibrationK');
 
     const btnSave = document.getElementById('btnSave');
     const btnReset = document.getElementById('btnReset');
@@ -63,7 +70,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         frequency: 1.9
     };
     let currentEuBenchmarks = { ...DEFAULT_EU_BENCHMARKS };
-    let suggestedCalibrationTiers = null;
+    let pendingCalibration = null;
+    let calibrationHistory = {};
 
     // Embedded fallback benchmarks template
     const EMBEDDED_DEFAULT_BENCHMARKS = {
@@ -71,6 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             spiritual_coaching: {
                 name: "Spiritual / Coaching",
                 calibrated: true,
+                k: 1550,
                 cpm_low: 170, cpm_mid: 226, cpm_high: 330,
                 ctr_low: 0.9, ctr_mid: 1.22, ctr_high: 1.7,
                 cost_per_purchase: 480,
@@ -83,6 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             d2c: {
                 name: "D2C (Direct to Consumer)",
                 calibrated: false,
+                k: 1550,
                 cpm_low: 170, cpm_mid: 226, cpm_high: 330,
                 ctr_low: 0.9, ctr_mid: 1.22, ctr_high: 1.7,
                 cost_per_purchase: 480,
@@ -95,6 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             healthcare: {
                 name: "Healthcare & Wellness",
                 calibrated: false,
+                k: 1550,
                 cpm_low: 170, cpm_mid: 226, cpm_high: 330,
                 ctr_low: 0.9, ctr_mid: 1.22, ctr_high: 1.7,
                 cost_per_purchase: 480,
@@ -107,6 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             fintech: {
                 name: "Fintech & Finance",
                 calibrated: false,
+                k: 1550,
                 cpm_low: 170, cpm_mid: 226, cpm_high: 330,
                 ctr_low: 0.9, ctr_mid: 1.22, ctr_high: 1.7,
                 cost_per_purchase: 480,
@@ -119,6 +131,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             education: {
                 name: "Education & EdTech",
                 calibrated: false,
+                k: 1550,
                 cpm_low: 170, cpm_mid: 226, cpm_high: 330,
                 ctr_low: 0.9, ctr_mid: 1.22, ctr_high: 1.7,
                 cost_per_purchase: 480,
@@ -131,6 +144,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             default: {
                 name: "Default / General",
                 calibrated: false,
+                k: 1550,
                 cpm_low: 170, cpm_mid: 226, cpm_high: 330,
                 ctr_low: 0.9, ctr_mid: 1.22, ctr_high: 1.7,
                 cost_per_purchase: 480,
@@ -157,7 +171,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let allBenchmarks = JSON.parse(JSON.stringify(defaultBenchmarks.verticals));
 
     // ─── Load from chrome.storage.local ─────────────────────────────────────────
-    chrome.storage.local.get(['active_vertical', 'custom_benchmarks', 'dashboard_api_url', 'eu_benchmarks', 'real_page_spend'], (result) => {
+    chrome.storage.local.get(['active_vertical', 'custom_benchmarks', 'dashboard_api_url', 'eu_benchmarks', 'real_page_spend', 'calibration_history'], (result) => {
         if (result.active_vertical) {
             activeVertical = result.active_vertical;
         }
@@ -171,6 +185,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         if (result.real_page_spend && realPageSpend) {
             realPageSpend.value = result.real_page_spend;
+        }
+        if (result.calibration_history) {
+            calibrationHistory = result.calibration_history;
         }
 
         populateEuBenchmarkFields();
@@ -240,7 +257,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const sarvamStatusBadge = document.getElementById('sarvamStatusBadge');
     async function checkSarvamStatus(baseUrl) {
-
         if (!sarvamStatusBadge) return;
         try {
             const cleanUrl = (baseUrl || 'http://localhost:3000').replace(/\/$/, '');
@@ -271,18 +287,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Confidence Banner & Badge
         const isCalibrated = vData.calibrated === true;
+        const vCalibs = calibrationHistory[vKey] || [];
+        const calibCount = vCalibs.length;
+
         if (isCalibrated) {
             confidenceBanner.className = 'confidence-banner banner-calibrated';
             bannerIcon.textContent = '✅';
-            bannerText.innerHTML = '<b>High Confidence:</b> Calibrated with live Meta Ad spend data.';
+            bannerText.innerHTML = `<b>High Confidence:</b> Calibrated (${calibCount > 0 ? `on ${calibCount} advertiser${calibCount === 1 ? '' : 's'}` : 'baseline'}).`;
             calibrationBadge.textContent = 'CALIBRATED';
             calibrationBadge.style.color = '#34d399';
         } else {
             confidenceBanner.className = 'confidence-banner banner-uncalibrated';
             bannerIcon.textContent = '⚠️';
-            bannerText.innerHTML = '<b>Low Confidence:</b> This vertical is not calibrated yet. Edit and calibrate numbers below for higher accuracy.';
+            bannerText.innerHTML = '<b>Low Confidence:</b> This vertical is not calibrated yet. Use live calibration below to tune k.';
             calibrationBadge.textContent = 'LOW CONFIDENCE';
             calibrationBadge.style.color = '#fbbf24';
+        }
+
+        // Spend Constant k (Requirement 1 & 4)
+        if (verticalK) {
+            verticalK.value = vData.k || 1550;
+        }
+        if (kCalibStatus) {
+            kCalibStatus.textContent = isCalibrated ? '● Calibrated' : '● Uncalibrated';
+            kCalibStatus.style.color = isCalibrated ? '#4ADE80' : '#FBBF24';
+        }
+        if (kCalibCountBadge) {
+            kCalibCountBadge.textContent = calibCount > 0
+                ? `Calibrated on ${calibCount} advertiser${calibCount === 1 ? '' : 's'}`
+                : (isCalibrated ? 'Calibrated default' : 'Uncalibrated');
         }
 
         // CPM
@@ -340,6 +373,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             ...allBenchmarks[vKey],
             name: verticalSelect.options[verticalSelect.selectedIndex].text.split('(')[0].trim(),
             calibrated: allBenchmarks[vKey].calibrated, // preserve calibration flag
+            k: parseFloat(verticalK?.value) || 1550,
             cpm_low: parseFloat(cpmLow.value) || 170,
             cpm_mid: parseFloat(cpmMid.value) || 226,
             cpm_high: parseFloat(cpmHigh.value) || 330,
@@ -389,11 +423,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, () => {
             checkDashboardHealth(customUrl);
             checkSarvamStatus(customUrl);
-            showToast('✅ Saved! Benchmarks, EU Rates & Dashboard URL applied.');
+            showToast('✅ Saved! Spend Constant k, Benchmarks & Dashboard URL applied.');
         });
     });
 
-    // ─── Calibration Mode Logic (Requirement 8) ────────────────────────────────
+    // ─── Calibration Mode Logic (Requirement 4) ────────────────────────────────
     if (btnCalculateCalibration) {
         btnCalculateCalibration.addEventListener('click', () => {
             const real = parseFloat(realPageSpend.value);
@@ -429,7 +463,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     const detected = response.estimatedSpend;
                     const diffPct = ((detected - real) / real) * 100;
-                    const scaleFactor = real / detected; // Single scale factor for all three tiers
+
+                    // Requirement 4: Compute k_new = k_old * (real / estimated)
+                    const currentK = response.currentK || allBenchmarks[activeVertical]?.k || 1550;
+                    const k_new = Math.round(currentK * (real / detected));
+
+                    // History of calibrations for this vertical
+                    const verticalHist = calibrationHistory[activeVertical] || [];
+                    const priorSum = verticalHist.reduce((acc, c) => acc + (Number(c.k) || currentK), 0);
+                    const newCount = verticalHist.length + 1;
+                    // AVERAGE k across all calibrations for that vertical
+                    const k_avg = Math.round((priorSum + k_new) / newCount);
 
                     const advEl = document.getElementById('calibAdvertiserText');
                     if (advEl) advEl.textContent = response.advertiserName || 'Current Advertiser';
@@ -443,46 +487,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                     calibDiffPercentText.textContent = `${isOver ? '+' : ''}${diffPct.toFixed(1)}% (${isOver ? 'Overestimated' : 'Underestimated'})`;
                     calibDiffPercentText.style.color = Math.abs(diffPct) <= 10 ? '#4ADE80' : (isOver ? '#F87171' : '#FBBF24');
 
-                    const scaleEl = document.getElementById('calibScaleFactorText');
-                    if (scaleEl) scaleEl.textContent = `${scaleFactor.toFixed(2)}x`;
+                    if (calibKOldText) calibKOldText.textContent = currentK.toLocaleString('en-IN');
+                    if (calibKNewText) calibKNewText.textContent = k_new.toLocaleString('en-IN');
+                    if (calibKAvgText) calibKAvgText.textContent = k_avg.toLocaleString('en-IN');
 
-                    const curTestLow = parseFloat(spendTestLow.value) || 100;
-                    const curTestMid = parseFloat(spendTestMid.value) || 200;
-                    const curTestHigh = parseFloat(spendTestHigh.value) || 300;
+                    if (calibHistorySummaryText) {
+                        calibHistorySummaryText.innerHTML = `
+                            Averaged across <b>${newCount}</b> advertiser calibration${newCount === 1 ? '' : 's'} (${verticalHist.length} previous + <b>${response.advertiserName || 'this advertiser'}</b>).
+                        `;
+                    }
 
-                    const curTestedLow = parseFloat(spendTestedLow.value) || 300;
-                    const curTestedMid = parseFloat(spendTestedMid.value) || 650;
-                    const curTestedHigh = parseFloat(spendTestedHigh.value) || 1000;
-
-                    const curWinnerLow = parseFloat(spendWinnerLow.value) || 2000;
-                    const curWinnerMid = parseFloat(spendWinnerMid.value) || 3000;
-                    const curWinnerHigh = parseFloat(spendWinnerHigh.value) || 4000;
-
-                    suggestedCalibrationTiers = {
-                        scaleFactor,
-                        test: {
-                            low: Math.max(50, Math.round(curTestLow * scaleFactor)),
-                            mid: Math.max(100, Math.round(curTestMid * scaleFactor)),
-                            high: Math.max(150, Math.round(curTestHigh * scaleFactor))
-                        },
-                        tested: {
-                            low: Math.max(150, Math.round(curTestedLow * scaleFactor)),
-                            mid: Math.max(300, Math.round(curTestedMid * scaleFactor)),
-                            high: Math.max(500, Math.round(curTestedHigh * scaleFactor))
-                        },
-                        winner: {
-                            low: Math.max(1000, Math.round(curWinnerLow * scaleFactor)),
-                            mid: Math.max(1500, Math.round(curWinnerMid * scaleFactor)),
-                            high: Math.max(2000, Math.round(curWinnerHigh * scaleFactor))
-                        }
+                    pendingCalibration = {
+                        advertiser: response.advertiserName || 'Advertiser',
+                        date: new Date().toISOString(),
+                        real,
+                        estimated: detected,
+                        k: k_new,
+                        k_avg,
+                        newCount
                     };
-
-                    calibSuggestedTiersText.innerHTML = `
-                        <b>Single Scale Factor Applied (${scaleFactor.toFixed(2)}x):</b><br>
-                        • Test (&lt;7d): ₹${suggestedCalibrationTiers.test.low}–₹${suggestedCalibrationTiers.test.high}/d<br>
-                        • Tested (7–30d): ₹${suggestedCalibrationTiers.tested.low}–₹${suggestedCalibrationTiers.tested.high}/d<br>
-                        • Winner (&gt;30d): ₹${suggestedCalibrationTiers.winner.low}–₹${suggestedCalibrationTiers.winner.high}/d
-                    `;
 
                     calibrationResultBox.style.display = 'block';
                 });
@@ -490,22 +513,45 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    if (btnApplySuggestedTiers) {
-        btnApplySuggestedTiers.addEventListener('click', () => {
-            if (!suggestedCalibrationTiers) return;
-            spendTestLow.value = suggestedCalibrationTiers.test.low;
-            spendTestMid.value = suggestedCalibrationTiers.test.mid;
-            spendTestHigh.value = suggestedCalibrationTiers.test.high;
+    // Requirement 4: "Apply" saves k_new for the active vertical and sets calibrated:true.
+    // Keep a history of calibrations (advertiser, date, real, estimated, k) and use AVERAGE k across all calibrations.
+    if (btnApplyCalibrationK) {
+        btnApplyCalibrationK.addEventListener('click', () => {
+            if (!pendingCalibration) return;
+            const vKey = activeVertical;
 
-            spendTestedLow.value = suggestedCalibrationTiers.tested.low;
-            spendTestedMid.value = suggestedCalibrationTiers.tested.mid;
-            spendTestedHigh.value = suggestedCalibrationTiers.tested.high;
+            if (!calibrationHistory[vKey]) {
+                calibrationHistory[vKey] = [];
+            }
 
-            spendWinnerLow.value = suggestedCalibrationTiers.winner.low;
-            spendWinnerMid.value = suggestedCalibrationTiers.winner.mid;
-            spendWinnerHigh.value = suggestedCalibrationTiers.winner.high;
+            // Save entry to calibration history
+            calibrationHistory[vKey].push({
+                advertiser: pendingCalibration.advertiser,
+                date: pendingCalibration.date,
+                real: pendingCalibration.real,
+                estimated: pendingCalibration.estimated,
+                k: pendingCalibration.k
+            });
 
-            showToast(`✨ ${suggestedCalibrationTiers.scaleFactor.toFixed(2)}x scale applied to all 3 tiers! Click "Save & Apply".`);
+            if (!allBenchmarks[vKey]) {
+                allBenchmarks[vKey] = {};
+            }
+
+            // Use the AVERAGE k across all calibrations for that vertical
+            allBenchmarks[vKey].k = pendingCalibration.k_avg;
+            allBenchmarks[vKey].calibrated = true;
+
+            if (verticalK) {
+                verticalK.value = pendingCalibration.k_avg;
+            }
+
+            chrome.storage.local.set({
+                custom_benchmarks: allBenchmarks,
+                calibration_history: calibrationHistory
+            }, () => {
+                populateFieldsForVertical(vKey);
+                showToast(`✨ Saved k = ${pendingCalibration.k_avg.toLocaleString('en-IN')}! Vertical calibrated on ${pendingCalibration.newCount} advertisers.`);
+            });
         });
     }
 
