@@ -718,6 +718,13 @@
             cpm: { low: 170, mid: 226, high: 330 },
             ctr_percent: { low: 0.9, mid: 1.22, high: 1.7 },
             cost_per_purchase: { target: 480 }
+        },
+        eu_benchmarks: {
+            cpm_low_eur: 4.0,
+            cpm_mid_eur: 7.0,
+            cpm_high_eur: 10.0,
+            eur_to_inr_rate: 90.0,
+            frequency: 1.9
         }
     };
 
@@ -763,13 +770,27 @@
         }
     }
 
+    function applyEuConfig(euData) {
+        if (!euData) return;
+        BENCHMARKS.eu_benchmarks = {
+            cpm_low_eur: Number(euData.cpm_low_eur) || 4.0,
+            cpm_mid_eur: Number(euData.cpm_mid_eur) || 7.0,
+            cpm_high_eur: Number(euData.cpm_high_eur) || 10.0,
+            eur_to_inr_rate: Number(euData.eur_to_inr_rate) || 90.0,
+            frequency: Number(euData.frequency) || 1.9
+        };
+    }
+
     // ─── Sync with chrome.storage.local ────────────────────────────────────────
     function loadBenchmarksAndSync(cb) {
         if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-            chrome.storage.local.get(['active_vertical', 'custom_benchmarks', 'dashboard_api_url'], (result) => {
+            chrome.storage.local.get(['active_vertical', 'custom_benchmarks', 'dashboard_api_url', 'eu_benchmarks'], (result) => {
                 const targetKey = result.active_vertical || 'spiritual_coaching';
                 if (result.dashboard_api_url) {
                     connectedDashboardUrl = result.dashboard_api_url;
+                }
+                if (result.eu_benchmarks) {
+                    applyEuConfig(result.eu_benchmarks);
                 }
 
                 if (result.custom_benchmarks && result.custom_benchmarks[targetKey]) {
@@ -791,6 +812,9 @@
             fetch(url)
                 .then(r => r.json())
                 .then(data => {
+                    if (data && data.eu_benchmarks) {
+                        applyEuConfig(data.eu_benchmarks);
+                    }
                     if (data && data.verticals && data.verticals[targetKey]) {
                         applyVerticalConfig(targetKey, data.verticals[targetKey]);
                     }
@@ -809,7 +833,7 @@
                 if (changes.dashboard_api_url) {
                     connectedDashboardUrl = changes.dashboard_api_url.newValue || 'http://localhost:3000';
                 }
-                if (changes.active_vertical || changes.custom_benchmarks) {
+                if (changes.active_vertical || changes.custom_benchmarks || changes.eu_benchmarks) {
                     loadBenchmarksAndSync(() => {
                         recalculateAllAds();
                     });
@@ -856,26 +880,134 @@
         return `${prefix}${formatted}`;
     }
 
-    // ─── Date Parsing Helper ───────────────────────────────────────────────────
-    function parseStartDate(text) {
-        if (!text) return null;
-        const match = text.match(/Started running on\s+([A-Za-z0-9,\s\/\-]+?)(?=\s*(?:\.|\n|•|Library ID|$))/i);
-        if (!match || !match[1]) return null;
-
-        const dateStr = match[1].trim();
-        const parsed = new Date(dateStr);
-        if (!isNaN(parsed.getTime())) return parsed;
-
-        const partsMatch = dateStr.match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/);
+    // ─── Date Parsing Helper (Start & End Date for Active/Inactive Ads) ───────
+    function parseDateString(str) {
+        if (!str) return null;
+        const clean = str.trim().replace(/^[•\s\-\–]+|[•\s\-\–]+$/g, '');
+        const d = new Date(clean);
+        if (!isNaN(d.getTime())) return d;
+        const partsMatch = clean.match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/);
         if (partsMatch) {
             const day = parseInt(partsMatch[1], 10);
             const monthStr = partsMatch[2];
             const year = parseInt(partsMatch[3], 10);
-            const d = new Date(`${monthStr} ${day}, ${year}`);
-            if (!isNaN(d.getTime())) return d;
+            const pd = new Date(`${monthStr} ${day}, ${year}`);
+            if (!isNaN(pd.getTime())) return pd;
+        }
+        return null;
+    }
+
+    function parseStartAndEndDate(text, status) {
+        if (!text) return { startDate: null, endDate: null };
+        let startDate = null;
+        let endDate = null;
+
+        // Pattern 1: Ran between 10 Oct 2026 - 18 Oct 2026 / 10 Oct 2026 – 18 Oct 2026
+        const ranMatch = text.match(/Ran between\s+([A-Za-z0-9,\s]+?)\s*(?:–|-|to)\s*([A-Za-z0-9,\s]+?)(?=\s*(?:\.|\n|•|Library ID|$))/i);
+        if (ranMatch) {
+            startDate = parseDateString(ranMatch[1]);
+            endDate = parseDateString(ranMatch[2]);
         }
 
-        return null;
+        // Pattern 2: Started running on [Date]
+        if (!startDate) {
+            const startMatch = text.match(/Started running on\s+([A-Za-z0-9,\s\/\-]+?)(?=\s*(?:\.|\n|•|Library ID|ended|$))/i);
+            if (startMatch) startDate = parseDateString(startMatch[1]);
+        }
+
+        // Pattern 3: Inactive with ended on [Date]
+        if (!endDate) {
+            const endMatch = text.match(/(?:ended on|until)\s+([A-Za-z0-9,\s]+?)(?=\s*(?:\.|\n|•|Library ID|$))/i);
+            if (endMatch) endDate = parseDateString(endMatch[1]);
+        }
+
+        return { startDate, endDate };
+    }
+
+    function parseStartDate(text) {
+        return parseStartAndEndDate(text).startDate;
+    }
+
+    // ─── EU Transparency & Reach Detection ─────────────────────────────────────
+    function parseNumWithMultiplier(numStr, multStr) {
+        if (!numStr) return 0;
+        let n = parseFloat(numStr.replace(/,/g, ''));
+        if (isNaN(n)) return 0;
+        const m = (multStr || '').toUpperCase();
+        if (m === 'K') n *= 1000;
+        else if (m === 'M') n *= 1000000;
+        return Math.round(n);
+    }
+
+    function detectEuTransparency(cardEl, cardText) {
+        if (!cardEl && !cardText) return null;
+        const text = cardText || cardEl.innerText || '';
+        const html = cardEl.innerHTML || '';
+
+        const hasEuTag = /European Union transparency|EU transparency|Beneficiary and payer/i.test(text) ||
+                         /European Union transparency|EU transparency/i.test(html);
+
+        let reach = null;
+        let reachStr = '';
+
+        const rangeMatch = text.match(/(?:Reach:?\s*~?\s*)?([0-9,\.]+)\s*(K|M|k|m)?\s*(?:–|-)\s*([0-9,\.]+)\s*(K|M|k|m)?\s*(?:EU\s+)?reach/i) ||
+                           text.match(/Reach:\s*~?\s*([0-9,\.]+)\s*(K|M|k|m)?\s*(?:–|-)\s*([0-9,\.]+)\s*(K|M|k|m)?/i);
+
+        if (rangeMatch) {
+            const num1 = parseNumWithMultiplier(rangeMatch[1], rangeMatch[2]);
+            const num2 = parseNumWithMultiplier(rangeMatch[3], rangeMatch[4]);
+            reach = Math.round((num1 + num2) / 2);
+            reachStr = `${rangeMatch[1]}${rangeMatch[2] || ''}–${rangeMatch[3]}${rangeMatch[4] || ''}`;
+        } else {
+            const singleMatch = text.match(/(?:Reach:?\s*~?\s*)?([0-9,\.]+)\s*(K|M|k|m)?\s*(?:EU\s+)?reach/i) ||
+                                text.match(/Reach:\s*~?\s*([0-9,\.]+)\s*(K|M|k|m)?/i);
+            if (singleMatch) {
+                reach = parseNumWithMultiplier(singleMatch[1], singleMatch[2]);
+                reachStr = `${singleMatch[1]}${singleMatch[2] || ''}`;
+            }
+        }
+
+        if (!hasEuTag && !reach) return null;
+
+        // Parse audience demographics breakdown if present
+        const demographics = {
+            age: [],
+            gender: [],
+            countries: []
+        };
+
+        const ageMatches = text.matchAll(/(18-24|25-34|35-44|45-54|55-64|65\+)\s*[:\-]?\s*(\d+%?)/gi);
+        for (const m of ageMatches) {
+            demographics.age.push(`${m[1]}: ${m[2].includes('%') ? m[2] : m[2] + '%'}`);
+        }
+
+        const genderMatches = text.matchAll(/(Men|Women|Male|Female|Non-binary)\s*[:\-]?\s*(\d+%?)/gi);
+        for (const m of genderMatches) {
+            demographics.gender.push(`${m[1]}: ${m[2].includes('%') ? m[2] : m[2] + '%'}`);
+        }
+
+        const euCountries = ['Germany', 'France', 'Italy', 'Spain', 'Poland', 'Netherlands', 'Belgium', 'Austria', 'Sweden', 'Ireland', 'Portugal', 'Greece', 'Czechia', 'Romania', 'Hungary'];
+        euCountries.forEach(country => {
+            const rgx = new RegExp(`${country}\\s*[:\\-]?\\s*(\\d+%?)`, 'i');
+            const cm = text.match(rgx);
+            if (cm) {
+                demographics.countries.push(`${country}: ${cm[1].includes('%') ? cm[1] : cm[1] + '%'}`);
+            } else if (text.includes(country)) {
+                demographics.countries.push(country);
+            }
+        });
+
+        if (!reach && hasEuTag) {
+            reach = 25000;
+            reachStr = '~25K (EU Transparency)';
+        }
+
+        return {
+            hasEuTag,
+            reach,
+            reachStr,
+            demographics
+        };
     }
 
     // ─── Platform Detection ────────────────────────────────────────────────────
@@ -942,16 +1074,22 @@
         return lines.length > 0 ? lines[0].substring(0, 50) + (lines[0].length > 50 ? '...' : '') : 'Ad Creative';
     }
 
-    // ─── Performance Calculation ───────────────────────────────────────────────
-    function calculatePerformance(startDate, today = new Date()) {
+    // ─── Dual-Mode Performance Calculation (1. EU Real-Reach, 2. India Estimate) ───
+    function calculatePerformance(startDate, endDate = null, status = 'Active', creativeCount = 1, euData = null, today = new Date()) {
         let daysRunning = 1;
-        if (startDate) {
+
+        // Requirement 2: days_running = start → end date for inactive ads, start → today only for active ads
+        if (status === 'Inactive' && startDate && endDate) {
+            const diffMs = endDate.getTime() - startDate.getTime();
+            daysRunning = Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+        } else if (startDate) {
             const diffMs = today.getTime() - startDate.getTime();
             daysRunning = Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
         }
 
+        // Tiers: <7 days ₹100–300/day, 7–30 days ₹300–1,000/day, >30 days ₹2,000–4,000/day
         let tierKey = 'test';
-        if (daysRunning <= 6) {
+        if (daysRunning < 7) {
             tierKey = 'test';
         } else if (daysRunning <= 30) {
             tierKey = 'tested';
@@ -961,14 +1099,87 @@
 
         const tier = BENCHMARKS.daily_spend_tiers[tierKey];
 
-        const spendLow = daysRunning * tier.low;
-        const spendMid = daysRunning * tier.mid;
-        const spendHigh = daysRunning * tier.high;
+        // "X ads use this creative": multiply by min(1 + 0.1 * (X - 1), 1.5) only
+        const count = typeof creativeCount === 'number' && creativeCount > 1 ? creativeCount : 1;
+        const creativeMultiplier = count > 1 ? Math.min(1 + 0.1 * (count - 1), 1.5) : 1.0;
 
-        const cpm = BENCHMARKS.metrics.cpm;
-        const viewsLow = Math.round((spendLow / cpm.high) * 1000);
-        const viewsMid = Math.round((spendMid / cpm.mid) * 1000);
-        const viewsHigh = Math.round((spendHigh / cpm.low) * 1000);
+        let spendLow = 0;
+        let spendMid = 0;
+        let spendHigh = 0;
+        let viewsLow = 0;
+        let viewsMid = 0;
+        let viewsHigh = 0;
+        let isEuMode = false;
+        let confidenceText = '';
+        let confidenceBadgeClass = '';
+        let confidenceType = 'medium';
+        const tooltips = {};
+
+        if (euData && euData.reach > 0) {
+            // ─── 1. EU REAL-REACH MODE ──────────────────────────────────────────────
+            isEuMode = true;
+            const reach = euData.reach;
+            const impressions = Math.round(reach * 1.9); // impressions = reach × 1.9
+
+            const euBenchmarks = BENCHMARKS.eu_benchmarks || {
+                cpm_low_eur: 4.0,
+                cpm_mid_eur: 7.0,
+                cpm_high_eur: 10.0,
+                eur_to_inr_rate: 90.0,
+                frequency: 1.9
+            };
+
+            const cpmLowEur = euBenchmarks.cpm_low_eur || 4.0;
+            const cpmMidEur = euBenchmarks.cpm_mid_eur || 7.0;
+            const cpmHighEur = euBenchmarks.cpm_high_eur || 10.0;
+            const eurRate = euBenchmarks.eur_to_inr_rate || 90.0;
+
+            // spend = impressions ÷ 1000 × EU CPM (convert to ₹)
+            const spendLowEur = (impressions / 1000) * cpmLowEur;
+            const spendMidEur = (impressions / 1000) * cpmMidEur;
+            const spendHighEur = (impressions / 1000) * cpmHighEur;
+
+            spendLow = Math.round(spendLowEur * eurRate);
+            spendMid = Math.round(spendMidEur * eurRate);
+            spendHigh = Math.round(spendHighEur * eurRate);
+
+            viewsMid = impressions;
+            viewsLow = Math.round(impressions * 0.85);
+            viewsHigh = Math.round(impressions * 1.15);
+
+            confidenceText = 'Real EU reach · High confidence';
+            confidenceBadgeClass = 'adlens-badge-eu';
+            confidenceType = 'eu';
+
+            tooltips.spend = `How calculated: Real EU Reach (${reach.toLocaleString()}) × 1.9 freq = ${impressions.toLocaleString()} views ÷ 1,000 × €${cpmMidEur} EU CPM × ₹${eurRate}/€ = ${formatIndianNumber(spendMid, true)} [Real EU Transparency]`;
+            tooltips.views = `How calculated: Real EU Reach (${reach.toLocaleString()}) × 1.9 Frequency = ${impressions.toLocaleString()} Impressions`;
+        } else {
+            // ─── 2. INDIA ESTIMATE MODE ─────────────────────────────────────────────
+            isEuMode = false;
+
+            spendLow = Math.round(daysRunning * tier.low * creativeMultiplier);
+            spendMid = Math.round(daysRunning * tier.mid * creativeMultiplier);
+            spendHigh = Math.round(daysRunning * tier.high * creativeMultiplier);
+
+            const cpm = BENCHMARKS.metrics.cpm;
+            viewsLow = Math.round((spendLow / cpm.high) * 1000);
+            viewsMid = Math.round((spendMid / cpm.mid) * 1000);
+            viewsHigh = Math.round((spendHigh / cpm.low) * 1000);
+
+            if (daysRunning >= 7) {
+                confidenceText = 'Estimated · Medium confidence';
+                confidenceBadgeClass = 'adlens-badge-med-conf';
+                confidenceType = 'medium';
+            } else {
+                confidenceText = 'Estimated · Low confidence';
+                confidenceBadgeClass = 'adlens-badge-low-conf';
+                confidenceType = 'low';
+            }
+
+            const multNote = count > 1 ? ` × ${creativeMultiplier.toFixed(2)} (${count} ads creative factor)` : '';
+            tooltips.spend = `How calculated: ${daysRunning}d running × ₹${tier.mid}/day (${tier.label})${multNote} = ${formatIndianNumber(spendMid, true)} [India Estimate Mode]`;
+            tooltips.views = `How calculated: Spend (${formatIndianNumber(spendMid, true)}) ÷ ₹${cpm.mid} CPM × 1,000 = ${formatCompactViews(viewsMid)} views`;
+        }
 
         const ctr = BENCHMARKS.metrics.ctr_percent;
         const clicksLow = Math.round(viewsLow * (ctr.low / 100));
@@ -982,15 +1193,25 @@
         const estPurchasesLow = Math.round(spendLow / costPerPurchase);
         const estPurchasesHigh = Math.round(spendHigh / costPerPurchase);
 
+        tooltips.orders = `How calculated: Spend (${formatIndianNumber(spendMid, true)}) ÷ ₹${costPerPurchase} Target CPA = ~${estPurchasesMid} orders`;
+        tooltips.daily = `How calculated: Running ${daysRunning} days matches '${tier.label}' bracket (₹${tier.low}–₹${tier.high}/day)`;
+
         return {
             daysRunning,
             tierKey,
             tier,
+            creativeMultiplier,
+            isEuMode,
+            euData,
+            confidenceText,
+            confidenceBadgeClass,
+            confidenceType,
             spend: { low: spendLow, mid: spendMid, high: spendHigh },
             views: { low: viewsLow, mid: viewsMid, high: viewsHigh },
             clicks: { low: clicksLow, mid: clicksMid, high: clicksHigh },
             cpcMid,
-            estPurchases: { low: estPurchasesLow, mid: estPurchasesMid, high: estPurchasesHigh }
+            estPurchases: { low: estPurchasesLow, mid: estPurchasesMid, high: estPurchasesHigh },
+            tooltips
         };
     }
 
@@ -1154,30 +1375,65 @@
         const viewsPerDay = Math.round(perf.views.mid / perf.daysRunning);
         const viewsPerDayStr = `${formatCompactViews(viewsPerDay)}/day`;
 
-        const confText = isCalibrated ? 'High confidence' : 'Medium confidence';
-
-        let tierBadgeClass = 'adlens-badge-tested';
-        let tierBadgeText = '⚡ Tested';
-        if (perf.tierKey === 'winner') {
-            tierBadgeClass = 'adlens-badge-winner';
-            tierBadgeText = '🏆 Winner';
-        } else if (perf.tierKey === 'test') {
-            tierBadgeClass = 'adlens-badge-new';
-            tierBadgeText = '🧪 New';
+        // Badge selection: Requirement 1 (Real EU reach) & Requirement 2 (Estimated Medium/Low confidence)
+        let badgeHtml = '';
+        if (perf.isEuMode) {
+            badgeHtml = `<span class="adlens-tier-badge adlens-badge-eu" title="Verified via European Union Ad Transparency data"><span class="adlens-tier-dot"></span>Real EU reach · High confidence</span>`;
+        } else {
+            badgeHtml = `<span class="adlens-tier-badge ${perf.confidenceBadgeClass}" title="${perf.confidenceText}"><span class="adlens-tier-dot"></span>${perf.confidenceText}</span>`;
         }
+
+        const durationTag = `${perf.daysRunning}d ${data.status === 'Inactive' ? 'ran (Inactive)' : 'active'}`;
 
         const platformsStr = Array.isArray(data.platforms) && data.platforms.length > 0 
             ? data.platforms.map(p => p === 'Facebook' ? 'FB' : (p === 'Instagram' ? 'IG' : p)).join(' · ')
             : 'FB · IG';
 
+        const spendSubStr = perf.isEuMode 
+            ? `🇪🇺 Real Reach: ~${formatCompactViews(perf.euData.reach)}`
+            : `Range: ${formatIndianNumber(perf.spend.low, true)}–${formatIndianNumber(perf.spend.high, true)}`;
+
+        // EU Audience Breakdown HTML (Requirement 1)
+        let euAudienceHtml = '';
+        if (perf.isEuMode && perf.euData && perf.euData.demographics) {
+            const demo = perf.euData.demographics;
+            const hasData = (demo.gender && demo.gender.length > 0) || (demo.age && demo.age.length > 0) || (demo.countries && demo.countries.length > 0);
+            if (hasData) {
+                euAudienceHtml = `
+                    <div class="adlens-eu-audience">
+                        <div class="adlens-eu-audience-title">
+                            <span>🇪🇺 EU Audience Breakdown (Transparency)</span>
+                            <span style="font-weight: 500; text-transform: none; color: #94A3B8;">Real EU Data</span>
+                        </div>
+                        ${demo.gender.length > 0 ? `
+                            <div class="adlens-eu-breakdown-row">
+                                <span style="color: #94A3B8; font-size: 9.5px; width: 48px;">Gender:</span>
+                                ${demo.gender.map(g => `<span class="adlens-eu-pill">${g}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                        ${demo.age.length > 0 ? `
+                            <div class="adlens-eu-breakdown-row">
+                                <span style="color: #94A3B8; font-size: 9.5px; width: 48px;">Age:</span>
+                                ${demo.age.map(a => `<span class="adlens-eu-pill">${a}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                        ${demo.countries.length > 0 ? `
+                            <div class="adlens-eu-breakdown-row">
+                                <span style="color: #94A3B8; font-size: 9.5px; width: 48px;">Countries:</span>
+                                ${demo.countries.slice(0, 5).map(c => `<span class="adlens-eu-pill">${c}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+        }
+
         container.innerHTML = `
             <!-- 1. Header with Duration & Status -->
             <div class="adlens-header-row">
                 <div class="adlens-header-left">
-                    <span class="adlens-tier-badge ${tierBadgeClass}">
-                        <span class="adlens-tier-dot"></span>
-                        ${tierBadgeText} · ${perf.daysRunning}d active
-                    </span>
+                    ${badgeHtml}
+                    <span class="adlens-platforms-tag">${durationTag}</span>
                     <span class="adlens-platforms-tag">${platformsStr}</span>
                 </div>
                 <div class="adlens-header-right">
@@ -1185,26 +1441,43 @@
                 </div>
             </div>
 
-            <!-- 2. Primary Spend & Impressions Grid (Instantly visible!) -->
+            <!-- 2. Primary Spend & Impressions Grid with Tooltips (Requirement 4) -->
             <div class="adlens-metrics-grid">
-                <div class="adlens-stat-box adlens-stat-spend" title="Estimated cumulative ad spend">
-                    <span class="adlens-stat-label">Est. Total Spend</span>
+                <div class="adlens-stat-box adlens-stat-spend">
+                    <span class="adlens-stat-label">
+                        Est. Total Spend
+                        <span class="adlens-calc-trigger" title="How calculated">?
+                            <span class="adlens-calc-tooltip">${perf.tooltips?.spend || 'Estimated cumulative ad spend'}</span>
+                        </span>
+                    </span>
                     <span class="adlens-stat-val adlens-spend-gradient">${totalSpendMidStr}</span>
-                    <span class="adlens-stat-sub">${daySpendRange}</span>
+                    <span class="adlens-stat-sub">${spendSubStr}</span>
                 </div>
 
-                <div class="adlens-stat-box" title="Estimated Views & Impressions">
-                    <span class="adlens-stat-label">Est. Views</span>
+                <div class="adlens-stat-box">
+                    <span class="adlens-stat-label">
+                        Est. Views
+                        <span class="adlens-calc-trigger" title="How calculated">?
+                            <span class="adlens-calc-tooltip">${perf.tooltips?.views || 'Estimated impressions based on CPM'}</span>
+                        </span>
+                    </span>
                     <span class="adlens-stat-val">${viewsCompactStr}</span>
                     <span class="adlens-stat-sub">${viewsPerDayStr}</span>
                 </div>
 
-                <div class="adlens-stat-box" title="Estimated conversions at benchmark CPA">
-                    <span class="adlens-stat-label">Est. Orders</span>
+                <div class="adlens-stat-box">
+                    <span class="adlens-stat-label">
+                        Est. Orders
+                        <span class="adlens-calc-trigger" title="How calculated">?
+                            <span class="adlens-calc-tooltip">${perf.tooltips?.orders || 'Estimated conversions at target CPA'}</span>
+                        </span>
+                    </span>
                     <span class="adlens-stat-val">~${perf.estPurchases.mid.toLocaleString('en-IN')}</span>
                     <span class="adlens-stat-sub">CPC ~₹${perf.cpcMid.toFixed(1)}</span>
                 </div>
             </div>
+
+            ${euAudienceHtml}
 
             <!-- 3. AdLens Action Toolbar -->
             <div class="adlens-actions-row">
@@ -1226,20 +1499,24 @@
             <div class="adlens-details-drawer" style="display: none;">
                 <div class="adlens-drawer-grid">
                     <div class="adlens-drawer-item">
-                        <span>Daily Spend:</span>
-                        <b>${daySpendStr} / day</b>
+                        <span>Daily Bracket:
+                            <span class="adlens-calc-trigger" title="How calculated">?
+                                <span class="adlens-calc-tooltip">${perf.tooltips?.daily || 'Daily spend tier range'}</span>
+                            </span>
+                        </span>
+                        <b>${daySpendStr} / day (${daySpendRange})</b>
                     </div>
                     <div class="adlens-drawer-item">
-                        <span>Benchmark CPM:</span>
-                        <b>₹${BENCHMARKS.metrics.cpm.mid}</b>
+                        <span>Creative Factor:</span>
+                        <b>${perf.creativeMultiplier > 1 ? `×${perf.creativeMultiplier.toFixed(2)} (${data.creativeCount} ads factor)` : '1.0× (Single Ad)'}</b>
                     </div>
                     <div class="adlens-drawer-item">
-                        <span>Benchmark CTR:</span>
-                        <b>${BENCHMARKS.metrics.ctr_percent.mid}%</b>
+                        <span>Estimation Mode:</span>
+                        <b>${perf.isEuMode ? '🇪🇺 EU Real-Reach' : '🇮🇳 India Estimate Mode'}</b>
                     </div>
                     <div class="adlens-drawer-item">
-                        <span>Model:</span>
-                        <b>${confText} · ${activeVerticalName}</b>
+                        <span>Vertical Benchmark:</span>
+                        <b>${activeVerticalName} (₹${BENCHMARKS.metrics.cpm.mid} CPM)</b>
                     </div>
                 </div>
                 <div class="adlens-drawer-footer">
@@ -1509,18 +1786,21 @@
 
     // ─── Recalculate All Existing Ads ──────────────────────────────────────────
     function recalculateAllAds() {
+        let totalSpend = 0;
         detectedAdsMap.forEach((ad, key) => {
-            const newPerf = calculatePerformance(ad.startDate);
+            const newPerf = calculatePerformance(ad.startDate, ad.endDate, ad.status, ad.creativeCount, ad.euData);
             ad.perf = newPerf;
             ad.tierKey = newPerf.tierKey;
             ad.tier = newPerf.tier;
             ad.daysRunning = newPerf.daysRunning;
+            totalSpend += (newPerf.spend?.mid || 0);
 
             if (ad.element) {
-                const oldLens = ad.element.querySelector('.spendo-lens-card, .bloomx-lens-card');
+                const oldLens = ad.element.querySelector('.spendo-lens-card, .bloomx-lens-card, .bloomx-adlens-card');
                 if (oldLens) {
                     const newLens = createLensCardElement({
                         startDate: ad.startDate,
+                        endDate: ad.endDate,
                         status: ad.status,
                         platforms: ad.platforms,
                         creativeCount: ad.creativeCount,
@@ -1534,6 +1814,10 @@
                 }
             }
         });
+
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.set({ last_detected_page_spend: totalSpend });
+        }
 
         renderFloatingPanel();
     }
@@ -1955,23 +2239,28 @@
                 }
             });
 
+            let pageDetectedTotalSpend = 0;
             cardsFound.forEach((card, idx) => {
                 const cardText = card.innerText || '';
                 const libraryId = detectLibraryId(cardText) || `card_${idx}`;
-
-                const startDate = parseStartDate(cardText);
                 const status = detectStatus(cardText);
+                const { startDate, endDate } = parseStartAndEndDate(cardText, status);
                 const platforms = detectPlatforms(card);
                 const creativeCount = detectCreativeCount(cardText);
                 const advertiserName = detectAdvertiserName(card);
                 const hookSnippet = detectHookSnippet(cardText);
-                const perf = calculatePerformance(startDate);
+                const euData = detectEuTransparency(card, cardText);
+                const perf = calculatePerformance(startDate, endDate, status, creativeCount, euData);
+
+                pageDetectedTotalSpend += (perf.spend?.mid || 0);
 
                 detectedAdsMap.set(libraryId, {
                     element: card,
                     libraryId,
                     advertiserName,
                     startDate,
+                    endDate,
+                    euData,
                     daysRunning: perf.daysRunning,
                     status,
                     platforms,
@@ -1989,6 +2278,7 @@
 
                 const lensElement = createLensCardElement({
                     startDate,
+                    endDate,
                     status,
                     platforms,
                     creativeCount,
@@ -2002,6 +2292,10 @@
                 card.setAttribute('data-bloomx-injected', 'true');
                 card.insertBefore(lensElement, card.firstChild);
             });
+
+            if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+                chrome.storage.local.set({ last_detected_page_spend: pageDetectedTotalSpend });
+            }
 
             renderFloatingPanel();
 

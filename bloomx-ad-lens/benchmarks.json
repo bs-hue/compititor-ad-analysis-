@@ -1,5 +1,12 @@
 {
   "active_vertical": "spiritual_coaching",
+  "eu_benchmarks": {
+    "cpm_low_eur": 4.0,
+    "cpm_mid_eur": 7.0,
+    "cpm_high_eur": 10.0,
+    "eur_to_inr_rate": 90.0,
+    "frequency": 1.9
+  },
   "verticals": {
     "spiritual_coaching": {
       "name": "Spiritual / Coaching",

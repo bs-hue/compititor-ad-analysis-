@@ -382,7 +382,7 @@ const ADLENS_BENCHMARKS = {
 
 let currentBenchmarkVertical = 'spiritual_coaching';
 
-function calculateAdLensEstimates(daysRunning, verticalKey = currentBenchmarkVertical) {
+function calculateAdLensEstimates(daysRunning, verticalKey = currentBenchmarkVertical, creativeCount = 1) {
   const bench = ADLENS_BENCHMARKS[verticalKey] || ADLENS_BENCHMARKS.spiritual_coaching;
   const days = Math.max(1, Number(daysRunning) || 1);
   let tierKey = 'test';
@@ -391,9 +391,12 @@ function calculateAdLensEstimates(daysRunning, verticalKey = currentBenchmarkVer
   else tierKey = 'winner';
 
   const tier = bench.daily_spend_tiers[tierKey];
-  const spendLow = days * tier.low;
-  const spendMid = days * tier.mid;
-  const spendHigh = days * tier.high;
+  const count = typeof creativeCount === 'number' && creativeCount > 1 ? creativeCount : 1;
+  const multiplier = count > 1 ? Math.min(1 + 0.1 * (count - 1), 1.5) : 1.0;
+
+  const spendLow = Math.round(days * tier.low * multiplier);
+  const spendMid = Math.round(days * tier.mid * multiplier);
+  const spendHigh = Math.round(days * tier.high * multiplier);
 
   const viewsLow = Math.round((spendLow / bench.metrics.cpm.high) * 1000);
   const viewsMid = Math.round((spendMid / bench.metrics.cpm.mid) * 1000);
@@ -406,6 +409,7 @@ function calculateAdLensEstimates(daysRunning, verticalKey = currentBenchmarkVer
   return {
     days,
     tierKey,
+    creativeMultiplier: multiplier,
     spend: { low: spendLow, mid: spendMid, high: spendHigh },
     views: { low: viewsLow, mid: viewsMid, high: viewsHigh },
     cpcMid,
