@@ -832,6 +832,9 @@
             if (area === 'local') {
                 if (changes.dashboard_api_url) {
                     connectedDashboardUrl = changes.dashboard_api_url.newValue || 'http://localhost:3000';
+                    document.querySelectorAll('.adlens-dashboard-link').forEach(link => {
+                        link.href = connectedDashboardUrl;
+                    });
                 }
                 if (changes.active_vertical || changes.custom_benchmarks || changes.eu_benchmarks) {
                     loadBenchmarksAndSync(() => {
@@ -1562,6 +1565,14 @@
                 const isHidden = drawerEl.style.display === 'none';
                 drawerEl.style.display = isHidden ? 'flex' : 'none';
                 toggleBtn.innerHTML = isHidden ? 'Details ▴' : 'Details ▾';
+            });
+        }
+
+        // Dashboard Link dynamic click sync
+        const dashboardLinkEl = container.querySelector('.adlens-dashboard-link');
+        if (dashboardLinkEl) {
+            dashboardLinkEl.addEventListener('click', () => {
+                dashboardLinkEl.href = connectedDashboardUrl;
             });
         }
 
