@@ -1,570 +1,738 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Competitor Intelligence | Ad Swipe & Creative Analysis</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700;750;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700;750;800&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
-<div class="app-layout">
+  <div class="app-layout">
 
-  <!-- ─── 1. COMPACT PERSISTENT LEFT SIDEBAR ───────────────────────────────── -->
-  <aside class="app-sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <a href="#" class="brand-badge">
-        <div class="brand-icon-box">⚡</div>
-        <div class="brand-meta">
-          <span class="brand-title">BloomX Intel</span>
-          <span class="brand-subtitle">Ad Intelligence Engine</span>
-        </div>
-      </a>
-    </div>
-
-    <!-- Client / Brand Switcher -->
-    <div class="workspace-switcher" id="workspaceSwitcherBtn" onclick="toggleWorkspaceDropdown()" title="Switch Client Workspace">
-      <div class="ws-info">
-        <span class="ws-label">Current Client</span>
-        <span class="ws-name" id="currentWsName">Master Kundli Report</span>
-      </div>
-      <span class="ws-chevron">▾</span>
-    </div>
-
-    <!-- Dropdown Menu for Workspaces -->
-    <div id="workspaceDropdown" style="display: none; margin: 0 14px 10px 14px; background: #fff; border: 1px solid var(--border-default); border-radius: var(--radius-sm); box-shadow: var(--shadow-md); padding: 4px;">
-      <!-- Populated dynamically -->
-    </div>
-
-    <!-- Navigation Menu -->
-    <nav class="sidebar-nav">
-      <span class="nav-section-label">Main Menu</span>
-      <a class="nav-link active" data-tab="overview" onclick="switchNavTab('overview', this)">
-        <div class="nav-link-left">
-          <span class="nav-icon">📊</span>
-          <span>Overview</span>
-        </div>
-      </a>
-
-      <a class="nav-link" data-tab="insights" onclick="switchNavTab('insights', this)">
-        <div class="nav-link-left">
-          <span class="nav-icon">💡</span>
-          <span>Market Insights</span>
-        </div>
-      </a>
-
-      <a class="nav-link" data-tab="winners" onclick="switchNavTab('winners', this)">
-        <div class="nav-link-left">
-          <span class="nav-icon">⭐</span>
-          <span>Top Ads</span>
-        </div>
-        <span class="nav-counter" id="navWinnersCount">6</span>
-      </a>
-
-      <a class="nav-link" data-tab="library" onclick="switchNavTab('library', this)">
-        <div class="nav-link-left">
-          <span class="nav-icon">📚</span>
-          <span>Ad Library</span>
-        </div>
-        <span class="nav-counter" id="navAdsCount">18</span>
-      </a>
-
-      <a class="nav-link" data-tab="saved" onclick="switchNavTab('saved', this)">
-        <div class="nav-link-left">
-          <span class="nav-icon">📁</span>
-          <span>Saved Ads</span>
-        </div>
-        <span class="nav-counter" id="navSavedCount">0</span>
-      </a>
-    </nav>
-
-    <!-- Sidebar Bottom Status -->
-    <div class="sidebar-footer">
-      <div class="proto-badge">
-        <span class="proto-dot"></span>
-        <span>Local Prototype Mode</span>
-      </div>
-      <button class="btn btn-secondary btn-sm" onclick="exportDataCSV()">
-        📥 Export Swipe CSV
-      </button>
-    </div>
-  </aside>
-
-  <!-- ─── 2. MAIN VIEW AREA ─────────────────────────────────────────────────── -->
-  <div class="main-wrapper">
-
-    <!-- Top Sticky Nav -->
-    <header class="top-nav">
-      <div class="nav-breadcrumb">
-        <span>Clients</span>
-        <span>›</span>
-        <span id="breadcrumbClientName">Master Kundli Report By Ankit Batra</span>
-        <span>›</span>
-        <span class="breadcrumb-active" id="breadcrumbActiveSection">Overview</span>
+    <!-- ─── 1. COMPACT PERSISTENT LEFT SIDEBAR ───────────────────────────────── -->
+    <aside class="app-sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="#" class="brand-badge">
+          <div class="brand-icon-box">⚡</div>
+          <div class="brand-meta">
+            <span class="brand-title">BloomX Intel</span>
+            <span class="brand-subtitle">Ad Intelligence Engine</span>
+          </div>
+        </a>
       </div>
 
-      <div class="top-nav-actions">
-        <!-- Apify Live Cloud Status & Sync Button -->
-        <div id="apifyStatusPill" class="apify-status-pill" title="Apify Cloud Scraper API Status">
-          <span class="apify-pulse-dot"></span>
-          <span id="apifyStatusText">Apify Cloud Active</span>
+      <!-- Client / Brand Switcher -->
+      <div class="workspace-switcher" id="workspaceSwitcherBtn" onclick="toggleWorkspaceDropdown()"
+        title="Switch Client Workspace">
+        <div class="ws-info">
+          <span class="ws-label">Current Client</span>
+          <span class="ws-name" id="currentWsName">Master Kundli Report</span>
         </div>
-        <button class="btn btn-secondary btn-sm" id="btnSyncApify" onclick="triggerApifySync()" title="Trigger live Meta Ad Library auto-scrape via Apify">
-          🔄 Sync via Apify
-        </button>
-        <button class="btn btn-primary btn-sm" onclick="openAddCompetitorModal()">
-          + Add Competitor
-        </button>
+        <span class="ws-chevron">▾</span>
+      </div>
+
+      <!-- Dropdown Menu for Workspaces -->
+      <div id="workspaceDropdown"
+        style="display: none; margin: 0 14px 10px 14px; background: #fff; border: 1px solid var(--border-default); border-radius: var(--radius-sm); box-shadow: var(--shadow-md); padding: 4px;">
+        <!-- Populated dynamically -->
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="sidebar-nav">
+        <span class="nav-section-label">Main Menu</span>
+        <a class="nav-link active" data-tab="overview" onclick="switchNavTab('overview', this)">
+          <div class="nav-link-left">
+            <span class="nav-icon">📊</span>
+            <span>Overview</span>
+          </div>
+        </a>
+
+        <a class="nav-link" data-tab="insights" onclick="switchNavTab('insights', this)">
+          <div class="nav-link-left">
+            <span class="nav-icon">💡</span>
+            <span>Market Insights</span>
+          </div>
+        </a>
+
+        <a class="nav-link" data-tab="winners" onclick="switchNavTab('winners', this)">
+          <div class="nav-link-left">
+            <span class="nav-icon">⭐</span>
+            <span>Top Ads</span>
+          </div>
+          <span class="nav-counter" id="navWinnersCount">6</span>
+        </a>
+
+        <a class="nav-link" data-tab="library" onclick="switchNavTab('library', this)">
+          <div class="nav-link-left">
+            <span class="nav-icon">📚</span>
+            <span>Ad Library</span>
+          </div>
+          <span class="nav-counter" id="navAdsCount">18</span>
+        </a>
+
+        <a class="nav-link" data-tab="saved" onclick="switchNavTab('saved', this)">
+          <div class="nav-link-left">
+            <span class="nav-icon">📁</span>
+            <span>Saved Ads</span>
+          </div>
+          <span class="nav-counter" id="navSavedCount">0</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Bottom Status -->
+      <div class="sidebar-footer">
+        <div class="proto-badge">
+          <span class="proto-dot"></span>
+          <span>Local Prototype Mode</span>
+        </div>
         <button class="btn btn-secondary btn-sm" onclick="exportDataCSV()">
-          Export CSV
+          📥 Export Swipe CSV
         </button>
       </div>
-    </header>
+    </aside>
 
-    <!-- Dashboard Content Canvas -->
-    <main class="dashboard-content">
+    <!-- ─── 2. MAIN VIEW AREA ─────────────────────────────────────────────────── -->
+    <div class="main-wrapper">
 
-      <!-- Page Header -->
-      <div class="page-header-row">
-        <div class="header-text-group">
-          <h1>Competitor Intelligence</h1>
-          <p>Review competitor marketing ads, discover high-performing angles, and save creative ideas for your campaigns.</p>
-        </div>
-      </div>
-
-      <!-- ─── 3. SUMMARY METRICS ROW ───────────────────────────────────────── -->
-      <section class="metrics-grid">
-        <div class="metric-card">
-          <div class="metric-top">
-            <span class="metric-label">Tracked Competitors</span>
-            <span class="metric-icon-pill">🏢</span>
-          </div>
-          <div class="metric-value-row">
-            <span class="metric-value" id="metricCompCount">4</span>
-            <span class="metric-badge badge-neutral">Brands</span>
-          </div>
-          <span class="metric-subtext">Active market monitoring</span>
+      <!-- Top Sticky Nav -->
+      <header class="top-nav">
+        <div class="nav-breadcrumb">
+          <span>Clients</span>
+          <span>›</span>
+          <span id="breadcrumbClientName">Master Kundli Report By Ankit Batra</span>
+          <span>›</span>
+          <span class="breadcrumb-active" id="breadcrumbActiveSection">Overview</span>
         </div>
 
-        <div class="metric-card">
-          <div class="metric-top">
-            <span class="metric-label">Monitored Ads</span>
-            <span class="metric-icon-pill">⚡</span>
+        <div class="top-nav-actions">
+          <!-- Apify Live Cloud Status & Sync Button -->
+          <div id="apifyStatusPill" class="apify-status-pill" title="Apify Cloud Scraper API Status">
+            <span class="apify-pulse-dot"></span>
+            <span id="apifyStatusText">Apify Cloud Active</span>
           </div>
-          <div class="metric-value-row">
-            <span class="metric-value" id="metricAdCount">18</span>
-            <span class="metric-badge badge-positive">Live</span>
+          <button class="btn btn-secondary btn-sm" id="btnSyncApify" onclick="triggerApifySync()"
+            title="Trigger live Meta Ad Library auto-scrape via Apify">
+            🔄 Sync via Apify
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="openAddCompetitorModal()">
+            + Add Competitor
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="exportDataCSV()">
+            Export CSV
+          </button>
+        </div>
+      </header>
+
+      <!-- Dashboard Content Canvas -->
+      <main class="dashboard-content">
+
+        <!-- Page Header -->
+        <div class="page-header-row">
+          <div class="header-text-group">
+            <h1>Competitor Intelligence</h1>
+            <p>Review competitor marketing ads, discover high-performing angles, and save creative ideas for your
+              campaigns.</p>
           </div>
-          <span class="metric-subtext">Ads tracked across Facebook &amp; Instagram</span>
         </div>
 
-        <div class="metric-card">
-          <div class="metric-top">
-            <span class="metric-label">Longest Running Ad</span>
-            <span class="metric-icon-pill">⏱️</span>
-          </div>
-          <div class="metric-value-row">
-            <span class="metric-value" id="metricLongestActive">340d</span>
-            <span class="metric-badge badge-positive">Winner</span>
-          </div>
-          <span class="metric-subtext">Astrotalk · Consistent scaler</span>
-        </div>
-
-        <div class="metric-card">
-          <div class="metric-top">
-            <span class="metric-label">Top Market Angle</span>
-            <span class="metric-icon-pill">🎯</span>
-          </div>
-          <div class="metric-value-row">
-            <span class="metric-value" style="font-size: 19px;" id="metricTopAngle">Problem Agitation</span>
-          </div>
-          <span class="metric-subtext">42% of 90d+ ads utilize this angle</span>
-        </div>
-      </section>
-
-      <!-- ─── 4. MARKET INTELLIGENCE PATTERNS ─────────────────────────────── -->
-      <section id="marketInsightsSection" style="margin-bottom: 32px;">
-        <div class="section-header">
-          <span class="section-title">💡 Market Insights</span>
-          <span style="font-size: 12.5px; color: var(--text-muted);">Synthesized from active competitor campaigns</span>
-        </div>
-
-        <div class="patterns-grid">
-          <div class="pattern-card">
-            <span class="pattern-tag tag-offer">Offer Pattern</span>
-            <p class="pattern-text">"Free entry-point tripwire offers (₹1 consultation / free Kundli audit) appear across 74% of long-running funnels."</p>
-            <div class="pattern-footer">
-              <span>16 ads detected</span>
-              <a class="pattern-link" onclick="filterByAngle('Free Entry Offer')">View matching ads →</a>
+        <!-- ─── 3. SUMMARY METRICS ROW ───────────────────────────────────────── -->
+        <section class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-top">
+              <span class="metric-label">Tracked Competitors</span>
+              <span class="metric-icon-pill">🏢</span>
             </div>
-          </div>
-
-          <div class="pattern-card">
-            <span class="pattern-tag tag-creative">Format Pattern</span>
-            <p class="pattern-text">"Direct-to-camera founder/expert talking-head video ads account for 47% of continuous 90d+ winners."</p>
-            <div class="pattern-footer">
-              <span>24 video ads</span>
-              <a class="pattern-link" onclick="filterByFormat('Video')">View video ads →</a>
+            <div class="metric-value-row">
+              <span class="metric-value" id="metricCompCount">4</span>
+              <span class="metric-badge badge-neutral">Brands</span>
             </div>
+            <span class="metric-subtext">Active market monitoring</span>
           </div>
 
-          <div class="pattern-card">
-            <span class="pattern-tag tag-longevity">Longevity Signal</span>
-            <p class="pattern-text">"Astro Arun Pandit's 'Graha Dosh / Career Friction' hook has scaled continuously for 285+ days without creative fatigue."</p>
-            <div class="pattern-footer">
-              <span>Winner Whale</span>
-              <a class="pattern-link" onclick="focusWinnerAd()">Analyze ad →</a>
+          <div class="metric-card">
+            <div class="metric-top">
+              <span class="metric-label">Monitored Ads</span>
+              <span class="metric-icon-pill">⚡</span>
             </div>
+            <div class="metric-value-row">
+              <span class="metric-value" id="metricAdCount">18</span>
+              <span class="metric-badge badge-positive">Live</span>
+            </div>
+            <span class="metric-subtext">Ads tracked across Facebook &amp; Instagram</span>
           </div>
-        </div>
-      </section>
 
-      <!-- ─── 4B. TOP PERFORMING ADS (PROVEN WINNERS SPOTLIGHT) ───────────── -->
-      <section id="topAdsSection" style="margin-bottom: 32px;">
-        <div class="section-header">
-          <span class="section-title">⭐ Top Performing Ads</span>
-          <span style="font-size: 12.5px; color: var(--text-muted);">Proven winners active for 90+ days without creative fatigue</span>
-        </div>
-        <div class="top-ads-grid" id="topAdsContainer">
-          <!-- Populated dynamically with top 3 champion ads -->
-        </div>
-      </section>
+          <div class="metric-card">
+            <div class="metric-top">
+              <span class="metric-label">Longest Running Ad</span>
+              <span class="metric-icon-pill">⏱️</span>
+            </div>
+            <div class="metric-value-row">
+              <span class="metric-value" id="metricLongestActive">340d</span>
+              <span class="metric-badge badge-positive">Winner</span>
+            </div>
+            <span class="metric-subtext">Astrotalk · Consistent scaler</span>
+          </div>
 
-      <!-- ─── 5. AD LIBRARY WORKSPACE (SEARCH, FILTER & CONTROLS) ──────────── -->
-      <section class="library-section" id="adLibrarySection">
-        
-        <!-- Ad Lens Instant URL Analyzer Banner -->
-        <div class="adlens-dashboard-analyzer">
-          <div class="adlens-analyzer-header">
-            <div class="adlens-analyzer-title">
-              <span class="adlens-badge-icon">⚡</span>
-              <div>
-                <h4 style="margin: 0; font-size: 14.5px; font-weight: 750; color: var(--text-primary);">Ad Lens™ Instant Intelligence Analyzer</h4>
-                <p style="margin: 2px 0 0; font-size: 12px; color: var(--text-secondary);">Paste any Facebook Ad Library link or ID to compute real-time spend estimates, reach, CPC, and winner tier without leaving your dashboard.</p>
+          <div class="metric-card">
+            <div class="metric-top">
+              <span class="metric-label">Top Market Angle</span>
+              <span class="metric-icon-pill">🎯</span>
+            </div>
+            <div class="metric-value-row">
+              <span class="metric-value" style="font-size: 19px;" id="metricTopAngle">Problem Agitation</span>
+            </div>
+            <span class="metric-subtext">42% of 90d+ ads utilize this angle</span>
+          </div>
+        </section>
+
+        <!-- ─── 4. MARKET INTELLIGENCE PATTERNS ─────────────────────────────── -->
+        <section id="marketInsightsSection" style="margin-bottom: 32px;">
+          <div class="section-header">
+            <span class="section-title">💡 Market Insights</span>
+            <span style="font-size: 12.5px; color: var(--text-muted);">Synthesized from active competitor
+              campaigns</span>
+          </div>
+
+          <div class="patterns-grid">
+            <div class="pattern-card">
+              <span class="pattern-tag tag-offer">Offer Pattern</span>
+              <p class="pattern-text">"Free entry-point tripwire offers (₹1 consultation / free Kundli audit) appear
+                across 74% of long-running funnels."</p>
+              <div class="pattern-footer">
+                <span>16 ads detected</span>
+                <a class="pattern-link" onclick="filterByAngle('Free Entry Offer')">View matching ads →</a>
               </div>
             </div>
-            <div class="adlens-analyzer-vertical-select-wrap">
-              <span style="font-size: 11px; font-weight: 750; color: var(--text-muted); text-transform: uppercase;">Benchmark:</span>
-              <select id="dashboardVerticalSelect" class="adlens-vertical-select" onchange="handleBenchmarkVerticalChange()">
-                <option value="spiritual_coaching" selected>Spiritual / Coaching (Calibrated)</option>
-                <option value="d2c">D2C E-commerce</option>
-                <option value="healthcare">Healthcare &amp; Wellness</option>
-                <option value="fintech">Fintech &amp; Finance</option>
-                <option value="education">Education &amp; EdTech</option>
-              </select>
-            </div>
-          </div>
-          <div class="adlens-analyzer-input-row">
-            <div class="adlens-input-wrap">
-              <span class="adlens-input-icon">🔗</span>
-              <input type="text" id="adLensUrlInput" class="adlens-input" placeholder="Paste FB Ad Library URL or ID (e.g. https://www.facebook.com/ads/library/?id=3271663196351922)..." onkeydown="if(event.key==='Enter') handleDashboardAdLensAnalyze()">
-            </div>
-            <button class="adlens-analyze-btn" id="btnRunAdLens" onclick="handleDashboardAdLensAnalyze()">
-              ⚡ Run Ad Lens Analysis
-            </button>
-          </div>
-          <div id="adLensAnalyzerResult" style="display: none; margin-top: 14px;"></div>
-        </div>
 
-        <!-- Controls Bar -->
-        <div class="library-top-controls">
-          <div class="search-and-view-row">
-            <div class="search-box">
-              <span class="search-icon">🔍</span>
-              <input type="text" id="searchInput" class="search-input" placeholder="Search hooks, copy, competitor names, or angles...">
+            <div class="pattern-card">
+              <span class="pattern-tag tag-creative">Format Pattern</span>
+              <p class="pattern-text">"Direct-to-camera founder/expert talking-head video ads account for 47% of
+                continuous 90d+ winners."</p>
+              <div class="pattern-footer">
+                <span>24 video ads</span>
+                <a class="pattern-link" onclick="filterByFormat('Video')">View video ads →</a>
+              </div>
             </div>
 
-            <div class="view-and-sort-group">
-              <select id="sortSelect" class="sort-select" onchange="handleSortChange(this.value)">
-                <option value="longest">Sort: Longest Running (Days)</option>
-                <option value="newest">Sort: Newest First</option>
-                <option value="competitor">Sort: Competitor Name</option>
-              </select>
-
-              <div class="view-toggle-group">
-                <button class="view-toggle-btn active" id="btnViewGrid" onclick="setViewMode('grid')" title="Grid View">
-                  ▦
-                </button>
-                <button class="view-toggle-btn" id="btnViewList" onclick="setViewMode('list')" title="List View">
-                  ☰
-                </button>
+            <div class="pattern-card">
+              <span class="pattern-tag tag-longevity">Longevity Signal</span>
+              <p class="pattern-text">"Astro Arun Pandit's 'Graha Dosh / Career Friction' hook has scaled continuously
+                for 285+ days without creative fatigue."</p>
+              <div class="pattern-footer">
+                <span>Winner Whale</span>
+                <a class="pattern-link" onclick="focusWinnerAd()">Analyze ad →</a>
               </div>
             </div>
           </div>
+        </section>
 
-          <!-- Filter Pills: Competitor, Format, Tier -->
-          <div class="filter-pills-row">
-            <span class="filter-group-label">Brand:</span>
-            <div id="competitorPillsContainer" style="display: inline-flex; gap: 6px; flex-wrap: wrap;">
+        <!-- ─── 4B. TOP PERFORMING ADS (PROVEN WINNERS SPOTLIGHT) ───────────── -->
+        <section id="topAdsSection" style="margin-bottom: 32px;">
+          <div class="section-header">
+            <span class="section-title">⭐ Top Performing Ads</span>
+            <span style="font-size: 12.5px; color: var(--text-muted);">Proven winners active for 90+ days without
+              creative fatigue</span>
+          </div>
+          <div class="top-ads-grid" id="topAdsContainer">
+            <!-- Populated dynamically with top 3 champion ads -->
+          </div>
+        </section>
+
+        <!-- ─── 5. AD LIBRARY WORKSPACE (SEARCH, FILTER & CONTROLS) ──────────── -->
+        <section class="library-section" id="adLibrarySection">
+
+          <!-- Ad Lens Instant URL Analyzer Banner -->
+          <div class="adlens-dashboard-analyzer">
+            <div class="adlens-analyzer-header">
+              <div class="adlens-analyzer-title">
+                <span class="adlens-badge-icon">⚡</span>
+                <div>
+                  <h4 style="margin: 0; font-size: 14.5px; font-weight: 750; color: var(--text-primary);">Ad Lens™
+                    Instant Intelligence Analyzer</h4>
+                  <p style="margin: 2px 0 0; font-size: 12px; color: var(--text-secondary);">Paste any Facebook Ad
+                    Library link or ID to compute real-time spend estimates, reach, CPC, and winner tier without leaving
+                    your dashboard.</p>
+                </div>
+              </div>
+              <div class="adlens-analyzer-vertical-select-wrap">
+                <span
+                  style="font-size: 11px; font-weight: 750; color: var(--text-muted); text-transform: uppercase;">Benchmark:</span>
+                <select id="dashboardVerticalSelect" class="adlens-vertical-select"
+                  onchange="handleBenchmarkVerticalChange()">
+                  <option value="spiritual_coaching" selected>Spiritual / Coaching (Calibrated)</option>
+                  <option value="d2c">D2C E-commerce</option>
+                  <option value="healthcare">Healthcare &amp; Wellness</option>
+                  <option value="fintech">Fintech &amp; Finance</option>
+                  <option value="education">Education &amp; EdTech</option>
+                </select>
+              </div>
+            </div>
+            <div class="adlens-analyzer-input-row">
+              <div class="adlens-input-wrap">
+                <span class="adlens-input-icon">🔗</span>
+                <input type="text" id="adLensUrlInput" class="adlens-input"
+                  placeholder="Paste FB Ad Library URL or ID (e.g. https://www.facebook.com/ads/library/?id=3271663196351922)..."
+                  onkeydown="if(event.key==='Enter') handleDashboardAdLensAnalyze()">
+              </div>
+              <button class="adlens-analyze-btn" id="btnRunAdLens" onclick="handleDashboardAdLensAnalyze()">
+                ⚡ Run Ad Lens Analysis
+              </button>
+            </div>
+            <div id="adLensAnalyzerResult" style="display: none; margin-top: 14px;"></div>
+          </div>
+
+          <!-- Controls Bar -->
+          <div class="library-top-controls">
+            <div class="search-and-view-row">
+              <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" class="search-input"
+                  placeholder="Search hooks, copy, competitor names, or angles...">
+              </div>
+
+              <div class="view-and-sort-group">
+                <select id="sortSelect" class="sort-select" onchange="handleSortChange(this.value)">
+                  <option value="longest">Sort: Longest Running (Days)</option>
+                  <option value="newest">Sort: Newest First</option>
+                  <option value="competitor">Sort: Competitor Name</option>
+                </select>
+
+                <div class="view-toggle-group">
+                  <button class="view-toggle-btn active" id="btnViewGrid" onclick="setViewMode('grid')"
+                    title="Grid View">
+                    ▦
+                  </button>
+                  <button class="view-toggle-btn" id="btnViewList" onclick="setViewMode('list')" title="List View">
+                    ☰
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Filter Pills: Competitor, Format, Tier -->
+            <div class="filter-pills-row">
+              <span class="filter-group-label">Brand:</span>
+              <div id="competitorPillsContainer" style="display: inline-flex; gap: 6px; flex-wrap: wrap;">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+            <div class="filter-pills-row" style="padding-top: 12px;">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span class="filter-group-label">Format:</span>
+                <span class="filter-pill active" data-filter="format" data-val="all"
+                  onclick="setFilter('format', 'all', this)">All</span>
+                <span class="filter-pill" data-filter="format" data-val="Video"
+                  onclick="setFilter('format', 'Video', this)">🎬 Video</span>
+                <span class="filter-pill" data-filter="format" data-val="Image"
+                  onclick="setFilter('format', 'Image', this)">🖼️ Image</span>
+                <span class="filter-pill" data-filter="format" data-val="Carousel"
+                  onclick="setFilter('format', 'Carousel', this)">📑 Carousel</span>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 8px; margin-left: auto; flex-wrap: wrap;">
+                <span class="filter-group-label">Tier:</span>
+                <span class="filter-pill active" data-filter="tier" data-val="all"
+                  onclick="setFilter('tier', 'all', this)">All</span>
+                <span class="filter-pill" data-filter="tier" data-val="Winner"
+                  onclick="setFilter('tier', 'Winner', this)">🏆 Winner (&gt;90d)</span>
+                <span class="filter-pill" data-filter="tier" data-val="Tested"
+                  onclick="setFilter('tier', 'Tested', this)">⚡ Tested (30-90d)</span>
+                <span class="filter-pill" data-filter="tier" data-val="New" onclick="setFilter('tier', 'New', this)">🧪
+                  New (&lt;30d)</span>
+                <button id="btnResetFilters" class="filter-reset-btn" onclick="resetFilters()" style="display: none;"
+                  title="Reset all filters">✕ Clear</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ad Cards Container -->
+          <div class="ads-library-grid" id="adsGridContainer">
+            <!-- Populated by JavaScript -->
+          </div>
+
+          <!-- Pagination Controls -->
+          <div class="pagination-bar" id="paginationBar">
+            <span id="paginationSummary">Showing 1–9 of 60 ads</span>
+            <div class="pagination-pages" id="paginationPages">
               <!-- Populated dynamically -->
             </div>
           </div>
+        </section>
 
-          <div class="filter-pills-row" style="padding-top: 12px;">
-            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-              <span class="filter-group-label">Format:</span>
-              <span class="filter-pill active" data-filter="format" data-val="all" onclick="setFilter('format', 'all', this)">All</span>
-              <span class="filter-pill" data-filter="format" data-val="Video" onclick="setFilter('format', 'Video', this)">🎬 Video</span>
-              <span class="filter-pill" data-filter="format" data-val="Image" onclick="setFilter('format', 'Image', this)">🖼️ Image</span>
-              <span class="filter-pill" data-filter="format" data-val="Carousel" onclick="setFilter('format', 'Carousel', this)">📑 Carousel</span>
-            </div>
-
-            <div style="display: flex; align-items: center; gap: 8px; margin-left: auto; flex-wrap: wrap;">
-              <span class="filter-group-label">Tier:</span>
-              <span class="filter-pill active" data-filter="tier" data-val="all" onclick="setFilter('tier', 'all', this)">All</span>
-              <span class="filter-pill" data-filter="tier" data-val="Winner" onclick="setFilter('tier', 'Winner', this)">🏆 Winner (&gt;90d)</span>
-              <span class="filter-pill" data-filter="tier" data-val="Tested" onclick="setFilter('tier', 'Tested', this)">⚡ Tested (30-90d)</span>
-              <span class="filter-pill" data-filter="tier" data-val="New" onclick="setFilter('tier', 'New', this)">🧪 New (&lt;30d)</span>
-              <button id="btnResetFilters" class="filter-reset-btn" onclick="resetFilters()" style="display: none;" title="Reset all filters">✕ Clear</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Ad Cards Container -->
-        <div class="ads-library-grid" id="adsGridContainer">
-          <!-- Populated by JavaScript -->
-        </div>
-
-        <!-- Pagination Controls -->
-        <div class="pagination-bar" id="paginationBar">
-          <span id="paginationSummary">Showing 1–9 of 60 ads</span>
-          <div class="pagination-pages" id="paginationPages">
-            <!-- Populated dynamically -->
-          </div>
-        </div>
-      </section>
-
-    </main>
-  </div>
-</div>
-
-<!-- ─── 6. DRAWERS (SLIDE-OVER PANELS) ─────────────────────────────────────── -->
-<div class="drawer-backdrop" id="drawerBackdrop" onclick="closeActiveDrawers()"></div>
-
-<!-- Drawer A: Hook Adaptation Studio -->
-<aside class="slide-drawer" id="hookDrawer">
-  <div class="drawer-header">
-    <div class="drawer-title-group">
-      <h3>✦ Adapt Hook for Your Brand</h3>
-      <p id="hookDrawerCompetitor">From Competitor Ad</p>
-    </div>
-    <button class="drawer-close-btn" onclick="closeActiveDrawers()">&times;</button>
-  </div>
-
-  <div class="drawer-body">
-    <!-- Original Hook -->
-    <div style="background: var(--bg-subtle); border-radius: var(--radius-md); padding: 14px 16px;">
-      <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Original Competitor Hook</span>
-      <div style="font-size: 14.5px; font-weight: 700; color: var(--text-primary); margin-top: 4px;" id="drawerOrigHook">"..."</div>
-    </div>
-
-    <!-- Why it works -->
-    <div>
-      <span style="font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase;">Why this hook works</span>
-      <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px; line-height: 1.5;" id="drawerWhyWorks">
-        • Direct psychological agitation on unrewarded effort.<br>
-        • Low barrier to entry removes user conversion friction.<br>
-        • Positions the product as the missing diagnosis.
-      </div>
-    </div>
-
-    <!-- AI Generated Adaptations -->
-    <div>
-      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
-        <span style="font-size: 12px; font-weight: 750; color: var(--text-primary);">Tailored Variations for <span id="drawerClientTargetName" style="color: var(--primary);">Your Client</span></span>
-        <button class="btn-read-toggle" onclick="regenerateHookAdaptations()">🎲 Regenerate</button>
-      </div>
-      <div id="drawerVariationsList" style="display: flex; flex-direction: column; gap: 10px;">
-        <!-- Populated dynamically -->
-      </div>
+      </main>
     </div>
   </div>
 
-  <div class="drawer-footer">
-    <button class="btn btn-secondary" onclick="closeActiveDrawers()">Close</button>
-    <button class="btn btn-primary" onclick="saveActiveHookToSwipe()">💾 Save to Swipe File</button>
-  </div>
-</aside>
+  <!-- ─── 6. DRAWERS (SLIDE-OVER PANELS) ─────────────────────────────────────── -->
+  <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeActiveDrawers()"></div>
 
-<!-- Drawer B: Video View & Audio Transcribe -->
-<aside class="slide-drawer drawer-wide" id="transcribeDrawer">
-  <div class="drawer-header">
-    <div class="drawer-title-group">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <h3>🎬 Video View &amp; Audio Transcribe</h3>
-        <span id="transcribeModelBadge" style="font-size: 11px; font-weight: 700; background: var(--tint-emerald-bg); color: var(--tint-emerald-text); border: 1px solid var(--tint-emerald-border); padding: 2px 8px; border-radius: var(--radius-full);">● Sarvam AI (saaras:v3)</span>
+  <!-- Drawer A: Hook Adaptation Studio -->
+  <aside class="slide-drawer" id="hookDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title-group">
+        <h3>✦ Adapt Hook for Your Brand</h3>
+        <p id="hookDrawerCompetitor">From Competitor Ad</p>
       </div>
-      <p id="transcribeDrawerMeta">Loading video &amp; script intelligence...</p>
-    </div>
-    <button class="drawer-close-btn" onclick="closeActiveDrawers()">&times;</button>
-  </div>
-
-  <div class="drawer-body">
-    <!-- Video Player Screen -->
-    <div class="video-screen-frame" id="videoScreenFrame">
-      <div class="sim-video-inner">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 12px; font-weight: 700; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: var(--radius-full);" id="simVideoBrand">⚡ Competitor</span>
-          <span style="font-size: 11px; color: #4ADE80; font-weight: 700;">● 9:16 Video Reel</span>
-        </div>
-
-        <div style="text-align: center; padding: 0 16px;">
-          <div style="font-size: 15px; font-weight: 800; color: #fff;" id="simVideoHookText">"Hook..."</div>
-          <div style="font-size: 12px; color: #A5B4FC; margin-top: 4px;">Spoken by Verified Astrologer / Creator</div>
-          <div class="sim-video-wave">
-            <div class="sim-wave-bar"></div>
-            <div class="sim-wave-bar"></div>
-            <div class="sim-wave-bar"></div>
-            <div class="sim-wave-bar"></div>
-            <div class="sim-wave-bar"></div>
-          </div>
-        </div>
-
-        <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.4); padding: 6px 12px; border-radius: var(--radius-sm); font-size: 12px;">
-          <button class="btn btn-primary btn-sm" id="btnSimPlay" onclick="toggleSimVideoPlayback()" style="width: 28px; height: 28px; padding: 0; border-radius: 50%;">▶</button>
-          <span style="font-family: monospace; font-weight: 700; color: #E2E8F0;" id="simTimerLabel">00:00 / 00:54</span>
-          <a href="#" target="_blank" id="simMetaLink" style="color: #A5B4FC; text-decoration: none; font-size: 11.5px;">Meta Library ↗</a>
-        </div>
-      </div>
+      <button class="drawer-close-btn" onclick="closeActiveDrawers()">&times;</button>
     </div>
 
-    <!-- Mini Metrics Strip -->
-    <div class="stats-mini-strip">
-      <div class="stat-mini-tile">
-        <div class="label">Duration</div>
-        <div class="val">00:54</div>
-      </div>
-      <div class="stat-mini-tile">
-        <div class="label">Spoken Words</div>
-        <div class="val">142 words</div>
-      </div>
-      <div class="stat-mini-tile">
-        <div class="label">Pacing</div>
-        <div class="val">157 WPM</div>
-      </div>
-      <div class="stat-mini-tile">
-        <div class="label">Language</div>
-        <div class="val">Hinglish</div>
-      </div>
-    </div>
-
-    <!-- Timestamped Spoken Script -->
-    <div>
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-        <span style="font-size: 12.5px; font-weight: 750; color: var(--text-primary);">Word-for-Word Spoken Script</span>
-        <button class="btn btn-secondary btn-sm" onclick="copyFullTranscriptText(this)">📋 Copy Script</button>
-      </div>
-
-      <div id="transcribeSegmentsContainer">
-        <!-- Segments inserted dynamically -->
-      </div>
-    </div>
-
-    <!-- Takeaways -->
-    <div style="background: var(--bg-subtle); border-left: 3px solid var(--primary); padding: 12px 14px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;">
-      <span style="font-size: 11px; font-weight: 750; color: var(--primary); text-transform: uppercase;">Persuasion Insights</span>
-      <ul style="padding-left: 16px; font-size: 12.5px; color: var(--text-secondary); margin-top: 4px; line-height: 1.5;" id="transcribeTakeawaysContainer">
-        <!-- Bullets inserted dynamically -->
-      </ul>
-    </div>
-  </div>
-
-  <div class="drawer-footer">
-    <button class="btn btn-secondary" onclick="closeActiveDrawers()">Close</button>
-    <button class="btn btn-primary" onclick="adaptFromTranscribe()">✦ Adapt Script for Client</button>
-  </div>
-</aside>
-
-<!-- Drawer C: Deep-Dive Analysis -->
-<aside class="slide-drawer" id="analyzeDrawer">
-  <div class="drawer-header">
-    <div class="drawer-title-group">
-      <h3>Ad Intelligence Analysis</h3>
-      <p id="analyzeDrawerMeta">Competitor Analysis Breakdown</p>
-    </div>
-    <button class="drawer-close-btn" onclick="closeActiveDrawers()">&times;</button>
-  </div>
-
-  <div class="drawer-body">
-    <div style="background: var(--bg-subtle); border-radius: var(--radius-md); padding: 14px 16px;">
-      <span style="font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase;">Message Architecture</span>
-      <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 8px;">
-        <div>
-          <span style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Hook</span>
-          <div style="font-size: 13.5px; font-weight: 700; color: var(--text-primary);" id="analyzeHookVal">"..."</div>
-        </div>
-        <div>
-          <span style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Headline / Body</span>
-          <div style="font-size: 13px; color: var(--text-secondary);" id="analyzeBodyVal">"..."</div>
-        </div>
-      </div>
-    </div>
-
-    <div>
-      <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Marketing Angle</span>
-      <div style="font-size: 13.5px; font-weight: 700; color: var(--text-primary); margin-top: 4px;" id="analyzeAngleVal">Dosha &amp; Problem Agitation</div>
-    </div>
-
-    <div style="background: #FFFBEB; border: 1px solid #FDE68A; padding: 12px 14px; border-radius: var(--radius-md);">
-      <span style="font-size: 11px; font-weight: 750; color: #D97706; text-transform: uppercase;">Strategic Adaptation Idea</span>
-      <div style="font-size: 13px; color: #92400E; margin-top: 4px;" id="analyzeIdeaVal">Adapt this structure for your brand.</div>
-    </div>
-  </div>
-
-  <div class="drawer-footer">
-    <button class="btn btn-secondary" onclick="closeActiveDrawers()">Close</button>
-    <button class="btn btn-primary" onclick="openHookFromAnalyze()">✦ Use This Hook</button>
-  </div>
-</aside>
-
-<!-- Modal: Add Competitor -->
-<div class="modal-backdrop" id="addCompModalBackdrop" onclick="closeAddCompetitorModal()"></div>
-<div class="modal-dialog" id="addCompetitorModal">
-  <div class="drawer-header">
-    <div class="drawer-title-group">
-      <h3>Track New Competitor</h3>
-      <p>Add a competitor brand to this workspace</p>
-    </div>
-    <button type="button" class="drawer-close-btn" aria-label="Close" onclick="closeAddCompetitorModal()">&times;</button>
-  </div>
-
-  <form onsubmit="handleCreateCompetitorSubmit(event)">
     <div class="drawer-body">
-      <div>
-        <label style="font-size: 12.5px; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Brand / Competitor Name</label>
-        <input type="text" id="compNameInput" class="search-input" placeholder="e.g. Astro Arun Pandit" required style="padding-left: 12px;">
+      <!-- Original Hook -->
+      <div style="background: var(--bg-subtle); border-radius: var(--radius-md); padding: 14px 16px;">
+        <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Original
+          Competitor Hook</span>
+        <div style="font-size: 14.5px; font-weight: 700; color: var(--text-primary); margin-top: 4px;"
+          id="drawerOrigHook">"..."</div>
       </div>
 
+      <!-- Why it works -->
       <div>
-        <label style="font-size: 12.5px; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Ad Library URL</label>
-        <input type="url" id="compUrlInput" class="search-input" placeholder="https://www.facebook.com/ads/library/?..." style="padding-left: 12px;">
+        <span style="font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase;">Why this hook
+          works</span>
+        <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px; line-height: 1.5;"
+          id="drawerWhyWorks">
+          • Direct psychological agitation on unrewarded effort.<br>
+          • Low barrier to entry removes user conversion friction.<br>
+          • Positions the product as the missing diagnosis.
+        </div>
       </div>
 
+      <!-- AI Generated Adaptations -->
       <div>
-        <label style="font-size: 12.5px; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Niche / Category</label>
-        <select id="compCategorySelect" class="sort-select" style="width: 100%;">
-          <option value="Spiritual / Coaching">Spiritual &amp; Astrology</option>
-          <option value="D2C E-commerce">D2C &amp; E-Commerce</option>
-          <option value="Healthcare">Healthcare &amp; Wellness</option>
-          <option value="Fintech">Fintech &amp; Finance</option>
-          <option value="Education">Education &amp; EdTech</option>
-        </select>
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+          <span style="font-size: 12px; font-weight: 750; color: var(--text-primary);">Tailored Variations for <span
+              id="drawerClientTargetName" style="color: var(--primary);">Your Client</span></span>
+          <button class="btn-read-toggle" onclick="regenerateHookAdaptations()">🎲 Regenerate</button>
+        </div>
+        <div id="drawerVariationsList" style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- Populated dynamically -->
+        </div>
       </div>
     </div>
 
     <div class="drawer-footer">
-      <button type="button" class="btn btn-secondary" onclick="closeAddCompetitorModal()">Cancel</button>
-      <button type="submit" class="btn btn-primary">+ Add to Tracking</button>
+      <button class="btn btn-secondary" onclick="closeActiveDrawers()">Close</button>
+      <button class="btn btn-primary" onclick="saveActiveHookToSwipe()">💾 Save to Swipe File</button>
     </div>
-  </form>
-</div>
+  </aside>
 
-<!-- Toast Container -->
-<div class="toast-container" id="toastContainer"></div>
+  <!-- Drawer B: Video View & Audio Transcribe -->
+  <aside class="slide-drawer drawer-wide" id="transcribeDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title-group">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <h3>🎬 Video View &amp; Audio Transcribe</h3>
+          <span id="transcribeModelBadge"
+            style="font-size: 11px; font-weight: 700; background: var(--tint-emerald-bg); color: var(--tint-emerald-text); border: 1px solid var(--tint-emerald-border); padding: 2px 8px; border-radius: var(--radius-full);">●
+            Sarvam AI (saaras:v3)</span>
+        </div>
+        <p id="transcribeDrawerMeta">Loading video &amp; script intelligence...</p>
+      </div>
+      <button class="drawer-close-btn" onclick="closeActiveDrawers()">&times;</button>
+    </div>
 
-<script src="js/app.js"></script>
+    <div class="drawer-body">
+      <!-- Video Player Screen -->
+      <div class="video-screen-frame" id="videoScreenFrame">
+        <div class="sim-video-inner">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span
+              style="font-size: 12px; font-weight: 700; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: var(--radius-full);"
+              id="simVideoBrand">⚡ Competitor</span>
+            <span style="font-size: 11px; color: #4ADE80; font-weight: 700;">● 9:16 Video Reel</span>
+          </div>
+
+          <div style="text-align: center; padding: 0 16px;">
+            <div style="font-size: 15px; font-weight: 800; color: #fff;" id="simVideoHookText">"Hook..."</div>
+            <div style="font-size: 12px; color: #A5B4FC; margin-top: 4px;">Spoken by Verified Astrologer / Creator</div>
+            <div class="sim-video-wave">
+              <div class="sim-wave-bar"></div>
+              <div class="sim-wave-bar"></div>
+              <div class="sim-wave-bar"></div>
+              <div class="sim-wave-bar"></div>
+              <div class="sim-wave-bar"></div>
+            </div>
+          </div>
+
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.4); padding: 6px 12px; border-radius: var(--radius-sm); font-size: 12px;">
+            <button class="btn btn-primary btn-sm" id="btnSimPlay" onclick="toggleSimVideoPlayback()"
+              style="width: 28px; height: 28px; padding: 0; border-radius: 50%;">▶</button>
+            <span style="font-family: monospace; font-weight: 700; color: #E2E8F0;" id="simTimerLabel">00:00 /
+              00:54</span>
+            <a href="#" target="_blank" id="simMetaLink"
+              style="color: #A5B4FC; text-decoration: none; font-size: 11.5px;">Meta Library ↗</a>
+          </div>
+
+          <!-- 1-Click Creative Download Controls inside Player Frame -->
+          <div style="display: flex; gap: 8px; margin-top: 8px;">
+            <button type="button" class="btn btn-primary btn-sm"
+              style="flex: 1; font-size: 11.5px; padding: 6px 10px; font-weight: 700;"
+              onclick="downloadActiveDrawerCreative('video')">
+              🎬 Download Video Reel (.mp4)
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm"
+              style="flex: 1; font-size: 11.5px; padding: 6px 10px; background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.2); font-weight: 700;"
+              onclick="downloadActiveDrawerCreative('image')">
+              🖼️ Download Frame (.png)
+            </button>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Mini Metrics Strip -->
+      <div class="stats-mini-strip">
+        <div class="stat-mini-tile">
+          <div class="label">Duration</div>
+          <div class="val">00:54</div>
+        </div>
+        <div class="stat-mini-tile">
+          <div class="label">Spoken Words</div>
+          <div class="val">142 words</div>
+        </div>
+        <div class="stat-mini-tile">
+          <div class="label">Pacing</div>
+          <div class="val">157 WPM</div>
+        </div>
+        <div class="stat-mini-tile">
+          <div class="label">Language</div>
+          <div class="val">Hinglish</div>
+        </div>
+      </div>
+
+      <!-- Timestamped Spoken Script -->
+      <div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+          <span style="font-size: 12.5px; font-weight: 750; color: var(--text-primary);">Word-for-Word Spoken
+            Script</span>
+          <button class="btn btn-secondary btn-sm" onclick="copyFullTranscriptText(this)">📋 Copy Script</button>
+        </div>
+
+        <div id="transcribeSegmentsContainer">
+          <!-- Segments inserted dynamically -->
+        </div>
+      </div>
+
+      <!-- Takeaways -->
+      <div
+        style="background: var(--bg-subtle); border-left: 3px solid var(--primary); padding: 12px 14px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;">
+        <span style="font-size: 11px; font-weight: 750; color: var(--primary); text-transform: uppercase;">Persuasion
+          Insights</span>
+        <ul
+          style="padding-left: 16px; font-size: 12.5px; color: var(--text-secondary); margin-top: 4px; line-height: 1.5;"
+          id="transcribeTakeawaysContainer">
+          <!-- Bullets inserted dynamically -->
+        </ul>
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <button class="btn btn-secondary" onclick="closeActiveDrawers()">Close</button>
+      <button class="btn btn-primary" onclick="adaptFromTranscribe()">✦ Adapt Script for Client</button>
+    </div>
+  </aside>
+
+  <!-- Drawer C: Deep-Dive Analysis -->
+  <aside class="slide-drawer" id="analyzeDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title-group">
+        <h3>Ad Intelligence Analysis</h3>
+        <p id="analyzeDrawerMeta">Competitor Analysis Breakdown</p>
+      </div>
+      <button class="drawer-close-btn" onclick="closeActiveDrawers()">&times;</button>
+    </div>
+
+    <div class="drawer-body">
+      <div style="background: var(--bg-subtle); border-radius: var(--radius-md); padding: 14px 16px;">
+        <span style="font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase;">Message
+          Architecture</span>
+        <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 8px;">
+          <div>
+            <span
+              style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Hook</span>
+            <div style="font-size: 13.5px; font-weight: 700; color: var(--text-primary);" id="analyzeHookVal">"..."
+            </div>
+          </div>
+          <div>
+            <span
+              style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Headline /
+              Body</span>
+            <div style="font-size: 13px; color: var(--text-secondary);" id="analyzeBodyVal">"..."</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Marketing
+          Angle</span>
+        <div style="font-size: 13.5px; font-weight: 700; color: var(--text-primary); margin-top: 4px;"
+          id="analyzeAngleVal">Dosha &amp; Problem Agitation</div>
+      </div>
+
+      <div style="background: #FFFBEB; border: 1px solid #FDE68A; padding: 12px 14px; border-radius: var(--radius-md);">
+        <span style="font-size: 11px; font-weight: 750; color: #D97706; text-transform: uppercase;">Strategic Adaptation
+          Idea</span>
+        <div style="font-size: 13px; color: #92400E; margin-top: 4px;" id="analyzeIdeaVal">Adapt this structure for your
+          brand.</div>
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <button class="btn btn-secondary" onclick="closeActiveDrawers()">Close</button>
+      <button class="btn btn-primary" onclick="openHookFromAnalyze()">✦ Use This Hook</button>
+    </div>
+  </aside>
+
+  <!-- Modal: Add Competitor -->
+  <div class="modal-backdrop" id="addCompModalBackdrop" onclick="closeAddCompetitorModal()"></div>
+  <div class="modal-dialog" id="addCompetitorModal">
+    <div class="drawer-header">
+      <div class="drawer-title-group">
+        <h3>Track New Competitor</h3>
+        <p>Add a competitor brand to this workspace</p>
+      </div>
+      <button type="button" class="drawer-close-btn" aria-label="Close"
+        onclick="closeAddCompetitorModal()">&times;</button>
+    </div>
+
+    <form onsubmit="handleCreateCompetitorSubmit(event)">
+      <div class="drawer-body">
+        <div>
+          <label
+            style="font-size: 12.5px; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Brand
+            / Competitor Name</label>
+          <input type="text" id="compNameInput" class="search-input" placeholder="e.g. Astro Arun Pandit" required
+            style="padding-left: 12px;">
+        </div>
+
+        <div>
+          <label
+            style="font-size: 12.5px; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Ad
+            Library URL</label>
+          <input type="url" id="compUrlInput" class="search-input"
+            placeholder="https://www.facebook.com/ads/library/?..." style="padding-left: 12px;">
+        </div>
+
+        <div>
+          <label
+            style="font-size: 12.5px; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 6px;">Niche
+            / Category</label>
+          <select id="compCategorySelect" class="sort-select" style="width: 100%;">
+            <option value="Spiritual / Coaching">Spiritual &amp; Astrology</option>
+            <option value="D2C E-commerce">D2C &amp; E-Commerce</option>
+            <option value="Healthcare">Healthcare &amp; Wellness</option>
+            <option value="Fintech">Fintech &amp; Finance</option>
+            <option value="Education">Education &amp; EdTech</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="drawer-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeAddCompetitorModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">+ Add to Tracking</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Modal: Download Ad Creative (Video, Image, Spec) -->
+  <div class="modal-backdrop" id="creativeModalBackdrop" onclick="closeCreativeDownloadModal()"></div>
+  <div class="modal-dialog creative-modal" id="creativeDownloadModal">
+    <div class="drawer-header">
+      <div class="drawer-title-group">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <h3>📥 Download Ad Creative &amp; Assets</h3>
+          <span class="ad-type-chip" id="modalAdFormatBadge">Video</span>
+        </div>
+        <p id="modalAdMetaSubtitle">Download high-definition video reels, studio images, and copy swipe specs</p>
+      </div>
+      <button type="button" class="drawer-close-btn" aria-label="Close" onclick="closeCreativeDownloadModal()">&times;</button>
+    </div>
+
+    <div class="drawer-body" style="gap: 16px;">
+      <!-- Selected Ad Context Preview Card -->
+      <div class="creative-modal-preview">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+          <div>
+            <span style="font-size: 11px; font-weight: 750; color: var(--primary); text-transform: uppercase;" id="modalPreviewBrand">Competitor Name</span>
+            <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin-top: 2px;" id="modalPreviewHook">"Hook headline..."</div>
+          </div>
+          <span class="longevity-badge tier-winner" id="modalPreviewTier" style="font-size: 11px; white-space: nowrap;">Winner</span>
+        </div>
+        <div style="display: flex; gap: 12px; margin-top: 8px; font-size: 11.5px; color: var(--text-muted); flex-wrap: wrap;">
+          <span id="modalPreviewDays">⏱️ 285d Active</span>
+          <span id="modalPreviewSpend">💰 Est. Spend: ₹2.8L</span>
+          <span id="modalPreviewAngle">🎯 Problem Agitation</span>
+        </div>
+      </div>
+
+      <!-- Download Options Grid -->
+      <div class="creative-options-grid">
+        <!-- Option 1: Video Reel (.mp4) -->
+        <div class="creative-option-card" id="cardOptionVideo" onclick="executeDownload('video')">
+          <div class="creative-option-icon">🎬</div>
+          <div class="creative-option-info">
+            <div class="creative-option-title">
+              <span>Video Reel Creative</span>
+              <span class="creative-badge mp4-badge">.MP4</span>
+            </div>
+            <div class="creative-option-desc">9:16 Vertical Video Reel formatted for Meta/Instagram with audio and hook animation.</div>
+          </div>
+          <button type="button" class="btn btn-primary btn-sm creative-action-btn" id="btnDlVideo">
+            📥 Download MP4
+          </button>
+        </div>
+
+        <!-- Option 2: HD Studio Image Creative (.png) -->
+        <div class="creative-option-card" id="cardOptionImage" onclick="executeDownload('image')">
+          <div class="creative-option-icon">🖼️</div>
+          <div class="creative-option-info">
+            <div class="creative-option-title">
+              <span>HD Studio Image Creative</span>
+              <span class="creative-badge png-badge">.PNG</span>
+            </div>
+            <div class="creative-option-desc">1080×1350 High-res ad graphic with verified brand header, hook contrast, spend badge &amp; CTA button.</div>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm creative-action-btn" id="btnDlImage" style="background: var(--bg-surface); border-color: var(--border-default); color: var(--text-primary);">
+            📥 Download PNG
+          </button>
+        </div>
+
+        <!-- Option 3: Swipe File Spec (.txt) -->
+        <div class="creative-option-card" id="cardOptionSpec" onclick="executeDownload('spec')">
+          <div class="creative-option-icon">📄</div>
+          <div class="creative-option-info">
+            <div class="creative-option-title">
+              <span>Swipe File Copy Spec</span>
+              <span class="creative-badge txt-badge">.TXT</span>
+            </div>
+            <div class="creative-option-desc">Full verbatim script, body copy, estimated spend &amp; reach metrics, and Meta Ad Library link.</div>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm creative-action-btn" id="btnDlSpec" style="background: var(--bg-surface); border-color: var(--border-default); color: var(--text-primary);">
+            📥 Download Spec
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-footer" style="justify-content: space-between;">
+      <span style="font-size: 11.5px; color: var(--text-muted);">⚡ Instant 1-click download saved directly to your Downloads folder</span>
+      <button type="button" class="btn btn-secondary" onclick="closeCreativeDownloadModal()">Close</button>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/app.js"></script>
 </body>
+
 </html>

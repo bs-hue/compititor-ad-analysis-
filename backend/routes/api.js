@@ -99,4 +99,81 @@ router.post('/transcribe/media', async (req, res) => {
     }
 });
 
+// ─── Direct Media & Creative Download Endpoints ──────────────────────────────
+router.get('/media/download', async (req, res) => {
+    try {
+        const { url, filename } = req.query;
+        if (!url || !url.startsWith('http')) {
+            return res.status(400).json({ error: 'Valid URL is required' });
+        }
+
+        const fallbackName = (filename || 'creative_asset.mp4').replace(/[^a-zA-Z0-9._-]/g, '_');
+
+        const upstreamRes = await fetch(url, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                'Referer': 'https://www.facebook.com/'
+            }
+        });
+
+        if (!upstreamRes.ok) {
+            return res.status(upstreamRes.status).json({
+                error: `Upstream media request failed (${upstreamRes.status} ${upstreamRes.statusText})`
+            });
+        }
+
+        const contentType = upstreamRes.headers.get('content-type') || (fallbackName.endsWith('.mp4') ? 'video/mp4' : 'image/jpeg');
+        res.setHeader('Content-Type', contentType);
+        res.setHeader('Content-Disposition', `attachment; filename="${fallbackName}"`);
+
+        const arrayBuffer = await upstreamRes.arrayBuffer();
+        res.send(Buffer.from(arrayBuffer));
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.get('/ads/:id/download-creative', async (req, res) => {
+    try {
+        const adId = parseInt(req.params.id, 10);
+        const formatType = (req.query.type || 'auto').toLowerCase();
+        const pathModule = require('path');
+        const fsModule = require('fs');
+
+        const overview = await dbService.getClientOverview(1);
+        let targetAd = null;
+        if (overview && overview.ads) {
+            targetAd = overview.ads.find(a => a.id === adId);
+        }
+
+        const compName = targetAd ? (targetAd.competitorName || 'Competitor').replace(/[^a-zA-Z0-9]/g, '_') : 'Creative';
+        const isVideo = targetAd ? (targetAd.format === 'Video') : true;
+
+        if (formatType === 'video' || (formatType === 'auto' && isVideo)) {
+            let videoPath = pathModule.join(__dirname, '..', '..', 'frontend', 'assets', 'videos', 'sample_reel_astrology.mp4');
+            if (targetAd && targetAd.videoUrl && !targetAd.videoUrl.startsWith('http')) {
+                const localCandidate = pathModule.join(__dirname, '..', '..', 'frontend', targetAd.videoUrl.replace(/^\//, ''));
+                if (fsModule.existsSync(localCandidate)) {
+                    videoPath = localCandidate;
+                }
+            }
+            if (fsModule.existsSync(videoPath)) {
+                res.setHeader('Content-Type', 'video/mp4');
+                res.setHeader('Content-Disposition', `attachment; filename="${compName}_Ad_${adId}_Reel.mp4"`);
+                return fsModule.createReadStream(videoPath).pipe(res);
+            }
+        }
+
+        res.json({
+            message: 'success',
+            adId,
+            competitor: compName,
+            format: targetAd ? targetAd.format : 'Image'
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 module.exports = router;
+

@@ -20,7 +20,8 @@ function initializeStore() {
         })),
         ads: JSON.parse(JSON.stringify(initialSeedData.ads)).map((ad, idx) => ({
             ...ad,
-            platforms: ad.platforms || platformDistribution[idx % platformDistribution.length]
+            platforms: ad.platforms || platformDistribution[idx % platformDistribution.length],
+            videoUrl: ad.format === 'Video' ? (ad.videoUrl || ((idx % 2 === 0) ? '/assets/videos/sample_reel_astrology.mp4' : '/assets/videos/sample_reel_gemstones.mp4')) : null
         }))
     };
 
@@ -29,6 +30,11 @@ function initializeStore() {
             const raw = fs.readFileSync(storeFilePath, 'utf8');
             const data = JSON.parse(raw);
             if (data && data.clients && data.competitors && data.ads) {
+                // Ensure all stored video ads have a working videoUrl
+                data.ads = data.ads.map((ad, idx) => ({
+                    ...ad,
+                    videoUrl: ad.format === 'Video' ? (ad.videoUrl || ((idx % 2 === 0) ? '/assets/videos/sample_reel_astrology.mp4' : '/assets/videos/sample_reel_gemstones.mp4')) : (ad.videoUrl || null)
+                }));
                 // Merge initial seed competitors from git so they are NEVER deleted
                 defaultStore.competitors.forEach(sc => {
                     if (!data.competitors.some(c => c.id === sc.id || c.name.toLowerCase() === sc.name.toLowerCase())) {
@@ -47,6 +53,7 @@ function initializeStore() {
     } catch (e) {
         console.warn('Using fresh seed data store:', e);
     }
+
 
     return defaultStore;
 }

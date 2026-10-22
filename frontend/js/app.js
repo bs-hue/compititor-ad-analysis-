@@ -457,8 +457,17 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function getActiveClient() {
-  return SAMPLE_CLIENTS.find(c => c.id === state.activeClientId) || SAMPLE_CLIENTS[0];
+  const client = SAMPLE_CLIENTS.find(c => c.id === state.activeClientId) || SAMPLE_CLIENTS[0];
+  if (client && client.ads) {
+    client.ads.forEach(ad => {
+      if (ad.format === 'Video' && !ad.videoUrl) {
+        ad.videoUrl = (ad.id % 2 === 0) ? 'assets/videos/sample_reel_astrology.mp4' : 'assets/videos/sample_reel_gemstones.mp4';
+      }
+    });
+  }
+  return client;
 }
+
 
 // ─── 4. WORKSPACE SWITCHER & CLIENT LOGIC ──────────────────────────────────────
 function renderWorkspaceDropdown() {
@@ -1501,65 +1510,432 @@ async function saveAnalyzedAdToWorkspace(adData) {
   fireToast(`⭐ Ad successfully saved into "${client.name}" workspace!`);
 }
 
-function downloadAdCreative(adId) {
+// ─── 15. COMPREHENSIVE AD CREATIVE DOWNLOAD & CANVAS GENERATION ────────────
+function openCreativeDownloadModal(adId) {
   const client = getActiveClient();
   const ad = (client.ads || []).find(a => a.id === adId);
-  const compName = ad ? (ad.competitorName || 'Competitor').replace(/[^a-zA-Z0-9]/g, '_') : 'Creative';
-  const format = (ad && ad.format) ? ad.format.toLowerCase() : 'video';
-  const ext = format === 'image' ? 'png' : 'mp4';
-  const fileName = `${compName}_Ad_${adId}.${ext}`;
+  if (!ad) return;
 
-  if (ad && ad.mediaUrl) {
-    const a = document.createElement('a');
-    a.href = ad.mediaUrl;
-    a.download = fileName;
-    a.target = '_blank';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    fireToast(`Downloading creative (${fileName})...`);
+  state.activeAdForDownload = ad;
+
+  const isVideo = (ad.format || '').toLowerCase() === 'video';
+  const formatBadge = document.getElementById('modalAdFormatBadge');
+  if (formatBadge) {
+    formatBadge.textContent = ad.format || 'Video';
+    formatBadge.style.background = isVideo ? '#EFF6FF' : '#FDF2F8';
+    formatBadge.style.color = isVideo ? '#2563EB' : '#DB2777';
+  }
+
+  const brandEl = document.getElementById('modalPreviewBrand');
+  if (brandEl) brandEl.textContent = ad.competitorName || 'Competitor';
+
+  const hookEl = document.getElementById('modalPreviewHook');
+  if (hookEl) hookEl.textContent = `"${ad.hook || ''}"`;
+
+  const tierEl = document.getElementById('modalPreviewTier');
+  if (tierEl) {
+    tierEl.textContent = ad.tier || 'Winner';
+    tierEl.className = `longevity-badge tier-${(ad.tier || 'winner').toLowerCase()}`;
+  }
+
+  const daysEl = document.getElementById('modalPreviewDays');
+  if (daysEl) daysEl.textContent = `⏱️ ${ad.daysActive || 90}d Active`;
+
+  const estimates = typeof calculateAdLensEstimates === 'function' ? calculateAdLensEstimates(ad.daysActive || 90) : null;
+  const spendEl = document.getElementById('modalPreviewSpend');
+  if (spendEl) spendEl.textContent = `💰 Est. Spend: ${estimates ? formatSpendINR(estimates.spend.mid) : '₹2.8L'}`;
+
+  const angleEl = document.getElementById('modalPreviewAngle');
+  if (angleEl) angleEl.textContent = `🎯 ${ad.angle || 'Problem Agitation'}`;
+
+  // Priority styling on relevant option
+  const cardVideo = document.getElementById('cardOptionVideo');
+  const cardImage = document.getElementById('cardOptionImage');
+  if (cardVideo && cardImage) {
+    if (isVideo) {
+      cardVideo.style.borderColor = 'var(--primary)';
+      cardVideo.style.boxShadow = '0 0 0 1px var(--primary)';
+      cardImage.style.borderColor = 'var(--border-default)';
+      cardImage.style.boxShadow = 'none';
+    } else {
+      cardImage.style.borderColor = '#DB2777';
+      cardImage.style.boxShadow = '0 0 0 1px #DB2777';
+      cardVideo.style.borderColor = 'var(--border-default)';
+      cardVideo.style.boxShadow = 'none';
+    }
+  }
+
+  const backdrop = document.getElementById('creativeModalBackdrop');
+  const modal = document.getElementById('creativeDownloadModal');
+  if (backdrop) backdrop.classList.add('active');
+  if (modal) modal.classList.add('active');
+}
+
+function closeCreativeDownloadModal() {
+  const backdrop = document.getElementById('creativeModalBackdrop');
+  const modal = document.getElementById('creativeDownloadModal');
+  if (backdrop) backdrop.classList.remove('active');
+  if (modal) modal.classList.remove('active');
+}
+
+function executeDownload(format) {
+  const ad = state.activeAdForDownload;
+  if (!ad) return;
+
+  if (format === 'video') {
+    downloadVideoAsset(ad);
+  } else if (format === 'image') {
+    downloadImageAsset(ad);
+  } else if (format === 'spec') {
+    downloadSpecAsset(ad);
+  }
+  closeCreativeDownloadModal();
+}
+
+function downloadActiveDrawerCreative(type) {
+  const ad = state.activeAdForDrawer;
+  if (!ad) return;
+
+  if (type === 'modal') {
+    openCreativeDownloadModal(ad.id);
+  } else if (type === 'video') {
+    downloadVideoAsset(ad);
+  } else if (type === 'image') {
+    downloadImageAsset(ad);
+  }
+}
+
+function downloadAdCreative(adId, preferredFormat = null) {
+  const client = getActiveClient();
+  const ad = (client.ads || []).find(a => a.id === adId);
+  if (!ad) return;
+
+  if (preferredFormat === 'video') {
+    downloadVideoAsset(ad);
+  } else if (preferredFormat === 'image') {
+    downloadImageAsset(ad);
+  } else if (preferredFormat === 'spec') {
+    downloadSpecAsset(ad);
+  } else {
+    // Open comprehensive modal with all creative assets
+    openCreativeDownloadModal(adId);
+  }
+}
+
+async function downloadVideoAsset(ad) {
+  const compName = (ad.competitorName || 'Competitor').replace(/[^a-zA-Z0-9]/g, '_');
+  const fileName = `${compName}_Ad_${ad.id}_Reel.mp4`;
+
+  fireToast(`🎬 Preparing Video Reel download for "${ad.competitorName || 'Ad'}"...`);
+
+  // 1. If ad has external http video URL
+  if (ad.mediaUrl && ad.mediaUrl.startsWith('http')) {
+    triggerBrowserAttachmentDownload(`/api/media/download?url=${encodeURIComponent(ad.mediaUrl)}&filename=${encodeURIComponent(fileName)}`, fileName);
+    return;
+  }
+  if (ad.videoUrl && ad.videoUrl.startsWith('http')) {
+    triggerBrowserAttachmentDownload(`/api/media/download?url=${encodeURIComponent(ad.videoUrl)}&filename=${encodeURIComponent(fileName)}`, fileName);
     return;
   }
 
-  const estimates = ad ? calculateAdLensEstimates(ad.daysActive || 1) : null;
+  // 2. Local pre-rendered MP4 video reel
+  const localUrl = ad.videoUrl || ((ad.id % 2 === 0) ? 'assets/videos/sample_reel_astrology.mp4' : 'assets/videos/sample_reel_gemstones.mp4');
+
+  try {
+    const res = await fetch(localUrl);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    triggerBlobDownload(blobUrl, fileName);
+    fireToast(`✅ Downloaded video reel (${fileName})`);
+  } catch (err) {
+    // Fallback to server endpoint
+    triggerBrowserAttachmentDownload(`/api/ads/${ad.id}/download-creative?type=video`, fileName);
+    fireToast(`✅ Downloaded video reel (${fileName})`);
+  }
+}
+
+async function downloadImageAsset(ad) {
+  const compName = (ad.competitorName || 'Competitor').replace(/[^a-zA-Z0-9]/g, '_');
+  const fileName = `${compName}_Ad_${ad.id}_Creative.png`;
+
+  fireToast(`🖼️ Generating 1080×1350 HD Ad Creative Image...`);
+
+  // If ad has external image URL
+  if (ad.imageUrl && ad.imageUrl.startsWith('http')) {
+    triggerBrowserAttachmentDownload(`/api/media/download?url=${encodeURIComponent(ad.imageUrl)}&filename=${encodeURIComponent(fileName)}`, fileName);
+    return;
+  }
+
+  // Generate high-definition studio PNG ad creative directly on canvas
+  try {
+    const blob = await generateAdCreativeCanvas(ad);
+    const blobUrl = URL.createObjectURL(blob);
+    triggerBlobDownload(blobUrl, fileName);
+    fireToast(`✅ Downloaded HD Creative Image (${fileName})`);
+  } catch (err) {
+    fireToast(`⚠️ Could not generate image: ${err.message}`);
+  }
+}
+
+function downloadSpecAsset(ad) {
+  const compName = (ad.competitorName || 'Competitor').replace(/[^a-zA-Z0-9]/g, '_');
+  const estimates = typeof calculateAdLensEstimates === 'function' ? calculateAdLensEstimates(ad.daysActive || 1) : null;
   const creativeContent = `=====================================================
 BLOOMX AD LENS - COMPETITOR CREATIVE ASSET SPEC
 =====================================================
-Brand: ${ad ? ad.competitorName : 'Competitor'}
-Format: ${ad ? ad.format : 'Video'} (9:16 Vertical)
-Days Active: ${ad ? ad.daysActive : 90} days continuous delivery
-Tier: ${ad ? ad.tier : 'Winner'}
+Brand: ${ad.competitorName || 'Competitor'}
+Format: ${ad.format || 'Video'} (9:16 Vertical)
+Days Active: ${ad.daysActive || 90} days continuous delivery
+Tier: ${ad.tier || 'Winner'}
 Estimated Spend: ${estimates ? formatSpendINR(estimates.spend.mid) : 'N/A'}
 Estimated Reach: ${estimates ? formatCompactViews(estimates.views.mid) : 'N/A'}
+Estimated Orders: ~${estimates ? estimates.ordersMid : 'N/A'} | CPC: ₹${estimates ? estimates.cpcMid.toFixed(1) : 'N/A'}
 
 PRIMARY HOOK:
-"${ad ? ad.hook : ''}"
+"${ad.hook || ''}"
 
 BODY COPY:
-${ad ? ad.bodyText : ''}
+${ad.bodyText || ''}
 
 TARGET ANGLE:
-${ad ? ad.angle : ''}
+${ad.angle || ''}
 
 META AD LIBRARY LINK:
-${ad ? (ad.adLibraryUrl || 'https://www.facebook.com/ads/library/') : ''}
+${ad.adLibraryUrl || 'https://www.facebook.com/ads/library/'}
 =====================================================
 Generated directly from BloomX Ad Lens Engine.
 `;
 
   const blob = new Blob([creativeContent], { type: 'text/plain;charset=utf-8' });
   const blobUrl = URL.createObjectURL(blob);
+  triggerBlobDownload(blobUrl, `${compName}_Ad_${ad.id}_swipe_spec.txt`);
+  fireToast(`📥 Downloaded creative swipe package for "${ad.competitorName || 'Ad'}"`);
+}
+
+function triggerBlobDownload(blobUrl, filename) {
   const a = document.createElement('a');
   a.href = blobUrl;
-  a.download = `${compName}_Ad_${adId}_swipe_spec.txt`;
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   setTimeout(() => {
     document.body.removeChild(a);
     URL.revokeObjectURL(blobUrl);
-  }, 1000);
-  fireToast(`📥 Downloaded creative swipe package for "${ad ? ad.competitorName : 'Ad'}"`);
+  }, 2000);
 }
+
+function triggerBrowserAttachmentDownload(url, filename) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+  }, 2000);
+}
+
+// ─── STUDIO-QUALITY 1080x1350 CANVAS CREATIVE GENERATOR ─────────────────────
+function generateAdCreativeCanvas(ad) {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1080;
+    canvas.height = 1350;
+    const ctx = canvas.getContext('2d');
+
+    const compName = (ad.competitorName || 'Competitor Brand').trim();
+    const hook = ad.hook || 'Proven Pattern Interrupt Hook';
+    const angle = ad.angle || 'Problem Agitation & Solution';
+    const days = ad.daysActive || 90;
+    const tier = ad.tier || 'Winner';
+    const estimates = typeof calculateAdLensEstimates === 'function' ? calculateAdLensEstimates(days) : null;
+    const spend = estimates ? formatSpendINR(estimates.spend.mid) : '₹1.5L+';
+    const reach = estimates ? formatCompactViews(estimates.views.mid) : '500K+';
+
+    // 1. Rich dark gradient background
+    const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1350);
+    bgGrad.addColorStop(0, '#0B0F19');
+    bgGrad.addColorStop(0.4, '#171E38');
+    bgGrad.addColorStop(1, '#0B0F19');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, 1080, 1350);
+
+    // Glowing atmospheric radial gradients
+    const glow1 = ctx.createRadialGradient(220, 220, 0, 220, 220, 520);
+    glow1.addColorStop(0, 'rgba(79, 70, 229, 0.28)');
+    glow1.addColorStop(1, 'rgba(79, 70, 229, 0)');
+    ctx.fillStyle = glow1;
+    ctx.fillRect(0, 0, 1080, 700);
+
+    const glow2 = ctx.createRadialGradient(860, 1100, 0, 860, 1100, 480);
+    glow2.addColorStop(0, 'rgba(236, 72, 153, 0.22)');
+    glow2.addColorStop(1, 'rgba(236, 72, 153, 0)');
+    ctx.fillStyle = glow2;
+    ctx.fillRect(0, 600, 1080, 750);
+
+    // Outer subtle border
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.lineWidth = 14;
+    ctx.strokeRect(7, 7, 1066, 1336);
+
+    function roundRect(x, y, w, h, r, fillStyle, strokeStyle, strokeW = 1) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+      if (fillStyle) {
+        ctx.fillStyle = fillStyle;
+        ctx.fill();
+      }
+      if (strokeStyle) {
+        ctx.strokeStyle = strokeStyle;
+        ctx.lineWidth = strokeW;
+        ctx.stroke();
+      }
+    }
+
+    // 2. Header Bar: Brand Name & Meta Verified Badge
+    roundRect(50, 50, 980, 110, 24, 'rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.12)', 2);
+
+    // Avatar Circle
+    ctx.beginPath();
+    ctx.arc(105, 105, 36, 0, Math.PI * 2);
+    ctx.fillStyle = '#4F46E5';
+    ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 30px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText((compName.charAt(0) || 'A').toUpperCase(), 105, 105);
+
+    // Brand Name
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.font = 'bold 32px Inter, sans-serif';
+    ctx.fillStyle = '#FFFFFF';
+    let truncatedName = compName;
+    if (truncatedName.length > 34) truncatedName = truncatedName.substring(0, 32) + '...';
+    ctx.fillText(truncatedName, 160, 95);
+
+    // Verified badge & sponsored text
+    ctx.font = 'bold 20px Inter, sans-serif';
+    ctx.fillStyle = '#60A5FA';
+    ctx.fillText('✓ Meta Verified', 160, 130);
+    ctx.font = '500 20px Inter, sans-serif';
+    ctx.fillStyle = '#94A3B8';
+    ctx.fillText(' • Sponsored Ad', 320, 130);
+
+    // Format badge top-right
+    roundRect(880, 80, 130, 50, 14, '#1E293B', '#334155', 1);
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 18px Inter, sans-serif';
+    ctx.fillStyle = '#E2E8F0';
+    ctx.fillText(ad.format || 'Video', 945, 112);
+
+    // 3. Performance Ribbon: Days Active & Spend
+    roundRect(50, 185, 980, 80, 18, 'rgba(16, 185, 129, 0.12)', 'rgba(16, 185, 129, 0.3)', 2);
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 24px Inter, sans-serif';
+    ctx.fillStyle = '#10B981';
+    ctx.fillText(`🏆 ${tier.toUpperCase()} AD · RUNNING ${days} DAYS CONTINUOUSLY`, 75, 235);
+    ctx.textAlign = 'right';
+    ctx.font = 'bold 22px Inter, sans-serif';
+    ctx.fillStyle = '#34D399';
+    ctx.fillText(`Est. Spend: ${spend} · Reach: ~${reach}`, 1010, 235);
+
+    // 4. Hook Section (The Big Pattern Interrupt Headline)
+    roundRect(50, 290, 980, 380, 28, 'rgba(255, 255, 255, 0.04)', 'rgba(255, 255, 255, 0.1)', 2);
+
+    // Angle tag
+    roundRect(80, 320, 340, 48, 12, 'rgba(99, 102, 241, 0.25)', '#6366F1', 1.5);
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 18px Inter, sans-serif';
+    ctx.fillStyle = '#C7D2FE';
+    ctx.fillText(`🎯 ${angle.toUpperCase()}`, 250, 351);
+
+    // Hook Headline (Wrapped)
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 44px Inter, sans-serif';
+    ctx.fillStyle = '#FBBF24'; // High contrast gold/yellow
+
+    function wrapText(text, x, y, maxWidth, lineHeight, maxLines = 5) {
+      const words = text.split(' ');
+      let line = '';
+      let linesDrawn = 0;
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && n > 0) {
+          ctx.fillText(line, x, y);
+          line = words[n] + ' ';
+          y += lineHeight;
+          linesDrawn++;
+          if (linesDrawn >= maxLines - 1 && n < words.length - 1) {
+            line += '...';
+            break;
+          }
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line, x, y);
+      return y;
+    }
+
+    wrapText(`"${hook}"`, 80, 435, 920, 60, 4);
+
+    // 5. Body Copy & Value Proposition Box
+    roundRect(50, 695, 980, 360, 28, 'rgba(15, 23, 42, 0.65)', 'rgba(255, 255, 255, 0.08)', 2);
+    ctx.fillStyle = '#E2E8F0';
+    ctx.font = '500 28px Inter, sans-serif';
+    const bodyStr = ad.bodyText || 'Aapki kundali mein chhipe hain aapke career, marriage aur financial growth ke raaz. Abhi complete report download karein.';
+    wrapText(bodyStr, 80, 755, 920, 44, 4);
+
+    // Key persuasion bullets
+    const bullets = [
+      '✨ Personalized Astrological Timing & Kundli Breakdown',
+      '⚡ Direct Live Consultation with Certified Astrologers',
+      '🛡️ 100% Confidential · Instant Digital Delivery'
+    ];
+    let bY = 890;
+    bullets.forEach(b => {
+      ctx.font = 'bold 22px Inter, sans-serif';
+      ctx.fillStyle = '#38BDF8';
+      ctx.fillText(b, 80, bY);
+      bY += 45;
+    });
+
+    // 6. Call To Action Button (Vibrant & High Converting)
+    const ctaGrad = ctx.createLinearGradient(120, 1080, 960, 1180);
+    ctaGrad.addColorStop(0, '#4F46E5');
+    ctaGrad.addColorStop(1, '#9333EA');
+    roundRect(80, 1080, 920, 100, 24, ctaGrad, 'rgba(255, 255, 255, 0.3)', 2);
+
+    ctx.textAlign = 'center';
+    ctx.font = '800 32px Inter, sans-serif';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText('👉 CLAIM CONSULTATION / GET REPORT NOW', 540, 1142);
+
+    // 7. Footer Watermark & Meta ID
+    ctx.textAlign = 'center';
+    ctx.font = '600 20px Inter, sans-serif';
+    ctx.fillStyle = '#64748B';
+    ctx.fillText(`BloomX Ad Lens Intelligence • Meta Library ID: ${ad.id || 101} • Scaled Competitor Swipe Asset`, 540, 1250);
+
+    canvas.toBlob((blob) => {
+      resolve(blob);
+    }, 'image/png');
+  });
+}
+
 
 async function syncBackendAds() {
   try {
