@@ -393,67 +393,99 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // ─── Calibration Mode Logic ────────────────────────────────────────────────
+    // ─── Calibration Mode Logic (Requirement 8) ────────────────────────────────
     if (btnCalculateCalibration) {
         btnCalculateCalibration.addEventListener('click', () => {
             const real = parseFloat(realPageSpend.value);
             if (!real || real <= 0) {
-                alert('Please enter a valid real spend total in ₹ (e.g. 150000)');
+                alert('Please enter a valid real spend total from Meta Ads Manager in ₹ (e.g. 150000)');
                 return;
             }
 
-            chrome.storage.local.get(['last_detected_page_spend'], (res) => {
-                const detected = res.last_detected_page_spend || 0;
-                const baseline = detected > 0 ? detected : 120000;
-                const diffPct = ((baseline - real) / real) * 100;
-                const scaleFactor = real / baseline;
+            const startDateVal = document.getElementById('calib_start_date')?.value || null;
+            const endDateVal = document.getElementById('calib_end_date')?.value || null;
 
-                calibDetectedSpendText.textContent = detected > 0 
-                    ? `₹${Math.round(detected).toLocaleString('en-IN')}`
-                    : `₹${Math.round(baseline).toLocaleString('en-IN')} (Estimated Baseline)`;
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                if (!tabs || !tabs[0] || !tabs[0].id) {
+                    alert('Please open Facebook Ad Library tab to calibrate against the active page.');
+                    return;
+                }
 
-                const isOver = diffPct > 0;
-                calibDiffPercentText.textContent = `${isOver ? '+' : ''}${diffPct.toFixed(1)}% (${isOver ? 'Overestimated' : 'Underestimated'})`;
-                calibDiffPercentText.style.color = Math.abs(diffPct) <= 10 ? '#4ADE80' : (isOver ? '#F87171' : '#FBBF24');
-
-                const curTestLow = parseFloat(spendTestLow.value) || 100;
-                const curTestMid = parseFloat(spendTestMid.value) || 200;
-                const curTestHigh = parseFloat(spendTestHigh.value) || 300;
-
-                const curTestedLow = parseFloat(spendTestedLow.value) || 300;
-                const curTestedMid = parseFloat(spendTestedMid.value) || 650;
-                const curTestedHigh = parseFloat(spendTestedHigh.value) || 1000;
-
-                const curWinnerLow = parseFloat(spendWinnerLow.value) || 2000;
-                const curWinnerMid = parseFloat(spendWinnerMid.value) || 3000;
-                const curWinnerHigh = parseFloat(spendWinnerHigh.value) || 4000;
-
-                suggestedCalibrationTiers = {
-                    test: {
-                        low: Math.max(50, Math.round(curTestLow * scaleFactor)),
-                        mid: Math.max(100, Math.round(curTestMid * scaleFactor)),
-                        high: Math.max(150, Math.round(curTestHigh * scaleFactor))
-                    },
-                    tested: {
-                        low: Math.max(150, Math.round(curTestedLow * scaleFactor)),
-                        mid: Math.max(300, Math.round(curTestedMid * scaleFactor)),
-                        high: Math.max(500, Math.round(curTestedHigh * scaleFactor))
-                    },
-                    winner: {
-                        low: Math.max(1000, Math.round(curWinnerLow * scaleFactor)),
-                        mid: Math.max(1500, Math.round(curWinnerMid * scaleFactor)),
-                        high: Math.max(2000, Math.round(curWinnerHigh * scaleFactor))
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    action: 'COMPUTE_CALIBRATION',
+                    realSpend: real,
+                    startDate: startDateVal,
+                    endDate: endDateVal
+                }, (response) => {
+                    if (chrome.runtime.lastError || !response) {
+                        alert('Could not communicate with the Facebook Ad Library page. Make sure the page is loaded and refresh if needed.');
+                        return;
                     }
-                };
 
-                calibSuggestedTiersText.innerHTML = `
-                    <b>Suggested Calibrated Tiers:</b><br>
-                    • &lt;7d: ₹${suggestedCalibrationTiers.test.low}–₹${suggestedCalibrationTiers.test.high}/d (mid ₹${suggestedCalibrationTiers.test.mid})<br>
-                    • 7–30d: ₹${suggestedCalibrationTiers.tested.low}–₹${suggestedCalibrationTiers.tested.high}/d (mid ₹${suggestedCalibrationTiers.tested.mid})<br>
-                    • &gt;30d: ₹${suggestedCalibrationTiers.winner.low}–₹${suggestedCalibrationTiers.winner.high}/d (mid ₹${suggestedCalibrationTiers.winner.mid})
-                `;
+                    if (!response.success || !response.estimatedSpend || response.estimatedSpend <= 0) {
+                        alert(`No spend detected for ${response.advertiserName || 'advertiser'} in that date range (${response.adCount || 0} ads detected). Please scroll down on Meta Ad Library to load more ads or adjust the dates.`);
+                        return;
+                    }
 
-                calibrationResultBox.style.display = 'block';
+                    const detected = response.estimatedSpend;
+                    const diffPct = ((detected - real) / real) * 100;
+                    const scaleFactor = real / detected; // Single scale factor for all three tiers
+
+                    const advEl = document.getElementById('calibAdvertiserText');
+                    if (advEl) advEl.textContent = response.advertiserName || 'Current Advertiser';
+
+                    const realEl = document.getElementById('calibRealSpendText');
+                    if (realEl) realEl.textContent = `₹${Math.round(real).toLocaleString('en-IN')}`;
+
+                    calibDetectedSpendText.textContent = `₹${Math.round(detected).toLocaleString('en-IN')}`;
+
+                    const isOver = diffPct > 0;
+                    calibDiffPercentText.textContent = `${isOver ? '+' : ''}${diffPct.toFixed(1)}% (${isOver ? 'Overestimated' : 'Underestimated'})`;
+                    calibDiffPercentText.style.color = Math.abs(diffPct) <= 10 ? '#4ADE80' : (isOver ? '#F87171' : '#FBBF24');
+
+                    const scaleEl = document.getElementById('calibScaleFactorText');
+                    if (scaleEl) scaleEl.textContent = `${scaleFactor.toFixed(2)}x`;
+
+                    const curTestLow = parseFloat(spendTestLow.value) || 100;
+                    const curTestMid = parseFloat(spendTestMid.value) || 200;
+                    const curTestHigh = parseFloat(spendTestHigh.value) || 300;
+
+                    const curTestedLow = parseFloat(spendTestedLow.value) || 300;
+                    const curTestedMid = parseFloat(spendTestedMid.value) || 650;
+                    const curTestedHigh = parseFloat(spendTestedHigh.value) || 1000;
+
+                    const curWinnerLow = parseFloat(spendWinnerLow.value) || 2000;
+                    const curWinnerMid = parseFloat(spendWinnerMid.value) || 3000;
+                    const curWinnerHigh = parseFloat(spendWinnerHigh.value) || 4000;
+
+                    suggestedCalibrationTiers = {
+                        scaleFactor,
+                        test: {
+                            low: Math.max(50, Math.round(curTestLow * scaleFactor)),
+                            mid: Math.max(100, Math.round(curTestMid * scaleFactor)),
+                            high: Math.max(150, Math.round(curTestHigh * scaleFactor))
+                        },
+                        tested: {
+                            low: Math.max(150, Math.round(curTestedLow * scaleFactor)),
+                            mid: Math.max(300, Math.round(curTestedMid * scaleFactor)),
+                            high: Math.max(500, Math.round(curTestedHigh * scaleFactor))
+                        },
+                        winner: {
+                            low: Math.max(1000, Math.round(curWinnerLow * scaleFactor)),
+                            mid: Math.max(1500, Math.round(curWinnerMid * scaleFactor)),
+                            high: Math.max(2000, Math.round(curWinnerHigh * scaleFactor))
+                        }
+                    };
+
+                    calibSuggestedTiersText.innerHTML = `
+                        <b>Single Scale Factor Applied (${scaleFactor.toFixed(2)}x):</b><br>
+                        • Test (&lt;7d): ₹${suggestedCalibrationTiers.test.low}–₹${suggestedCalibrationTiers.test.high}/d<br>
+                        • Tested (7–30d): ₹${suggestedCalibrationTiers.tested.low}–₹${suggestedCalibrationTiers.tested.high}/d<br>
+                        • Winner (&gt;30d): ₹${suggestedCalibrationTiers.winner.low}–₹${suggestedCalibrationTiers.winner.high}/d
+                    `;
+
+                    calibrationResultBox.style.display = 'block';
+                });
             });
         });
     }
@@ -473,7 +505,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             spendWinnerMid.value = suggestedCalibrationTiers.winner.mid;
             spendWinnerHigh.value = suggestedCalibrationTiers.winner.high;
 
-            showToast('✨ Calibrated tiers applied! Click "Save & Apply".');
+            showToast(`✨ ${suggestedCalibrationTiers.scaleFactor.toFixed(2)}x scale applied to all 3 tiers! Click "Save & Apply".`);
         });
     }
 

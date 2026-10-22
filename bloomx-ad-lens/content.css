@@ -1214,4 +1214,82 @@
     opacity: 1 !important;
 }
 
+/* ─── Dates Unclear Greyed Card & Badge (Requirement 1) ─────────────────── */
+.bloomx-adlens-card.adlens-dates-unclear,
+.spendo-lens-card.adlens-dates-unclear {
+    opacity: 0.58 !important;
+    filter: grayscale(0.5) !important;
+    border-color: rgba(148, 163, 184, 0.25) !important;
+}
+
+.adlens-badge-unclear {
+    background: rgba(148, 163, 184, 0.15) !important;
+    border: 1px solid rgba(148, 163, 184, 0.3) !important;
+    color: #94A3B8 !important;
+}
+
+/* ─── 4-Number Top Budget Grid in Floating Panel (Requirement 6) ───────── */
+.bloomx-budget-4grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    margin: 8px 0 !important;
+}
+
+.bloomx-budget-box {
+    background: #0A0D14 !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px !important;
+    padding: 8px 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+}
+
+.bloomx-budget-sub {
+    font-size: 9.5px !important;
+    font-weight: 750 !important;
+    color: #8E95A2 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.3px !important;
+}
+
+.bloomx-budget-val {
+    font-size: 13.5px !important;
+    font-weight: 850 !important;
+    letter-spacing: -0.2px !important;
+}
+
+.bloomx-budget-hint {
+    font-size: 9.5px !important;
+    color: #64748B !important;
+}
+
+.bloomx-launch-strip {
+    background: rgba(56, 189, 248, 0.08) !important;
+    border: 1px solid rgba(56, 189, 248, 0.2) !important;
+    border-radius: 8px !important;
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+    color: #E2E8F0 !important;
+    margin-top: 6px !important;
+}
+
+.bloomx-custom-date-row {
+    display: flex !important;
+    gap: 6px !important;
+    margin-top: 6px !important;
+    align-items: center !important;
+}
+
+.bloomx-custom-date-row input[type="date"] {
+    background: #0E1219 !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: #F8FAFC !important;
+    border-radius: 6px !important;
+    padding: 3px 6px !important;
+    font-size: 10px !important;
+    flex: 1 !important;
+}
+
 

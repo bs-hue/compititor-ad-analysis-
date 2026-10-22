@@ -661,6 +661,73 @@
                 border-color: #EC4899 !important;
                 color: #F472B6 !important;
             }
+
+            /* Accuracy & Budget Staged Overlays */
+            .adlens-dates-unclear {
+                opacity: 0.55 !important;
+                filter: grayscale(0.7) !important;
+                border-color: rgba(255, 255, 255, 0.08) !important;
+            }
+            .adlens-badge-unclear {
+                background: rgba(148, 163, 184, 0.16) !important;
+                border: 1px solid rgba(148, 163, 184, 0.35) !important;
+                color: #94A3B8 !important;
+            }
+            .bloomx-budget-4grid {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 8px !important;
+                margin-bottom: 10px !important;
+            }
+            .bloomx-budget-box {
+                background: #0A0D14 !important;
+                border: 1px solid rgba(255, 255, 255, 0.08) !important;
+                border-radius: 10px !important;
+                padding: 8px 10px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 2px !important;
+            }
+            .bloomx-budget-sub {
+                font-size: 9.5px !important;
+                font-weight: 750 !important;
+                color: #8E95A2 !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.3px !important;
+            }
+            .bloomx-budget-val {
+                font-size: 13.5px !important;
+                font-weight: 850 !important;
+                letter-spacing: -0.2px !important;
+            }
+            .bloomx-budget-hint {
+                font-size: 9.5px !important;
+                color: #64748B !important;
+            }
+            .bloomx-launch-strip {
+                background: rgba(56, 189, 248, 0.08) !important;
+                border: 1px solid rgba(56, 189, 248, 0.2) !important;
+                border-radius: 8px !important;
+                padding: 6px 10px !important;
+                font-size: 11px !important;
+                color: #E2E8F0 !important;
+                margin-top: 6px !important;
+            }
+            .bloomx-custom-date-row {
+                display: flex !important;
+                gap: 6px !important;
+                margin-top: 6px !important;
+                align-items: center !important;
+            }
+            .bloomx-custom-date-row input[type="date"] {
+                background: #0E1219 !important;
+                border: 1px solid rgba(255, 255, 255, 0.15) !important;
+                color: #F8FAFC !important;
+                border-radius: 6px !important;
+                padding: 3px 6px !important;
+                font-size: 10px !important;
+                flex: 1 !important;
+            }
         `;
         (document.head || document.documentElement).appendChild(style);
     }
@@ -883,55 +950,102 @@
         return `${prefix}${formatted}`;
     }
 
-    // ─── Date Parsing Helper (Start & End Date for Active/Inactive Ads) ───────
+    // ─── Date Parsing Helper (Start & End Date for Active/Inactive Ads - Req 1) ───────
+    const MONTH_MAP = {
+        jan: 0, january: 0,
+        feb: 1, february: 1,
+        mar: 2, march: 2,
+        apr: 3, april: 3,
+        may: 4,
+        jun: 5, june: 5,
+        jul: 6, july: 6,
+        aug: 7, august: 7,
+        sep: 8, sept: 8, september: 8,
+        oct: 9, october: 9,
+        nov: 10, november: 10,
+        dec: 11, december: 11
+    };
+
     function parseDateString(str) {
         if (!str) return null;
-        const clean = str.trim().replace(/^[•\s\-\–]+|[•\s\-\–]+$/g, '');
+        const clean = str.trim().replace(/^[•\s\-\–\—,]+|[•\s\-\–\—,]+$/g, '');
+
+        // Pattern A: "10 Oct 2026" or "10 October, 2026"
+        const dmy = clean.match(/^(\d{1,2})\s+([A-Za-z]+),?\s+(\d{4})$/);
+        if (dmy) {
+            const day = parseInt(dmy[1], 10);
+            const mKey = dmy[2].toLowerCase();
+            const year = parseInt(dmy[3], 10);
+            if (MONTH_MAP[mKey] !== undefined) {
+                return new Date(year, MONTH_MAP[mKey], day);
+            }
+        }
+
+        // Pattern B: "Oct 10, 2026" or "October 10 2026"
+        const mdy = clean.match(/^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})$/);
+        if (mdy) {
+            const mKey = mdy[1].toLowerCase();
+            const day = parseInt(mdy[2], 10);
+            const year = parseInt(mdy[3], 10);
+            if (MONTH_MAP[mKey] !== undefined) {
+                return new Date(year, MONTH_MAP[mKey], day);
+            }
+        }
+
+        // Fallback standard parsing
         const d = new Date(clean);
         if (!isNaN(d.getTime())) return d;
-        const partsMatch = clean.match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/);
-        if (partsMatch) {
-            const day = parseInt(partsMatch[1], 10);
-            const monthStr = partsMatch[2];
-            const year = parseInt(partsMatch[3], 10);
-            const pd = new Date(`${monthStr} ${day}, ${year}`);
-            if (!isNaN(pd.getTime())) return pd;
-        }
+
         return null;
     }
 
     function parseStartAndEndDate(text, status) {
-        if (!text) return { startDate: null, endDate: null };
+        if (!text) return { startDate: null, endDate: null, datesUnclear: (status === 'Inactive') };
         let startDate = null;
         let endDate = null;
 
-        // Pattern 1: Ran between 10 Oct 2026 - 18 Oct 2026 / 10 Oct 2026 – 18 Oct 2026
-        const ranMatch = text.match(/Ran between\s+([A-Za-z0-9,\s]+?)\s*(?:–|-|to)\s*([A-Za-z0-9,\s]+?)(?=\s*(?:\.|\n|•|Library ID|$))/i);
-        if (ranMatch) {
-            startDate = parseDateString(ranMatch[1]);
-            endDate = parseDateString(ranMatch[2]);
+        // Date snippet regex that matches either "10 Oct 2026" or "Oct 10, 2026"
+        const dateSubPattern = '(?:\\d{1,2}\\s+[A-Za-z]{3,9},?\\s+\\d{4}|[A-Za-z]{3,9}\\s+\\d{1,2},?\\s+\\d{4})';
+
+        // Pattern 1: Date Range: "10 Oct 2026 - 18 Oct 2026" or "Oct 10, 2026 – Oct 18, 2026" (with or without "Ran between")
+        const rangeRegex = new RegExp(`(?:Ran between\\s+)?(${dateSubPattern})\\s*(?:–|-|—|to)\\s*(${dateSubPattern})`, 'i');
+        const rangeMatch = text.match(rangeRegex);
+        if (rangeMatch) {
+            startDate = parseDateString(rangeMatch[1]);
+            endDate = parseDateString(rangeMatch[2]);
         }
 
-        // Pattern 2: Started running on [Date]
+        // Pattern 2: "Started running on [Date]"
         if (!startDate) {
-            const startMatch = text.match(/Started running on\s+([A-Za-z0-9,\s\/\-]+?)(?=\s*(?:\.|\n|•|Library ID|ended|$))/i);
+            const startRegex = new RegExp(`Started running on\\s+(${dateSubPattern})`, 'i');
+            const startMatch = text.match(startRegex);
             if (startMatch) startDate = parseDateString(startMatch[1]);
         }
 
-        // Pattern 3: Inactive with ended on [Date]
+        // Pattern 3: Inactive with ended on [Date] or until [Date]
         if (!endDate) {
-            const endMatch = text.match(/(?:ended on|until)\s+([A-Za-z0-9,\s]+?)(?=\s*(?:\.|\n|•|Library ID|$))/i);
+            const endRegex = new RegExp(`(?:ended on|until)\\s+(${dateSubPattern})`, 'i');
+            const endMatch = text.match(endRegex);
             if (endMatch) endDate = parseDateString(endMatch[1]);
         }
 
-        return { startDate, endDate };
+        // Pattern 4: Fallback generic single date if start date still missing
+        if (!startDate) {
+            const anyDateMatch = text.match(new RegExp(`(${dateSubPattern})`, 'i'));
+            if (anyDateMatch) startDate = parseDateString(anyDateMatch[1]);
+        }
+
+        // Requirement 1: If an ad is Inactive and no end date is found, mark it "Dates unclear"
+        const datesUnclear = (status === 'Inactive' && !endDate);
+
+        return { startDate, endDate, datesUnclear };
     }
 
     function parseStartDate(text) {
         return parseStartAndEndDate(text).startDate;
     }
 
-    // ─── EU Transparency & Reach Detection ─────────────────────────────────────
+    // ─── EU Transparency & Reach Detection (Requirement 7) ─────────────────────
     function parseNumWithMultiplier(numStr, multStr) {
         if (!numStr) return 0;
         let n = parseFloat(numStr.replace(/,/g, ''));
@@ -970,7 +1084,8 @@
             }
         }
 
-        if (!hasEuTag && !reach) return null;
+        // Requirement 7: Remove 25,000 default. Only use EU mode when a real reach number is parsed.
+        if (!reach || reach <= 0) return null;
 
         // Parse audience demographics breakdown if present
         const demographics = {
@@ -1000,11 +1115,6 @@
             }
         });
 
-        if (!reach && hasEuTag) {
-            reach = 25000;
-            reachStr = '~25K (EU Transparency)';
-        }
-
         return {
             hasEuTag,
             reach,
@@ -1013,18 +1123,40 @@
         };
     }
 
-    // ─── Platform Detection ────────────────────────────────────────────────────
+    // ─── Platform Detection (Requirement 9: Only from card's Platforms section) ─
     function detectPlatforms(cardEl) {
         const platforms = [];
-        const cardText = cardEl.innerText || '';
-        const html = cardEl.innerHTML.toLowerCase();
+        if (!cardEl) return ['Facebook'];
 
-        if (html.includes('facebook') || cardText.includes('Facebook')) platforms.push('Facebook');
-        if (html.includes('instagram') || cardText.includes('Instagram')) platforms.push('Instagram');
-        if (html.includes('messenger') || cardText.includes('Messenger')) platforms.push('Messenger');
-        if (html.includes('audience network') || cardText.includes('Audience Network')) platforms.push('Audience Network');
+        // Requirement 9: Locate the dedicated "Platforms" section inside the card
+        let platformsSection = null;
+        const allElements = cardEl.querySelectorAll('div, span, section');
+        for (const el of allElements) {
+            if (/^Platforms$/i.test((el.textContent || '').trim())) {
+                platformsSection = el.parentElement;
+                break;
+            }
+        }
 
-        return platforms.length > 0 ? platforms : ['Facebook', 'Instagram'];
+        const targetScope = platformsSection || cardEl;
+        const iconNodes = targetScope.querySelectorAll('[aria-label], [title], [alt], img, svg');
+        iconNodes.forEach(icon => {
+            const descriptor = ((icon.getAttribute('aria-label') || '') + ' ' + (icon.getAttribute('title') || '') + ' ' + (icon.getAttribute('alt') || '')).toLowerCase();
+            if (descriptor.includes('facebook') && !platforms.includes('Facebook')) platforms.push('Facebook');
+            if (descriptor.includes('instagram') && !platforms.includes('Instagram')) platforms.push('Instagram');
+            if (descriptor.includes('messenger') && !platforms.includes('Messenger')) platforms.push('Messenger');
+            if (descriptor.includes('audience network') && !platforms.includes('Audience Network')) platforms.push('Audience Network');
+        });
+
+        if (platforms.length === 0 && platformsSection) {
+            const txt = platformsSection.innerText.toLowerCase();
+            if (txt.includes('facebook') && !platforms.includes('Facebook')) platforms.push('Facebook');
+            if (txt.includes('instagram') && !platforms.includes('Instagram')) platforms.push('Instagram');
+            if (txt.includes('messenger') && !platforms.includes('Messenger')) platforms.push('Messenger');
+            if (txt.includes('audience network') && !platforms.includes('Audience Network')) platforms.push('Audience Network');
+        }
+
+        return platforms.length > 0 ? platforms : ['Facebook'];
     }
 
     // ─── Creative Count Detection ──────────────────────────────────────────────
@@ -1077,11 +1209,132 @@
         return lines.length > 0 ? lines[0].substring(0, 50) + (lines[0].length > 50 ? '...' : '') : 'Ad Creative';
     }
 
-    // ─── Dual-Mode Performance Calculation (1. EU Real-Reach, 2. India Estimate) ───
-    function calculatePerformance(startDate, endDate = null, status = 'Active', creativeCount = 1, euData = null, today = new Date()) {
-        let daysRunning = 1;
+    // ─── Window Selection State (Requirement 5) ────────────────────────────────
+    let activeWindowKey = '90d'; // '30d' | '90d' | 'all' | 'custom'
+    let customWindowStart = null;
+    let customWindowEnd = null;
 
-        // Requirement 2: days_running = start → end date for inactive ads, start → today only for active ads
+    function getActiveWindowDates() {
+        const today = new Date();
+        today.setHours(23, 59, 59, 999);
+
+        if (activeWindowKey === '30d') {
+            const start = new Date(today);
+            start.setDate(today.getDate() - 30);
+            start.setHours(0, 0, 0, 0);
+            return { start, end: today, label: 'Last 30 Days' };
+        }
+        if (activeWindowKey === '90d') {
+            const start = new Date(today);
+            start.setDate(today.getDate() - 90);
+            start.setHours(0, 0, 0, 0);
+            return { start, end: today, label: 'Last 90 Days' };
+        }
+        if (activeWindowKey === 'custom' && customWindowStart) {
+            const start = new Date(customWindowStart);
+            start.setHours(0, 0, 0, 0);
+            const end = customWindowEnd ? new Date(customWindowEnd) : today;
+            end.setHours(23, 59, 59, 999);
+            return { start, end, label: 'Custom Window' };
+        }
+        return { start: null, end: today, label: 'Lifetime' };
+    }
+
+    // ─── Staged Spend Calculation Helper (Requirement 4) ───────────────────────
+    function computeStagedSpendForDays(totalDays, creativeMultiplier = 1.0) {
+        if (!totalDays || totalDays <= 0) {
+            return { low: 0, mid: 0, high: 0, dTest: 0, dTested: 0, dWinner: 0 };
+        }
+        const tTest = BENCHMARKS.daily_spend_tiers.test;
+        const tTested = BENCHMARKS.daily_spend_tiers.tested;
+        const tWinner = BENCHMARKS.daily_spend_tiers.winner;
+
+        // Days 1–7 at Test rate
+        const dTest = Math.min(totalDays, 7);
+        // Days 8–30 (up to 23 days) at Tested rate
+        const dTested = Math.max(0, Math.min(totalDays - 7, 23));
+        // Days 31+ at Winner rate
+        const dWinner = Math.max(0, totalDays - 30);
+
+        const low = Math.round(((dTest * tTest.low) + (dTested * tTested.low) + (dWinner * tWinner.low)) * creativeMultiplier);
+        const mid = Math.round(((dTest * tTest.mid) + (dTested * tTested.mid) + (dWinner * tWinner.mid)) * creativeMultiplier);
+        const high = Math.round(((dTest * tTest.high) + (dTested * tTested.high) + (dWinner * tWinner.high)) * creativeMultiplier);
+
+        return { low, mid, high, dTest, dTested, dWinner };
+    }
+
+    // ─── Calculate Staged Spend of an Ad inside a Date Window (Requirement 5) ──
+    function calculateAdSpendInWindow(ad, windowStart, windowEnd, today = new Date()) {
+        if (ad.datesUnclear || !ad.startDate) {
+            return { daysInWindow: 0, spend: { low: 0, mid: 0, high: 0 } };
+        }
+
+        const adStart = ad.startDate;
+        const adEnd = (ad.status === 'Active' || !ad.endDate) ? today : ad.endDate;
+
+        const overlapStart = new Date(Math.max(adStart.getTime(), windowStart ? windowStart.getTime() : 0));
+        const overlapEnd = new Date(Math.min(adEnd.getTime(), windowEnd ? windowEnd.getTime() : today.getTime()));
+
+        if (overlapEnd.getTime() < overlapStart.getTime()) {
+            return { daysInWindow: 0, spend: { low: 0, mid: 0, high: 0 } };
+        }
+
+        const daysInWindow = Math.floor((overlapEnd.getTime() - overlapStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        if (daysInWindow <= 0) {
+            return { daysInWindow: 0, spend: { low: 0, mid: 0, high: 0 } };
+        }
+
+        // Offset of the window start from the ad's initial launch date:
+        const startDayOffset = Math.floor((overlapStart.getTime() - adStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        const endDayOffset = startDayOffset + daysInWindow - 1;
+
+        const tTest = BENCHMARKS.daily_spend_tiers.test;
+        const tTested = BENCHMARKS.daily_spend_tiers.tested;
+        const tWinner = BENCHMARKS.daily_spend_tiers.winner;
+        const creativeMultiplier = ad.perf ? ad.perf.creativeMultiplier : 1.0;
+
+        // How many days of this window fall into Day 1-7, Day 8-30, Day 31+:
+        const dTest = Math.max(0, Math.min(endDayOffset, 7) - Math.max(startDayOffset - 1, 0));
+        const dTested = Math.max(0, Math.min(endDayOffset, 30) - Math.max(startDayOffset - 1, 7));
+        const dWinner = Math.max(0, endDayOffset - Math.max(startDayOffset - 1, 30));
+
+        const spendLow = Math.round(((dTest * tTest.low) + (dTested * tTested.low) + (dWinner * tWinner.low)) * creativeMultiplier);
+        const spendMid = Math.round(((dTest * tTest.mid) + (dTested * tTested.mid) + (dWinner * tWinner.mid)) * creativeMultiplier);
+        const spendHigh = Math.round(((dTest * tTest.high) + (dTested * tTested.high) + (dWinner * tWinner.high)) * creativeMultiplier);
+
+        return {
+            daysInWindow,
+            spend: { low: spendLow, mid: spendMid, high: spendHigh }
+        };
+    }
+
+    // ─── Dual-Mode Performance Calculation (1. EU Real-Reach, 2. India Staged Estimate) ───
+    function calculatePerformance(startDate, endDate = null, status = 'Active', creativeCount = 1, euData = null, datesUnclear = false, today = new Date()) {
+        // Requirement 1: If inactive and no end date, mark Dates unclear, 0 spend, excluded
+        if (datesUnclear) {
+            return {
+                daysRunning: 0,
+                tierKey: 'unclear',
+                tier: { label: 'Dates Unclear', low: 0, mid: 0, high: 0 },
+                creativeMultiplier: 1.0,
+                isEuMode: false,
+                euData: null,
+                datesUnclear: true,
+                confidenceText: 'Dates unclear',
+                confidenceBadgeClass: 'adlens-badge-unclear',
+                confidenceType: 'unclear',
+                spend: { low: 0, mid: 0, high: 0 },
+                views: { low: 0, mid: 0, high: 0 },
+                clicks: { low: 0, mid: 0, high: 0 },
+                cpcMid: 0,
+                estPurchases: { low: 0, mid: 0, high: 0 },
+                tooltips: {
+                    spend: 'Dates unclear for Inactive ad (no end date found). Excluded from calculations.'
+                }
+            };
+        }
+
+        let daysRunning = 1;
         if (status === 'Inactive' && startDate && endDate) {
             const diffMs = endDate.getTime() - startDate.getTime();
             daysRunning = Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
@@ -1090,7 +1343,7 @@
             daysRunning = Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
         }
 
-        // Tiers: <7 days ₹100–300/day, 7–30 days ₹300–1,000/day, >30 days ₹2,000–4,000/day
+        // The ad's badge still shows its current type based on total days running (Req 4)
         let tierKey = 'test';
         if (daysRunning < 7) {
             tierKey = 'test';
@@ -1118,7 +1371,8 @@
         let confidenceType = 'medium';
         const tooltips = {};
 
-        if (euData && euData.reach > 0) {
+        // Requirement 7: Only use EU mode when a real reach number is parsed
+        if (euData && typeof euData.reach === 'number' && euData.reach > 0) {
             // ─── 1. EU REAL-REACH MODE ──────────────────────────────────────────────
             isEuMode = true;
             const reach = euData.reach;
@@ -1137,7 +1391,6 @@
             const cpmHighEur = euBenchmarks.cpm_high_eur || 10.0;
             const eurRate = euBenchmarks.eur_to_inr_rate || 90.0;
 
-            // spend = impressions ÷ 1000 × EU CPM (convert to ₹)
             const spendLowEur = (impressions / 1000) * cpmLowEur;
             const spendMidEur = (impressions / 1000) * cpmMidEur;
             const spendHighEur = (impressions / 1000) * cpmHighEur;
@@ -1157,12 +1410,12 @@
             tooltips.spend = `How calculated: Real EU Reach (${reach.toLocaleString()}) × 1.9 freq = ${impressions.toLocaleString()} views ÷ 1,000 × €${cpmMidEur} EU CPM × ₹${eurRate}/€ = ${formatIndianNumber(spendMid, true)} [Real EU Transparency]`;
             tooltips.views = `How calculated: Real EU Reach (${reach.toLocaleString()}) × 1.9 Frequency = ${impressions.toLocaleString()} Impressions`;
         } else {
-            // ─── 2. INDIA ESTIMATE MODE ─────────────────────────────────────────────
+            // ─── 2. INDIA STAGED SPEND MODE (Requirement 4) ─────────────────────────
             isEuMode = false;
-
-            spendLow = Math.round(daysRunning * tier.low * creativeMultiplier);
-            spendMid = Math.round(daysRunning * tier.mid * creativeMultiplier);
-            spendHigh = Math.round(daysRunning * tier.high * creativeMultiplier);
+            const staged = computeStagedSpendForDays(daysRunning, creativeMultiplier);
+            spendLow = staged.low;
+            spendMid = staged.mid;
+            spendHigh = staged.high;
 
             const cpm = BENCHMARKS.metrics.cpm;
             viewsLow = Math.round((spendLow / cpm.high) * 1000);
@@ -1179,8 +1432,9 @@
                 confidenceType = 'low';
             }
 
+            const breakdownStr = `${staged.dTest}d@Test (${BENCHMARKS.daily_spend_tiers.test.mid}/d)${staged.dTested > 0 ? ` + ${staged.dTested}d@Tested (${BENCHMARKS.daily_spend_tiers.tested.mid}/d)` : ''}${staged.dWinner > 0 ? ` + ${staged.dWinner}d@Winner (${BENCHMARKS.daily_spend_tiers.winner.mid}/d)` : ''}`;
             const multNote = count > 1 ? ` × ${creativeMultiplier.toFixed(2)} (${count} ads creative factor)` : '';
-            tooltips.spend = `How calculated: ${daysRunning}d running × ₹${tier.mid}/day (${tier.label})${multNote} = ${formatIndianNumber(spendMid, true)} [India Estimate Mode]`;
+            tooltips.spend = `How calculated (Staged Spend): ${breakdownStr}${multNote} = ${formatIndianNumber(spendMid, true)} [India Staged Model]`;
             tooltips.views = `How calculated: Spend (${formatIndianNumber(spendMid, true)}) ÷ ₹${cpm.mid} CPM × 1,000 = ${formatCompactViews(viewsMid)} views`;
         }
 
@@ -1197,7 +1451,7 @@
         const estPurchasesHigh = Math.round(spendHigh / costPerPurchase);
 
         tooltips.orders = `How calculated: Spend (${formatIndianNumber(spendMid, true)}) ÷ ₹${costPerPurchase} Target CPA = ~${estPurchasesMid} orders`;
-        tooltips.daily = `How calculated: Running ${daysRunning} days matches '${tier.label}' bracket (₹${tier.low}–₹${tier.high}/day)`;
+        tooltips.daily = `Current Stage: Running ${daysRunning} days matches '${tier.label}' badge (₹${tier.low}–₹${tier.high}/day)`;
 
         return {
             daysRunning,
@@ -1206,6 +1460,7 @@
             creativeMultiplier,
             isEuMode,
             euData,
+            datesUnclear: false,
             confidenceText,
             confidenceBadgeClass,
             confidenceType,
@@ -1395,30 +1650,40 @@
             container.setAttribute('data-lib-id-ref', data.libraryId);
         }
 
-        const totalSpendMidStr = formatIndianNumber(perf.spend.mid, true);
-        const daySpendStr = `₹${Math.round(perf.spend.mid / perf.daysRunning).toLocaleString('en-IN')}`;
-        const daySpendRange = `₹${tier.low.toLocaleString('en-IN')}–${tier.high.toLocaleString('en-IN')}/day`;
-        const viewsCompactStr = formatCompactViews(perf.views.mid);
-        const viewsPerDay = Math.round(perf.views.mid / perf.daysRunning);
-        const viewsPerDayStr = `${formatCompactViews(viewsPerDay)}/day`;
+        const isDatesUnclear = !!perf.datesUnclear;
+        if (isDatesUnclear) {
+            container.classList.add('adlens-dates-unclear');
+            if (data.cardEl) data.cardEl.classList.add('adlens-dates-unclear');
+        }
 
-        // Badge selection: Requirement 1 (Real EU reach) & Requirement 2 (Estimated Medium/Low confidence)
+        const totalSpendMidStr = isDatesUnclear ? '—' : formatIndianNumber(perf.spend.mid, true);
+        const daySpendStr = isDatesUnclear ? '—' : `₹${Math.round(perf.spend.mid / Math.max(1, perf.daysRunning)).toLocaleString('en-IN')}`;
+        const daySpendRange = isDatesUnclear ? 'Excluded from totals' : `₹${tier.low.toLocaleString('en-IN')}–${tier.high.toLocaleString('en-IN')}/day`;
+        const viewsCompactStr = isDatesUnclear ? '—' : formatCompactViews(perf.views.mid);
+        const viewsPerDay = Math.round(perf.views.mid / Math.max(1, perf.daysRunning));
+        const viewsPerDayStr = isDatesUnclear ? '—' : `${formatCompactViews(viewsPerDay)}/day`;
+
+        // Badge selection: Requirement 1 (Real EU reach, Dates unclear, Estimated Medium/Low confidence)
         let badgeHtml = '';
-        if (perf.isEuMode) {
+        if (isDatesUnclear) {
+            badgeHtml = `<span class="adlens-tier-badge adlens-badge-unclear" title="Dates unclear for Inactive ad (no end date found). Excluded from calculations."><span class="adlens-tier-dot" style="background: #94A3B8;"></span>Dates unclear</span>`;
+        } else if (perf.isEuMode) {
             badgeHtml = `<span class="adlens-tier-badge adlens-badge-eu" title="Verified via European Union Ad Transparency data"><span class="adlens-tier-dot"></span>Real EU reach · High confidence</span>`;
         } else {
             badgeHtml = `<span class="adlens-tier-badge ${perf.confidenceBadgeClass}" title="${perf.confidenceText}"><span class="adlens-tier-dot"></span>${perf.confidenceText}</span>`;
         }
 
-        const durationTag = `${perf.daysRunning}d ${data.status === 'Inactive' ? 'ran (Inactive)' : 'active'}`;
+        const durationTag = isDatesUnclear ? 'Dates unclear (Inactive)' : `${perf.daysRunning}d ${data.status === 'Inactive' ? 'ran (Inactive)' : 'active'}`;
 
         const platformsStr = Array.isArray(data.platforms) && data.platforms.length > 0 
             ? data.platforms.map(p => p === 'Facebook' ? 'FB' : (p === 'Instagram' ? 'IG' : p)).join(' · ')
             : 'FB · IG';
 
-        const spendSubStr = perf.isEuMode 
-            ? `🇪🇺 Real Reach: ~${formatCompactViews(perf.euData.reach)}`
-            : `Range: ${formatIndianNumber(perf.spend.low, true)}–${formatIndianNumber(perf.spend.high, true)}`;
+        const spendSubStr = isDatesUnclear
+            ? 'Dates unclear (Excluded)'
+            : (perf.isEuMode 
+                ? `🇪🇺 Real Reach: ~${formatCompactViews(perf.euData.reach)}`
+                : `Range: ${formatIndianNumber(perf.spend.low, true)}–${formatIndianNumber(perf.spend.high, true)}`);
 
         // EU Audience Breakdown HTML (Requirement 1)
         let euAudienceHtml = '';
@@ -1823,12 +2088,14 @@
     function recalculateAllAds() {
         let totalSpend = 0;
         detectedAdsMap.forEach((ad, key) => {
-            const newPerf = calculatePerformance(ad.startDate, ad.endDate, ad.status, ad.creativeCount, ad.euData);
+            const newPerf = calculatePerformance(ad.startDate, ad.endDate, ad.status, ad.creativeCount, ad.euData, ad.datesUnclear);
             ad.perf = newPerf;
             ad.tierKey = newPerf.tierKey;
             ad.tier = newPerf.tier;
             ad.daysRunning = newPerf.daysRunning;
-            totalSpend += (newPerf.spend?.mid || 0);
+            if (!ad.datesUnclear) {
+                totalSpend += (newPerf.spend?.mid || 0);
+            }
 
             if (ad.element) {
                 const oldLens = ad.element.querySelector('.spendo-lens-card, .bloomx-lens-card, .bloomx-adlens-card');
@@ -1883,42 +2150,73 @@
         }
         panel.style.display = 'block';
 
+        const windowDates = getActiveWindowDates();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
         let activeCount = 0;
         let inactiveCount = 0;
+        let unclearCount = 0;
         let testCount = 0;
         let testedCount = 0;
         let winnerCount = 0;
 
-        let totalSpendLow = 0;
-        let totalSpendMid = 0;
-        let totalSpendHigh = 0;
-        let totalViewsLow = 0;
-        let totalViewsMid = 0;
-        let totalViewsHigh = 0;
-        let totalEstPurchasesMid = 0;
+        let currentDailyBudgetMid = 0;
+        let windowSpendLow = 0;
+        let windowSpendMid = 0;
+        let windowSpendHigh = 0;
+
+        let launchedLast7 = 0;
+        let launchedLast30 = 0;
+
+        const validAds = [];
 
         ads.forEach(ad => {
-            if (ad.status === 'Active') activeCount++;
-            else inactiveCount++;
+            // Requirement 1: If inactive and no end date, exclude from totals
+            if (ad.datesUnclear) {
+                unclearCount++;
+                return;
+            }
+
+            validAds.push(ad);
+
+            if (ad.status === 'Active') {
+                activeCount++;
+                // Requirement 6: Current daily budget = sum of today's daily rate of ACTIVE ads only
+                const t = BENCHMARKS.daily_spend_tiers[ad.tierKey] || BENCHMARKS.daily_spend_tiers.test;
+                const mult = ad.perf ? ad.perf.creativeMultiplier : 1.0;
+                currentDailyBudgetMid += Math.round(t.mid * mult);
+            } else {
+                inactiveCount++;
+            }
 
             if (ad.tierKey === 'winner') winnerCount++;
             else if (ad.tierKey === 'tested') testedCount++;
             else testCount++;
 
-            totalSpendLow += ad.perf.spend.low;
-            totalSpendMid += ad.perf.spend.mid;
-            totalSpendHigh += ad.perf.spend.high;
+            // Requirement 6: New ads launched last 7 / 30 days
+            if (ad.startDate) {
+                const daysAgo = Math.floor((today.getTime() - ad.startDate.getTime()) / (1000 * 60 * 60 * 24));
+                if (daysAgo >= 0 && daysAgo <= 7) launchedLast7++;
+                if (daysAgo >= 0 && daysAgo <= 30) launchedLast30++;
+            }
 
-            totalViewsLow += ad.perf.views.low;
-            totalViewsMid += ad.perf.views.mid;
-            totalViewsHigh += ad.perf.views.high;
-
-            totalEstPurchasesMid += ad.perf.estPurchases.mid;
+            // Requirement 5: Only count days inside selected window
+            const winResult = calculateAdSpendInWindow(ad, windowDates.start, windowDates.end);
+            windowSpendLow += winResult.spend.low;
+            windowSpendMid += winResult.spend.mid;
+            windowSpendHigh += winResult.spend.high;
         });
+
+        const estMonthlyBudget = currentDailyBudgetMid * 30;
+        const cpm = BENCHMARKS.metrics.cpm;
+        const costPerPurchase = BENCHMARKS.metrics.cost_per_purchase.target || 480;
+        const windowViewsMid = Math.round((windowSpendMid / (cpm.mid || 226)) * 1000);
+        const windowPurchasesMid = Math.round(windowSpendMid / costPerPurchase);
 
         const advertiserName = ads[0]?.advertiserName || 'Advertiser';
 
-        const sortedWinners = [...ads]
+        const sortedWinners = [...validAds]
             .sort((a, b) => b.daysRunning - a.daysRunning)
             .slice(0, 5);
 
@@ -1926,7 +2224,7 @@
             panel.innerHTML = `
                 <div class="bloomx-panel-mini" id="bloomx-panel-expand">
                     <span class="bloomx-mini-dot"></span>
-                    <span class="bloomx-mini-text">⚡ BloomX Ad Lens (<b>${ads.length}</b>)</span>
+                    <span class="bloomx-mini-text">⚡ BloomX Ad Lens (<b>${validAds.length}</b>)</span>
                     <button class="bloomx-btn-expand" title="Expand Panel">➕</button>
                 </div>
             `;
@@ -1973,13 +2271,62 @@
                     ${confidencePill}
                 </div>
 
+                <!-- Requirement 6: Top Advertiser Budget 4 Numbers -->
+                <div class="bloomx-budget-4grid">
+                    <div class="bloomx-budget-box">
+                        <div class="bloomx-budget-sub">Daily Budget</div>
+                        <div class="bloomx-budget-val" style="color: #4ADE80;">${formatIndianNumber(currentDailyBudgetMid, true)}</div>
+                        <div class="bloomx-budget-hint">Active ads today</div>
+                    </div>
+                    <div class="bloomx-budget-box">
+                        <div class="bloomx-budget-sub">Est. Monthly</div>
+                        <div class="bloomx-budget-val" style="color: #A3E635;">${formatIndianNumber(estMonthlyBudget, true)}</div>
+                        <div class="bloomx-budget-hint">Daily × 30 days</div>
+                    </div>
+                    <div class="bloomx-budget-box">
+                        <div class="bloomx-budget-sub">Spend in Window</div>
+                        <div class="bloomx-budget-val" style="color: #C084FC;">${formatIndianNumber(windowSpendMid, true)}</div>
+                        <div class="bloomx-budget-hint">${windowDates.label}</div>
+                    </div>
+                    <div class="bloomx-budget-box">
+                        <div class="bloomx-budget-sub">Active / Winners</div>
+                        <div class="bloomx-budget-val" style="color: #60A5FA;">${activeCount} / ${winnerCount}</div>
+                        <div class="bloomx-budget-hint">Lifecycle ratio</div>
+                    </div>
+                </div>
+
+                <!-- Requirement 6: New Ads Launched Strip -->
+                <div class="bloomx-launch-strip">
+                    🚀 <b>New ads launched:</b> <span style="color:#4ADE80; font-weight:800;">${launchedLast7}</span> in last 7d · <span style="color:#60A5FA; font-weight:800;">${launchedLast30}</span> in last 30d
+                </div>
+
+                <!-- Requirement 5: Date Window Selector -->
+                <div class="bloomx-panel-card" style="margin-top: 8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span class="bloomx-vertical-label" style="font-size:11px; font-weight:700;">📅 Date Window:</span>
+                        <select id="bloomx-panel-window-select" class="bloomx-panel-select" style="min-width: 140px;">
+                            <option value="90d" ${activeWindowKey === '90d' ? 'selected' : ''}>Last 90 days (Default)</option>
+                            <option value="30d" ${activeWindowKey === '30d' ? 'selected' : ''}>Last 30 days</option>
+                            <option value="all" ${activeWindowKey === 'all' ? 'selected' : ''}>Lifetime</option>
+                            <option value="custom" ${activeWindowKey === 'custom' ? 'selected' : ''}>Custom Range...</option>
+                        </select>
+                    </div>
+                    <div id="bloomx-custom-date-container" class="bloomx-custom-date-row" style="display: ${activeWindowKey === 'custom' ? 'flex' : 'none'};">
+                        <input type="date" id="bloomx-custom-start" value="${customWindowStart ? customWindowStart.toISOString().split('T')[0] : ''}" />
+                        <span style="color:#64748B; font-size:10px;">to</span>
+                        <input type="date" id="bloomx-custom-end" value="${customWindowEnd ? customWindowEnd.toISOString().split('T')[0] : ''}" />
+                        <button id="bloomx-custom-apply" style="background:#6366F1; color:#fff; border:none; border-radius:5px; padding:3px 8px; font-size:10px; cursor:pointer; font-weight:700;">Apply</button>
+                    </div>
+                </div>
+
                 <!-- Ad Counts Summary -->
                 <div class="bloomx-panel-card">
                     <div class="bloomx-panel-label">Advertiser Ads On Screen</div>
                     <div class="bloomx-status-row">
                         <span class="bloomx-status-pill bloomx-active-pill">🟢 ${activeCount} Active</span>
                         ${inactiveCount > 0 ? `<span class="bloomx-status-pill bloomx-inactive-pill">⚪ ${inactiveCount} Inactive</span>` : ''}
-                        <span class="bloomx-total-pill">${ads.length} Total</span>
+                        ${unclearCount > 0 ? `<span class="bloomx-status-pill" style="background:rgba(100,116,139,0.2);color:#94A3B8;border:1px solid #475569;" title="Inactive ads with no end date are excluded from totals">⚠️ ${unclearCount} Dates Unclear</span>` : ''}
+                        <span class="bloomx-total-pill">${validAds.length} Counted</span>
                     </div>
                     <div class="bloomx-tiers-pills-row">
                         <span class="bloomx-tier-chip chip-winner">Winner: <b>${winnerCount}</b></span>
@@ -1988,24 +2335,24 @@
                     </div>
                 </div>
 
-                <!-- Financial Totals -->
+                <!-- Financial Totals (Window specified on every total) -->
                 <div class="bloomx-panel-card bloomx-card-highlight">
-                    <div class="bloomx-panel-label">Minimum Visible Spend</div>
+                    <div class="bloomx-panel-label">Spend (${windowDates.label})</div>
                     <div class="bloomx-spend-total">
-                        ${formatIndianNumber(totalSpendLow, true)} – ${formatIndianNumber(totalSpendHigh, true)}
+                        ${formatIndianNumber(windowSpendLow, true)} – ${formatIndianNumber(windowSpendHigh, true)}
                     </div>
                     <div class="bloomx-spend-mid-sub">
-                        Mid: <b>${formatIndianNumber(totalSpendMid, true)}</b> est. total
+                        Mid: <b>${formatIndianNumber(windowSpendMid, true)}</b> est. (${windowDates.label})
                     </div>
 
                     <div class="bloomx-summary-stats-grid">
                         <div class="bloomx-stat-box">
-                            <div class="bloomx-stat-sub">Total Views</div>
-                            <div class="bloomx-stat-main">${formatIndianNumber(totalViewsMid, false)}</div>
+                            <div class="bloomx-stat-sub">Views (${windowDates.label})</div>
+                            <div class="bloomx-stat-main">${formatIndianNumber(windowViewsMid, false)}</div>
                         </div>
                         <div class="bloomx-stat-box">
-                            <div class="bloomx-stat-sub">Est. Purchases</div>
-                            <div class="bloomx-stat-main">~${totalEstPurchasesMid.toLocaleString('en-IN')}</div>
+                            <div class="bloomx-stat-sub">Purchases (${windowDates.label})</div>
+                            <div class="bloomx-stat-main">~${windowPurchasesMid.toLocaleString('en-IN')}</div>
                         </div>
                     </div>
                 </div>
@@ -2042,7 +2389,7 @@
                     🚀 Send to BloomX Dashboard
                 </button>
                 <button class="bloomx-btn-export" id="bloomx-btn-export-csv">
-                    📥 Export CSV (${ads.length} Ads)
+                    📥 Export CSV (${validAds.length} Ads)
                 </button>
                 <div id="bloomx-panel-toast" class="bloomx-panel-toast"></div>
             </div>
@@ -2057,6 +2404,31 @@
         if (btnClose) {
             btnClose.addEventListener('click', () => {
                 panel.style.display = 'none';
+            });
+        }
+
+        // Date window selector listener
+        const winSelectEl = panel.querySelector('#bloomx-panel-window-select');
+        const customContainerEl = panel.querySelector('#bloomx-custom-date-container');
+        if (winSelectEl) {
+            winSelectEl.addEventListener('change', (e) => {
+                activeWindowKey = e.target.value;
+                if (activeWindowKey === 'custom') {
+                    if (customContainerEl) customContainerEl.style.display = 'flex';
+                } else {
+                    renderFloatingPanel();
+                }
+            });
+        }
+
+        const customApplyBtn = panel.querySelector('#bloomx-custom-apply');
+        if (customApplyBtn) {
+            customApplyBtn.addEventListener('click', () => {
+                const sVal = panel.querySelector('#bloomx-custom-start').value;
+                const eVal = panel.querySelector('#bloomx-custom-end').value;
+                if (sVal) customWindowStart = new Date(sVal);
+                if (eVal) customWindowEnd = new Date(eVal);
+                renderFloatingPanel();
             });
         }
 
@@ -2078,11 +2450,11 @@
                 btnSend.disabled = true;
                 btnSend.innerHTML = '⏳ Sending to Dashboard...';
 
-                const advertiserName = ads[0]?.advertiserName || 'Advertiser';
+                const advertiserName = validAds[0]?.advertiserName || 'Advertiser';
                 const payload = {
                     advertiserName,
                     vertical: activeVerticalKey,
-                    ads: ads.map(a => ({
+                    ads: validAds.map(a => ({
                         libraryId: a.libraryId,
                         adLibraryUrl: a.libraryId ? `https://www.facebook.com/ads/library/?id=${a.libraryId}` : window.location.href,
                         daysActive: a.daysRunning,
@@ -2114,7 +2486,7 @@
                         btnSend.disabled = false;
                         btnSend.innerHTML = '✅ Ingested! Open Dashboard ↗';
                         btnSend.classList.add('btn-send-success');
-                        showPanelToast(`🎉 Successfully sent ${ads.length} ads for "${advertiserName}" to your Competitor Dashboard!`);
+                        showPanelToast(`🎉 Successfully sent ${validAds.length} ads for "${advertiserName}" to your Competitor Dashboard!`);
                         btnSend.onclick = () => {
                             window.open(connectedDashboardUrl, '_blank');
                         };
@@ -2275,19 +2647,29 @@
             });
 
             let pageDetectedTotalSpend = 0;
-            cardsFound.forEach((card, idx) => {
+            cardsFound.forEach((card) => {
                 const cardText = card.innerText || '';
-                const libraryId = detectLibraryId(cardText) || `card_${idx}`;
+                // Requirement 3: Skip if Library ID cannot be read (never use fake card_index IDs)
+                const libraryId = detectLibraryId(cardText);
+                if (!libraryId) return;
+
+                // Requirement 10: Performance - only process cards not already processed
+                if (detectedAdsMap.has(libraryId) && card.getAttribute('data-bloomx-injected') === 'true') {
+                    return;
+                }
+
                 const status = detectStatus(cardText);
-                const { startDate, endDate } = parseStartAndEndDate(cardText, status);
+                const { startDate, endDate, datesUnclear } = parseStartAndEndDate(cardText, status);
                 const platforms = detectPlatforms(card);
                 const creativeCount = detectCreativeCount(cardText);
                 const advertiserName = detectAdvertiserName(card);
                 const hookSnippet = detectHookSnippet(cardText);
                 const euData = detectEuTransparency(card, cardText);
-                const perf = calculatePerformance(startDate, endDate, status, creativeCount, euData);
+                const perf = calculatePerformance(startDate, endDate, status, creativeCount, euData, datesUnclear);
 
-                pageDetectedTotalSpend += (perf.spend?.mid || 0);
+                if (!datesUnclear) {
+                    pageDetectedTotalSpend += (perf.spend?.mid || 0);
+                }
 
                 detectedAdsMap.set(libraryId, {
                     element: card,
@@ -2295,6 +2677,7 @@
                     advertiserName,
                     startDate,
                     endDate,
+                    datesUnclear,
                     euData,
                     daysRunning: perf.daysRunning,
                     status,
@@ -2341,7 +2724,7 @@
         }
     }
 
-    // ─── Debounced Observer for Infinite Scroll ────────────────────────────────
+    // ─── Debounced Observer for Infinite Scroll (Requirement 10) ───────────────
     let debounceTimer = null;
     function scheduleScan() {
         if (debounceTimer) clearTimeout(debounceTimer);
@@ -2367,7 +2750,93 @@
     });
 
     scheduleScan();
-    setInterval(scanAndEnhanceAdCards, 1800);
+    // Requirement 10: Removed setInterval(scanAndEnhanceAdCards, 1800);
 
-    console.log('%c[BloomX Ad Lens]%c Active with Popup Sync & Vertical Benchmarks', 'color: #6366f1; font-weight: bold;', 'color: #10b981;');
+    // ─── Reset on Navigation & Advertiser Change (Requirement 2) ───────────────
+    let lastKnownUrl = window.location.href;
+    let lastAdvertiserKey = getAdvertiserKeyFromUrl(window.location.href);
+
+    function getAdvertiserKeyFromUrl(urlStr) {
+        try {
+            const u = new URL(urlStr, window.location.origin);
+            const pageId = u.searchParams.get('view_all_page_id') || u.searchParams.get('page_id');
+            if (pageId) return 'page_' + pageId;
+            const q = u.searchParams.get('q');
+            if (q) return 'q_' + q.toLowerCase().trim();
+            const id = u.searchParams.get('id');
+            if (id) return 'id_' + id;
+            return u.pathname + u.search;
+        } catch (e) {
+            return urlStr;
+        }
+    }
+
+    function resetOnNavigation() {
+        detectedAdsMap.clear();
+        // Remove all injected lens overlays
+        document.querySelectorAll('.bloomx-adlens-card, .spendo-lens-card').forEach(el => el.remove());
+        document.querySelectorAll('[data-bloomx-injected]').forEach(el => el.removeAttribute('data-bloomx-injected'));
+        if (floatingPanelEl) {
+            floatingPanelEl.style.display = 'none';
+        }
+        scheduleScan();
+    }
+
+    function checkNavigationChange() {
+        const currentUrl = window.location.href;
+        const currentAdvertiserKey = getAdvertiserKeyFromUrl(currentUrl);
+
+        if (currentUrl !== lastKnownUrl || currentAdvertiserKey !== lastAdvertiserKey) {
+            lastKnownUrl = currentUrl;
+            lastAdvertiserKey = currentAdvertiserKey;
+            resetOnNavigation();
+        }
+    }
+
+    // Watch location.href every 1s and listen to popstate / hashchange
+    setInterval(checkNavigationChange, 1000);
+    window.addEventListener('popstate', checkNavigationChange);
+    window.addEventListener('hashchange', checkNavigationChange);
+
+    // ─── Calibration Message Listener (Requirement 8) ──────────────────────────
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+        chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+            if (request.action === 'COMPUTE_CALIBRATION') {
+                const calibStart = request.startDate ? new Date(request.startDate) : null;
+                const calibEnd = request.endDate ? new Date(request.endDate) : new Date();
+
+                const ads = Array.from(detectedAdsMap.values());
+                if (ads.length === 0) {
+                    sendResponse({
+                        success: false,
+                        error: 'No ads detected on this page yet. Please scroll the Facebook Ad Library first.'
+                    });
+                    return true;
+                }
+
+                let totalEstimatedSpendMid = 0;
+                let validAdCount = 0;
+                const today = new Date();
+
+                ads.forEach(ad => {
+                    if (ad.datesUnclear || !ad.startDate) return;
+                    validAdCount++;
+                    const res = calculateAdSpendInWindow(ad, calibStart, calibEnd, today);
+                    totalEstimatedSpendMid += res.spend.mid;
+                });
+
+                const advertiserName = ads[0]?.advertiserName || 'Current Advertiser';
+
+                sendResponse({
+                    success: true,
+                    advertiserName,
+                    estimatedSpend: totalEstimatedSpendMid,
+                    adCount: validAdCount
+                });
+                return true;
+            }
+        });
+    }
+
+    console.log('%c[BloomX Ad Lens]%c Active with Popup Sync, Staged Spend & Navigation Watcher', 'color: #6366f1; font-weight: bold;', 'color: #10b981;');
 })();
